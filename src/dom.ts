@@ -182,6 +182,10 @@ export interface SpindleFrontendContext {
   };
   permissions: {
     getGranted(): Promise<string[]>;
+    /** Request that the given permissions be granted. Returns the updated granted list.
+     *  Privileged permissions (e.g. cors_proxy) require admin/owner approval.
+     *  The extension may be restarted after permissions are applied. */
+    request(permissions: string[]): Promise<string[]>;
   };
   sendToBackend(payload: unknown): void;
   onBackendMessage(handler: (payload: unknown) => void): () => void;
