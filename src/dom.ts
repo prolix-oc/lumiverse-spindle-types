@@ -158,6 +158,13 @@ export interface SpindleMessageTagInterceptorOptions {
   removeFromMessage?: boolean;
 }
 
+/** Options for `permissions.request()` — displayed in the system confirmation modal. */
+export interface PermissionRequestOptions {
+  /** Human-readable explanation of why the extension needs these permissions.
+   *  Shown to the user in the confirmation modal. */
+  reason?: string;
+}
+
 /** Context object provided to frontend extension modules */
 export interface SpindleFrontendContext {
   dom: SpindleDOMHelper;
@@ -183,9 +190,10 @@ export interface SpindleFrontendContext {
   permissions: {
     getGranted(): Promise<string[]>;
     /** Request that the given permissions be granted. Returns the updated granted list.
+     *  A system-level confirmation modal is shown to the user before any permissions are applied.
      *  Privileged permissions (e.g. cors_proxy) require admin/owner approval.
-     *  The extension may be restarted after permissions are applied. */
-    request(permissions: string[]): Promise<string[]>;
+     *  Rejects with an error if the user denies the request. */
+    request(permissions: string[], options?: PermissionRequestOptions): Promise<string[]>;
   };
   sendToBackend(payload: unknown): void;
   onBackendMessage(handler: (payload: unknown) => void): () => void;

@@ -33,6 +33,7 @@ export type {
   SpindleUploadFile,
   SpindleMessageTagIntercept,
   SpindleMessageTagInterceptorOptions,
+  PermissionRequestOptions,
   SpindleFrontendContext,
   SpindleFrontendModule,
   SpindleDrawerTabOptions,
