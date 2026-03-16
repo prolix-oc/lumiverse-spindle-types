@@ -246,37 +246,41 @@ export interface SpindleAPI {
       has(chatId: string, key: string): Promise<boolean>;
     };
     global: {
-      get(key: string): Promise<string>;
-      set(key: string, value: string): Promise<void>;
-      delete(key: string): Promise<void>;
-      list(): Promise<Record<string, string>>;
-      has(key: string): Promise<boolean>;
+      get(key: string, userId?: string): Promise<string>;
+      set(key: string, value: string, userId?: string): Promise<void>;
+      delete(key: string, userId?: string): Promise<void>;
+      list(userId?: string): Promise<Record<string, string>>;
+      has(key: string, userId?: string): Promise<boolean>;
     };
   };
 
   /**
    * Character CRUD (permission: "characters").
    * Returns safe DTO representations — raw extensions blob is not exposed.
+   * For user-scoped extensions, userId is inferred from the extension owner.
+   * For operator-scoped extensions, pass userId to scope to a specific user.
    */
   characters: {
-    list(options?: { limit?: number; offset?: number }): Promise<{ data: CharacterDTO[]; total: number }>;
-    get(characterId: string): Promise<CharacterDTO | null>;
-    create(input: CharacterCreateDTO): Promise<CharacterDTO>;
-    update(characterId: string, input: CharacterUpdateDTO): Promise<CharacterDTO>;
-    delete(characterId: string): Promise<boolean>;
+    list(options?: { limit?: number; offset?: number; userId?: string }): Promise<{ data: CharacterDTO[]; total: number }>;
+    get(characterId: string, userId?: string): Promise<CharacterDTO | null>;
+    create(input: CharacterCreateDTO, userId?: string): Promise<CharacterDTO>;
+    update(characterId: string, input: CharacterUpdateDTO, userId?: string): Promise<CharacterDTO>;
+    delete(characterId: string, userId?: string): Promise<boolean>;
   };
 
   /**
    * Chat session CRUD (permission: "chats").
    * Separate from `chat` (message-level mutation) — this operates on chat entities.
+   * For user-scoped extensions, userId is inferred from the extension owner.
+   * For operator-scoped extensions, pass userId to scope to a specific user.
    */
   chats: {
-    list(options?: { characterId?: string; limit?: number; offset?: number }): Promise<{ data: ChatDTO[]; total: number }>;
-    get(chatId: string): Promise<ChatDTO | null>;
+    list(options?: { characterId?: string; limit?: number; offset?: number; userId?: string }): Promise<{ data: ChatDTO[]; total: number }>;
+    get(chatId: string, userId?: string): Promise<ChatDTO | null>;
     /** Get the user's currently active chat (as tracked by the frontend). Returns null if none. */
-    getActive(): Promise<ChatDTO | null>;
-    update(chatId: string, input: ChatUpdateDTO): Promise<ChatDTO>;
-    delete(chatId: string): Promise<boolean>;
+    getActive(userId?: string): Promise<ChatDTO | null>;
+    update(chatId: string, input: ChatUpdateDTO, userId?: string): Promise<ChatDTO>;
+    delete(chatId: string, userId?: string): Promise<boolean>;
   };
 
   permissions: {
