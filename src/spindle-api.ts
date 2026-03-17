@@ -12,6 +12,12 @@ import type {
   CharacterUpdateDTO,
   ChatDTO,
   ChatUpdateDTO,
+  WorldBookDTO,
+  WorldBookCreateDTO,
+  WorldBookUpdateDTO,
+  WorldBookEntryDTO,
+  WorldBookEntryCreateDTO,
+  WorldBookEntryUpdateDTO,
 } from "./api";
 
 /** The global `spindle` object available in backend extension workers */
@@ -281,6 +287,27 @@ export interface SpindleAPI {
     getActive(userId?: string): Promise<ChatDTO | null>;
     update(chatId: string, input: ChatUpdateDTO, userId?: string): Promise<ChatDTO>;
     delete(chatId: string, userId?: string): Promise<boolean>;
+  };
+
+  /**
+   * World Books CRUD (permission: "world_books").
+   * Full access to world books and their entries.
+   * For user-scoped extensions, userId is inferred from the extension owner.
+   * For operator-scoped extensions, pass userId to scope to a specific user.
+   */
+  world_books: {
+    list(options?: { limit?: number; offset?: number; userId?: string }): Promise<{ data: WorldBookDTO[]; total: number }>;
+    get(worldBookId: string, userId?: string): Promise<WorldBookDTO | null>;
+    create(input: WorldBookCreateDTO, userId?: string): Promise<WorldBookDTO>;
+    update(worldBookId: string, input: WorldBookUpdateDTO, userId?: string): Promise<WorldBookDTO>;
+    delete(worldBookId: string, userId?: string): Promise<boolean>;
+    entries: {
+      list(worldBookId: string, options?: { limit?: number; offset?: number; userId?: string }): Promise<{ data: WorldBookEntryDTO[]; total: number }>;
+      get(entryId: string, userId?: string): Promise<WorldBookEntryDTO | null>;
+      create(worldBookId: string, input: WorldBookEntryCreateDTO, userId?: string): Promise<WorldBookEntryDTO>;
+      update(entryId: string, input: WorldBookEntryUpdateDTO, userId?: string): Promise<WorldBookEntryDTO>;
+      delete(entryId: string, userId?: string): Promise<boolean>;
+    };
   };
 
   permissions: {

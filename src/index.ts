@@ -25,6 +25,12 @@ export type {
   CharacterUpdateDTO,
   ChatDTO,
   ChatUpdateDTO,
+  WorldBookDTO,
+  WorldBookCreateDTO,
+  WorldBookUpdateDTO,
+  WorldBookEntryDTO,
+  WorldBookEntryCreateDTO,
+  WorldBookEntryUpdateDTO,
   WorkerToHost,
   HostToWorker,
 } from "./api";

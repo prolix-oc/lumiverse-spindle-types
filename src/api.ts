@@ -136,6 +136,110 @@ export interface ChatUpdateDTO {
   metadata?: Record<string, unknown>;
 }
 
+// ─── World Book DTOs ─────────────────────────────────────────────────────
+
+/**
+ * Safe representation of a world book exposed to extensions.
+ */
+export interface WorldBookDTO {
+  id: string;
+  name: string;
+  description: string;
+  metadata: Record<string, unknown>;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface WorldBookCreateDTO {
+  name: string;
+  description?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface WorldBookUpdateDTO {
+  name?: string;
+  description?: string;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Full representation of a world book entry exposed to extensions.
+ */
+export interface WorldBookEntryDTO {
+  id: string;
+  world_book_id: string;
+  uid: string;
+  key: string[];
+  keysecondary: string[];
+  content: string;
+  comment: string;
+  position: number;
+  depth: number;
+  role: string | null;
+  order_value: number;
+  selective: boolean;
+  constant: boolean;
+  disabled: boolean;
+  group_name: string;
+  group_override: boolean;
+  group_weight: number;
+  probability: number;
+  scan_depth: number | null;
+  case_sensitive: boolean;
+  match_whole_words: boolean;
+  automation_id: string | null;
+  use_regex: boolean;
+  prevent_recursion: boolean;
+  exclude_recursion: boolean;
+  delay_until_recursion: boolean;
+  priority: number;
+  sticky: number;
+  cooldown: number;
+  delay: number;
+  selective_logic: number;
+  use_probability: boolean;
+  vectorized: boolean;
+  extensions: Record<string, unknown>;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface WorldBookEntryCreateDTO {
+  key?: string[];
+  keysecondary?: string[];
+  content?: string;
+  comment?: string;
+  position?: number;
+  depth?: number;
+  role?: string;
+  order_value?: number;
+  selective?: boolean;
+  constant?: boolean;
+  disabled?: boolean;
+  group_name?: string;
+  group_override?: boolean;
+  group_weight?: number;
+  probability?: number;
+  scan_depth?: number;
+  case_sensitive?: boolean;
+  match_whole_words?: boolean;
+  automation_id?: string;
+  use_regex?: boolean;
+  prevent_recursion?: boolean;
+  exclude_recursion?: boolean;
+  delay_until_recursion?: boolean;
+  priority?: number;
+  sticky?: number;
+  cooldown?: number;
+  delay?: number;
+  selective_logic?: number;
+  use_probability?: boolean;
+  vectorized?: boolean;
+  extensions?: Record<string, unknown>;
+}
+
+export type WorldBookEntryUpdateDTO = WorldBookEntryCreateDTO;
+
 /**
  * Structured error code included in permission-denied error messages.
  * Extensions can check `error.startsWith("PERMISSION_DENIED:")` to
@@ -343,7 +447,19 @@ export type WorkerToHost =
   | { type: "chats_get"; requestId: string; chatId: string; userId?: string }
   | { type: "chats_get_active"; requestId: string; userId?: string }
   | { type: "chats_update"; requestId: string; chatId: string; input: ChatUpdateDTO; userId?: string }
-  | { type: "chats_delete"; requestId: string; chatId: string; userId?: string };
+  | { type: "chats_delete"; requestId: string; chatId: string; userId?: string }
+  // ─── World Books (gated: "world_books") ──────────────────────────────
+  | { type: "world_books_list"; requestId: string; limit?: number; offset?: number; userId?: string }
+  | { type: "world_books_get"; requestId: string; worldBookId: string; userId?: string }
+  | { type: "world_books_create"; requestId: string; input: WorldBookCreateDTO; userId?: string }
+  | { type: "world_books_update"; requestId: string; worldBookId: string; input: WorldBookUpdateDTO; userId?: string }
+  | { type: "world_books_delete"; requestId: string; worldBookId: string; userId?: string }
+  // ─── World Book Entries (gated: "world_books") ───────────────────────
+  | { type: "world_book_entries_list"; requestId: string; worldBookId: string; limit?: number; offset?: number; userId?: string }
+  | { type: "world_book_entries_get"; requestId: string; entryId: string; userId?: string }
+  | { type: "world_book_entries_create"; requestId: string; worldBookId: string; input: WorldBookEntryCreateDTO; userId?: string }
+  | { type: "world_book_entries_update"; requestId: string; entryId: string; input: WorldBookEntryUpdateDTO; userId?: string }
+  | { type: "world_book_entries_delete"; requestId: string; entryId: string; userId?: string };
 
 // ─── Host → Worker messages ──────────────────────────────────────────────
 
