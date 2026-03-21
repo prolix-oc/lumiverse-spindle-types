@@ -21,6 +21,10 @@ import type {
   PersonaDTO,
   PersonaCreateDTO,
   PersonaUpdateDTO,
+  ActivatedWorldInfoEntryDTO,
+  DryRunRequestDTO,
+  DryRunResultDTO,
+  ChatMemoryResultDTO,
 } from "./api";
 
 /** The global `spindle` object available in backend extension workers */
@@ -59,6 +63,8 @@ export interface SpindleAPI {
     raw(input: GenerationRequestDTO): Promise<unknown>;
     quiet(input: GenerationRequestDTO): Promise<unknown>;
     batch(input: GenerationRequestDTO): Promise<unknown>;
+    /** Run a dry-run prompt assembly without calling the LLM. */
+    dryRun(input: DryRunRequestDTO): Promise<DryRunResultDTO>;
   };
 
   /** Scoped storage (per-extension virtual disk) */
@@ -290,6 +296,8 @@ export interface SpindleAPI {
     getActive(userId?: string): Promise<ChatDTO | null>;
     update(chatId: string, input: ChatUpdateDTO, userId?: string): Promise<ChatDTO>;
     delete(chatId: string, userId?: string): Promise<boolean>;
+    /** Get top-K chat memory chunks for a chat via vector search. */
+    getMemories(chatId: string, options?: { topK?: number; userId?: string }): Promise<ChatMemoryResultDTO>;
   };
 
   /**
@@ -311,6 +319,8 @@ export interface SpindleAPI {
       update(entryId: string, input: WorldBookEntryUpdateDTO, userId?: string): Promise<WorldBookEntryDTO>;
       delete(entryId: string, userId?: string): Promise<boolean>;
     };
+    /** Get activated world info entries (keyword + vector) for a chat. */
+    getActivated(chatId: string, userId?: string): Promise<ActivatedWorldInfoEntryDTO[]>;
   };
 
   /**

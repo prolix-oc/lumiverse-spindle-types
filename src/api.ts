@@ -280,6 +280,107 @@ export interface PersonaUpdateDTO {
   metadata?: Record<string, unknown>;
 }
 
+// ─── Activated World Info DTOs ─────────────────────────────────────────
+
+/**
+ * Lightweight summary of an activated world info entry.
+ * Safe subset — no raw entry content or internal fields exposed.
+ */
+export interface ActivatedWorldInfoEntryDTO {
+  id: string;
+  comment: string;
+  keys: string[];
+  source: "keyword" | "vector";
+  score?: number;
+}
+
+// ─── Dry Run DTOs ──────────────────────────────────────────────────────
+
+export interface DryRunRequestDTO {
+  chatId: string;
+  connectionId?: string;
+  personaId?: string;
+  presetId?: string;
+  generationType?: string;
+  parameters?: Record<string, unknown>;
+}
+
+export interface AssemblyBreakdownEntryDTO {
+  type: string;
+  name: string;
+  role?: string;
+  content?: string;
+  blockId?: string;
+  marker?: string;
+  messageCount?: number;
+  firstMessageIndex?: number;
+  preCountedTokens?: number;
+  excludeFromTotal?: boolean;
+}
+
+export interface ActivationStatsDTO {
+  totalCandidates: number;
+  activatedBeforeBudget: number;
+  activatedAfterBudget: number;
+  evictedByBudget: number;
+  evictedByMinPriority: number;
+  estimatedTokens: number;
+  recursionPassesUsed: number;
+}
+
+export interface MemoryStatsDTO {
+  enabled: boolean;
+  chunksRetrieved: number;
+  chunksAvailable: number;
+  chunksPending: number;
+  injectionMethod: "macro" | "fallback" | "disabled";
+  retrievedChunks: Array<{
+    score: number;
+    tokenEstimate: number;
+    messageRange: [number, number];
+    preview: string;
+  }>;
+  queryPreview: string;
+  settingsSource: "global" | "per_chat";
+}
+
+export interface DryRunTokenCountDTO {
+  total_tokens: number;
+  breakdown: Array<{ name: string; type: string; tokens: number; role?: string }>;
+  tokenizer_id: string | null;
+  tokenizer_name: string | null;
+}
+
+export interface DryRunResultDTO {
+  messages: LlmMessageDTO[];
+  breakdown: AssemblyBreakdownEntryDTO[];
+  parameters: Record<string, unknown>;
+  model: string;
+  provider: string;
+  tokenCount?: DryRunTokenCountDTO;
+  worldInfoStats?: ActivationStatsDTO;
+  memoryStats?: MemoryStatsDTO;
+}
+
+// ─── Chat Memory DTOs ──────────────────────────────────────────────────
+
+export interface ChatMemoryChunkDTO {
+  content: string;
+  score: number;
+  metadata: Record<string, unknown>;
+}
+
+export interface ChatMemoryResultDTO {
+  chunks: ChatMemoryChunkDTO[];
+  formatted: string;
+  count: number;
+  enabled: boolean;
+  queryPreview: string;
+  settingsSource: "global" | "per_chat";
+  chunksAvailable: number;
+  chunksPending: number;
+}
+
 /**
  * Structured error code included in permission-denied error messages.
  * Extensions can check `error.startsWith("PERMISSION_DENIED:")` to
@@ -510,6 +611,12 @@ export type WorkerToHost =
   | { type: "personas_delete"; requestId: string; personaId: string; userId?: string }
   | { type: "personas_switch"; requestId: string; personaId: string | null; userId?: string }
   | { type: "personas_get_world_book"; requestId: string; personaId: string; userId?: string }
+  // ─── Activated World Info (gated: "world_books") ───────────────────
+  | { type: "world_books_get_activated"; requestId: string; chatId: string; userId?: string }
+  // ─── Dry Run (gated: "generation") ────────────────────────────────
+  | { type: "generate_dry_run"; requestId: string; input: DryRunRequestDTO; userId?: string }
+  // ─── Chat Memories (gated: "chats") ───────────────────────────────
+  | { type: "chats_get_memories"; requestId: string; chatId: string; topK?: number; userId?: string }
   // ─── Toast (free tier) ───────────────────────────────────────────────
   | { type: "toast_show"; toastType: "success" | "warning" | "error" | "info"; message: string; title?: string; duration?: number };
 
