@@ -64,7 +64,7 @@ export interface SpindleAPI {
     quiet(input: GenerationRequestDTO): Promise<unknown>;
     batch(input: GenerationRequestDTO): Promise<unknown>;
     /** Run a dry-run prompt assembly without calling the LLM. */
-    dryRun(input: DryRunRequestDTO): Promise<DryRunResultDTO>;
+    dryRun(input: DryRunRequestDTO, userId?: string): Promise<DryRunResultDTO>;
   };
 
   /** Scoped storage (per-extension virtual disk) */
