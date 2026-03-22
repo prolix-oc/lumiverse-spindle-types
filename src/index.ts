@@ -78,6 +78,7 @@ export type { SpindleAPI } from "./spindle-api";
 
 export type {
   CouncilMember,
+  SidecarConfig,
   CouncilSidecarConfig,
   CouncilToolsSettings,
   CouncilSettings,
@@ -87,6 +88,7 @@ export type {
   CouncilToolDefinition,
 } from "./council";
 export {
+  SIDECAR_DEFAULTS,
   COUNCIL_SIDECAR_DEFAULTS,
   COUNCIL_TOOLS_DEFAULTS,
   COUNCIL_SETTINGS_DEFAULTS,

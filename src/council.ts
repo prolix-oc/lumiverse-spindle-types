@@ -15,8 +15,14 @@ export interface CouncilMember {
   chance: number;
 }
 
-/** Sidecar LLM configuration — binds to an existing connection profile. */
-export interface CouncilSidecarConfig {
+// ---- Sidecar LLM ----
+
+/**
+ * Shared sidecar LLM configuration — binds to an existing connection profile.
+ * Used by council tools, expression detection, and other background LLM features.
+ * Stored as the `sidecarSettings` user setting, independent of council.
+ */
+export interface SidecarConfig {
   connectionProfileId: string;
   model: string;
   temperature: number;
@@ -24,9 +30,22 @@ export interface CouncilSidecarConfig {
   maxTokens: number;
 }
 
+/**
+ * @deprecated Use `SidecarConfig` instead. Kept for backwards compatibility
+ * with code that references the old name.
+ */
+export type CouncilSidecarConfig = SidecarConfig;
+
+// ---- Council Tool Settings ----
+
 /** Settings governing council tool execution. */
 export interface CouncilToolsSettings {
-  enabled: boolean;
+  /**
+   * @deprecated Tools are now active when any council member has tools assigned.
+   * This field is ignored by the backend but kept for backwards compatibility
+   * with saved settings that include it.
+   */
+  enabled?: boolean;
   /** Execution mode: "sidecar" uses a separate LLM, "inline" sends tools as function definitions to the main LLM. */
   mode: "sidecar" | "inline";
   /** Timeout per tool call in ms. */
@@ -40,7 +59,11 @@ export interface CouncilToolsSettings {
   allowUserControl: boolean;
   /** Word limit per tool response (0 = unlimited). */
   maxWordsPerTool: number;
-  sidecar: CouncilSidecarConfig;
+  /**
+   * @deprecated Sidecar config is now stored as a top-level `sidecarSettings`
+   * user setting. This field is read as a fallback for backwards compatibility.
+   */
+  sidecar?: SidecarConfig;
 }
 
 /** Top-level council settings object persisted per user. */
@@ -103,7 +126,7 @@ export interface CouncilToolDefinition {
 
 // ---- Defaults ----
 
-export const COUNCIL_SIDECAR_DEFAULTS: CouncilSidecarConfig = {
+export const SIDECAR_DEFAULTS: SidecarConfig = {
   connectionProfileId: "",
   model: "",
   temperature: 0.7,
@@ -111,8 +134,10 @@ export const COUNCIL_SIDECAR_DEFAULTS: CouncilSidecarConfig = {
   maxTokens: 1024,
 };
 
+/** @deprecated Use `SIDECAR_DEFAULTS` instead. */
+export const COUNCIL_SIDECAR_DEFAULTS: SidecarConfig = { ...SIDECAR_DEFAULTS };
+
 export const COUNCIL_TOOLS_DEFAULTS: CouncilToolsSettings = {
-  enabled: false,
   mode: "sidecar",
   timeoutMs: 30000,
   sidecarContextWindow: 25,
@@ -121,7 +146,6 @@ export const COUNCIL_TOOLS_DEFAULTS: CouncilToolsSettings = {
   includeWorldInfo: true,
   allowUserControl: false,
   maxWordsPerTool: 250,
-  sidecar: { ...COUNCIL_SIDECAR_DEFAULTS },
 };
 
 export const COUNCIL_SETTINGS_DEFAULTS: CouncilSettings = {
