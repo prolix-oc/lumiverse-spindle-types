@@ -25,11 +25,30 @@ export interface ToolRegistrationDTO {
   council_eligible?: boolean;
 }
 
+/** Tool/function schema passed to LLM for inline function calling. */
+export interface ToolSchemaDTO {
+  name: string;
+  description: string;
+  parameters: Record<string, unknown>; // JSON Schema
+}
+
+/** A single function call made by the LLM. */
+export interface ToolCallDTO {
+  /** Tool name (as given in the schema). */
+  name: string;
+  /** Parsed JSON arguments as returned by the LLM. */
+  args: Record<string, unknown>;
+  /** Provider call ID (e.g. Anthropic `id`, OpenAI `id`). Synthetic UUID for providers that don't supply one (e.g. Google). */
+  call_id: string;
+}
+
 export interface GenerationRequestDTO {
   type: "raw" | "quiet" | "batch";
   messages?: LlmMessageDTO[];
   parameters?: Record<string, unknown>;
   connection_id?: string;
+  /** Optional tool/function definitions for inline function calling (raw/quiet only). */
+  tools?: ToolSchemaDTO[];
   /**
    * For operator-scoped extensions: the user ID whose connection profiles
    * and generation context should be used. For user-scoped extensions this

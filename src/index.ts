@@ -16,6 +16,8 @@ export type {
   LlmMessageDTO,
   MacroDefinitionDTO,
   ToolRegistrationDTO,
+  ToolSchemaDTO,
+  ToolCallDTO,
   GenerationRequestDTO,
   RequestInitDTO,
   ConnectionProfileDTO,
