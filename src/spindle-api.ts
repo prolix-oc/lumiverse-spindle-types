@@ -402,6 +402,22 @@ export interface SpindleAPI {
     }>;
   };
 
+  /**
+   * User presence queries (free tier — no permission needed).
+   * Check whether a user currently has the Lumiverse app visible/focused
+   * in at least one browser tab or PWA window.
+   */
+  users: {
+    /**
+     * Returns true if the user has the app visible in at least one session.
+     * Returns false if all sessions are hidden/backgrounded or the user has no
+     * active WebSocket connections.
+     * For user-scoped extensions, userId is inferred from the extension owner.
+     * For operator-scoped extensions, pass userId explicitly.
+     */
+    isVisible(userId?: string): Promise<boolean>;
+  };
+
   /** Show toast notifications in the frontend UI (free tier — no permission needed) */
   toast: {
     success(message: string, options?: { title?: string; duration?: number }): void;
