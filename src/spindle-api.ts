@@ -403,6 +403,39 @@ export interface SpindleAPI {
   };
 
   /**
+   * Text editor (free tier — no permission needed).
+   * Opens the native Lumiverse expanded text editor modal on the user's
+   * frontend. Provides macro syntax highlighting, insertion panel, and
+   * full-screen editing. The call blocks until the user closes the editor.
+   */
+  textEditor: {
+    /**
+     * Open the text editor and wait for the user to close it.
+     *
+     * @example
+     * ```ts
+     * const result = await spindle.textEditor.open({
+     *   title: 'Edit System Prompt',
+     *   value: currentText,
+     * })
+     * if (!result.cancelled) {
+     *   currentText = result.text
+     * }
+     * ```
+     */
+    open(options?: {
+      title?: string;
+      value?: string;
+      placeholder?: string;
+      /** For operator-scoped extensions only. */
+      userId?: string;
+    }): Promise<{
+      text: string;
+      cancelled: boolean;
+    }>;
+  };
+
+  /**
    * Macro resolution (free tier — no permission needed).
    * Resolve `{{macro}}` placeholders in arbitrary text using
    * the full Lumiverse macro engine (character fields, chat context,

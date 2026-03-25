@@ -199,26 +199,6 @@ export interface SpindleFrontendContext {
     requestDockPanel(options: SpindleDockPanelOptions): SpindleDockPanelHandle;
     mountApp(options?: SpindleAppMountOptions): SpindleAppMountHandle;
     registerInputBarAction(options: SpindleInputBarActionOptions): SpindleInputBarActionHandle;
-    /**
-     * Open the native Lumiverse expanded text editor modal.
-     * Provides macro syntax highlighting, macro insertion panel with search,
-     * and a full-screen editing experience.
-     *
-     * Returns a Promise that resolves when the user closes the editor.
-     *
-     * @example
-     * ```ts
-     * const result = await ctx.ui.openTextEditor({
-     *   title: 'Edit System Prompt',
-     *   value: currentText,
-     *   macros: true,
-     * })
-     * if (!result.cancelled) {
-     *   currentText = result.text
-     * }
-     * ```
-     */
-    openTextEditor(options?: SpindleTextEditorOptions): Promise<SpindleTextEditorResult>;
   };
   uploads: {
     pickFile(options?: {
