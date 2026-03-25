@@ -165,6 +165,26 @@ export interface PermissionRequestOptions {
   reason?: string;
 }
 
+// ── Text Editor ──
+
+export interface SpindleTextEditorOptions {
+  /** Modal title. Default: "Edit Text" */
+  title?: string;
+  /** Initial text content. Default: "" */
+  value?: string;
+  /** Placeholder text. Default: "" */
+  placeholder?: string;
+  /** Enable macro syntax highlighting and insertion panel. Default: true */
+  macros?: boolean;
+}
+
+export interface SpindleTextEditorResult {
+  /** The edited text (or original value if cancelled) */
+  text: string;
+  /** True if the user dismissed the editor without confirming */
+  cancelled: boolean;
+}
+
 /** Context object provided to frontend extension modules */
 export interface SpindleFrontendContext {
   dom: SpindleDOMHelper;
@@ -179,6 +199,26 @@ export interface SpindleFrontendContext {
     requestDockPanel(options: SpindleDockPanelOptions): SpindleDockPanelHandle;
     mountApp(options?: SpindleAppMountOptions): SpindleAppMountHandle;
     registerInputBarAction(options: SpindleInputBarActionOptions): SpindleInputBarActionHandle;
+    /**
+     * Open the native Lumiverse expanded text editor modal.
+     * Provides macro syntax highlighting, macro insertion panel with search,
+     * and a full-screen editing experience.
+     *
+     * Returns a Promise that resolves when the user closes the editor.
+     *
+     * @example
+     * ```ts
+     * const result = await ctx.ui.openTextEditor({
+     *   title: 'Edit System Prompt',
+     *   value: currentText,
+     *   macros: true,
+     * })
+     * if (!result.cancelled) {
+     *   currentText = result.text
+     * }
+     * ```
+     */
+    openTextEditor(options?: SpindleTextEditorOptions): Promise<SpindleTextEditorResult>;
   };
   uploads: {
     pickFile(options?: {
