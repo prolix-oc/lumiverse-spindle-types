@@ -235,6 +235,20 @@ export interface SpindleFrontendContext {
      *  Rejects with an error if the user denies the request. */
     request(permissions: string[], options?: PermissionRequestOptions): Promise<string[]>;
   };
+  /**
+   * Get the currently active chat and character.
+   * Returns immediately from the frontend app state — no async, no backend roundtrip.
+   * Works reliably on page refresh, extension reload, and initial load.
+   *
+   * @example
+   * ```ts
+   * const { chatId, characterId } = ctx.getActiveChat()
+   * if (chatId) {
+   *   ctx.sendToBackend({ type: 'init', chatId, characterId })
+   * }
+   * ```
+   */
+  getActiveChat(): { chatId: string | null; characterId: string | null };
   sendToBackend(payload: unknown): void;
   onBackendMessage(handler: (payload: unknown) => void): () => void;
   messages: {
