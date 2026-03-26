@@ -148,6 +148,10 @@ export interface ImageGenResultDTO {
   imageDataUrl: string;
   model: string;
   provider: string;
+  /** Persisted image ID in the images table (for gallery, backgrounds, etc.) */
+  imageId?: string;
+  /** Public URL for the image — works without authentication. Suitable for push notification `image` field. */
+  imageUrl?: string;
 }
 
 // ─── Character DTOs ─────────────────────────────────────────────────────
