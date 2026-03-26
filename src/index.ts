@@ -50,6 +50,8 @@ export type {
   ImageGenProviderDTO,
   ImageGenRequestDTO,
   ImageGenResultDTO,
+  ThemeOverrideDTO,
+  ThemeInfoDTO,
   WorkerToHost,
   HostToWorker,
 } from "./api";

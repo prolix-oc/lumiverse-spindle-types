@@ -491,6 +491,61 @@ export interface PermissionDeniedDetail {
   operation: string;
 }
 
+// ─── Theme DTOs ──────────────────────────────────────────────────────────
+
+/**
+ * Theme override payload sent by extensions to customize the UI appearance.
+ * Overrides are applied on top of the user's current theme and automatically
+ * removed when the extension is disabled or unloaded.
+ */
+export interface ThemeOverrideDTO {
+  /**
+   * Direct CSS variable overrides. Keys are CSS custom property names
+   * (e.g. `--lumiverse-primary`, `--lumiverse-bg`, `--lcs-glass-bg`).
+   * Values must be valid CSS values.
+   *
+   * Common variable groups:
+   * - **Primary accent**: `--lumiverse-primary`, `--lumiverse-primary-hover`, `-text`, `-muted`, `-light`, `-010`…`-050`, `-contrast`
+   * - **Backgrounds**: `--lumiverse-bg`, `-elevated`, `-hover`, `-dark`, `-darker`, `-deep`, `-040`…`-070`
+   * - **Text**: `--lumiverse-text`, `-muted`, `-dim`, `-hint`
+   * - **Borders**: `--lumiverse-border`, `-hover`, `-light`, `-neutral`, `-neutral-hover`
+   * - **Status**: `--lumiverse-danger`, `--lumiverse-success`, `--lumiverse-warning` (+ `-015`, `-020`, `-050` variants)
+   * - **Glass**: `--lcs-glass-bg`, `-bg-hover`, `-border`, `-border-hover`, `-blur`, `-soft-blur`, `-strong-blur`
+   * - **Prose**: `--lumiverse-prose-italic`, `-bold`, `-dialogue`, `-blockquote`, `-link`
+   * - **Shadows**: `--lumiverse-shadow`, `-sm`, `-md`, `-lg`, `-xl`
+   * - **Radii**: `--lumiverse-radius`, `-sm`, `-md`, `-lg`, `-xl`, `--lcs-radius`, `-sm`, `-xs`
+   * - **Fills**: `--lumiverse-fill`, `-subtle`, `-hover`, `-medium`, `-strong`, `-heavy`, `-deepest`
+   * - **Cards**: `--lumiverse-card-bg`, `--lumiverse-card-image-bg`
+   * - **Icons**: `--lumiverse-icon`, `-muted`, `-dim`
+   * - **Modals**: `--lumiverse-modal-backdrop`, `--lumiverse-gradient-modal`, `--lumiverse-swatch-border`
+   * - **Typography**: `--lumiverse-font-family`, `--lumiverse-font-mono`, `--lumiverse-font-scale`
+   * - **Transitions**: `--lumiverse-transition`, `--lumiverse-transition-fast`, `--lcs-transition`, `--lcs-transition-fast`
+   */
+  variables?: Record<string, string>;
+}
+
+/**
+ * Read-only snapshot of the user's current theme configuration.
+ */
+export interface ThemeInfoDTO {
+  /** Theme preset ID (e.g. `"lumiverse-purple"`, `"character-aware"`) */
+  id: string;
+  /** Display name of the theme */
+  name: string;
+  /** Resolved mode — always `"light"` or `"dark"`, never `"system"` */
+  mode: "light" | "dark";
+  /** Primary accent color in HSL (hue 0-360, saturation 0-100, lightness 0-100) */
+  accent: { h: number; s: number; l: number };
+  /** Whether glassmorphic backdrop-filter effects are enabled */
+  enableGlass: boolean;
+  /** Border radius multiplier (1.0 = default) */
+  radiusScale: number;
+  /** Font size multiplier (1.0 = default) */
+  fontScale: number;
+  /** Whether the theme dynamically adapts to the active character's avatar */
+  characterAware: boolean;
+}
+
 // ─── Worker → Host messages ──────────────────────────────────────────────
 
 export type WorkerToHost =
@@ -725,7 +780,11 @@ export type WorkerToHost =
   | { type: "image_gen_providers"; requestId: string; userId?: string }
   | { type: "image_gen_connections_list"; requestId: string; userId?: string }
   | { type: "image_gen_connections_get"; requestId: string; connectionId: string; userId?: string }
-  | { type: "image_gen_models"; requestId: string; connectionId: string; userId?: string };
+  | { type: "image_gen_models"; requestId: string; connectionId: string; userId?: string }
+  // ─── Theme (gated: "app_manipulation") ──────────────────────────────────
+  | { type: "theme_apply"; requestId: string; overrides: ThemeOverrideDTO; userId?: string }
+  | { type: "theme_clear"; requestId: string; userId?: string }
+  | { type: "theme_get_current"; requestId: string; userId?: string };
 
 // ─── Host → Worker messages ──────────────────────────────────────────────
 

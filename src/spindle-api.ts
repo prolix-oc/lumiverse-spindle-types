@@ -29,6 +29,8 @@ import type {
   ImageGenResultDTO,
   ImageGenConnectionDTO,
   ImageGenProviderDTO,
+  ThemeOverrideDTO,
+  ThemeInfoDTO,
 } from "./api";
 
 /** The global `spindle` object available in backend extension workers */
@@ -545,6 +547,52 @@ export interface SpindleAPI {
     getCallbackUrl(): string;
     /** Create a platform-managed OAuth state nonce for CSRF protection */
     createState(): Promise<string>;
+  };
+
+  /**
+   * Theme manipulation (permission: "app_manipulation").
+   * Apply CSS variable overrides on top of the user's current theme.
+   * Overrides are scoped to the extension and automatically removed
+   * when the extension is disabled or unloaded.
+   *
+   * @example
+   * ```ts
+   * // Apply a blue-tinted theme
+   * await spindle.theme.apply({
+   *   variables: {
+   *     '--lumiverse-primary': 'hsl(210, 80%, 60%)',
+   *     '--lumiverse-bg': 'hsl(210, 12%, 11%)',
+   *     '--lumiverse-bg-elevated': 'hsl(210, 12%, 14%)',
+   *     '--lcs-glass-bg': 'hsla(210, 12%, 6%, 0.55)',
+   *   },
+   * })
+   *
+   * // Read current theme state
+   * const info = await spindle.theme.getCurrent()
+   * console.log(info.mode, info.accent)
+   *
+   * // Remove all overrides
+   * await spindle.theme.clear()
+   * ```
+   */
+  theme: {
+    /**
+     * Apply CSS variable overrides on top of the user's current theme.
+     * Subsequent calls merge with (and overwrite) any previously applied
+     * overrides from this extension. The frontend applies overrides
+     * immediately via a WebSocket event.
+     */
+    apply(overrides: ThemeOverrideDTO): Promise<void>;
+    /**
+     * Remove all CSS variable overrides previously applied by this extension.
+     * The UI reverts to the user's base theme.
+     */
+    clear(): Promise<void>;
+    /**
+     * Get a read-only snapshot of the user's current theme configuration.
+     * Returns the base theme info (not including any extension overrides).
+     */
+    getCurrent(userId?: string): Promise<ThemeInfoDTO>;
   };
 
   /** This extension's manifest */
