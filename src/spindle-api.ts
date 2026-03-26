@@ -433,6 +433,8 @@ export interface SpindleAPI {
       icon?: string;
       /** When true, the notification title is used as-is without the extension name prefix. */
       rawTitle?: boolean;
+      /** Relative URL path to a large image displayed in the notification body (e.g. `/api/v1/image-gen/results/{id}?size=lg`). Must start with `/`. */
+      image?: string;
     }, userId?: string): Promise<{ sent: number }>;
     /**
      * Check if push notifications are available for a user.

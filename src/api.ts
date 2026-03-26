@@ -712,7 +712,7 @@ export type WorkerToHost =
   // ─── Toast (free tier) ───────────────────────────────────────────────
   | { type: "toast_show"; toastType: "success" | "warning" | "error" | "info"; message: string; title?: string; duration?: number }
   // ─── Push Notifications (gated: "push_notification") ────────────────
-  | { type: "push_send"; requestId: string; title: string; body: string; tag?: string; url?: string; userId?: string; icon?: string; rawTitle?: boolean }
+  | { type: "push_send"; requestId: string; title: string; body: string; tag?: string; url?: string; userId?: string; icon?: string; rawTitle?: boolean; image?: string }
   | { type: "push_get_status"; requestId: string; userId?: string }
   // ─── User Visibility (free tier) ───────────────────────────────────
   | { type: "user_is_visible"; requestId: string; userId?: string }
