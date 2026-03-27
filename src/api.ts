@@ -491,6 +491,19 @@ export interface PermissionDeniedDetail {
   operation: string;
 }
 
+/**
+ * Detail object delivered via the `permission_changed` host→worker message
+ * when a permission is granted or revoked at runtime (without restart).
+ */
+export interface PermissionChangedDetail {
+  /** The permission that changed */
+  permission: string;
+  /** Whether the permission was granted (true) or revoked (false) */
+  granted: boolean;
+  /** The full list of currently granted permissions after the change */
+  allGranted: string[];
+}
+
 // ─── Theme DTOs ──────────────────────────────────────────────────────────
 
 /**
@@ -874,6 +887,12 @@ export type HostToWorker =
       type: "permission_denied";
       permission: string;
       operation: string;
+    }
+  | {
+      type: "permission_changed";
+      permission: string;
+      granted: boolean;
+      allGranted: string[];
     }
   | {
       type: "tool_invocation";

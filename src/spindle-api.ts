@@ -7,6 +7,7 @@ import type {
   RequestInitDTO,
   ConnectionProfileDTO,
   PermissionDeniedDetail,
+  PermissionChangedDetail,
   CharacterDTO,
   CharacterCreateDTO,
   CharacterUpdateDTO,
@@ -389,11 +390,25 @@ export interface SpindleAPI {
   permissions: {
     getGranted(): Promise<string[]>;
     /**
+     * Synchronously check whether a specific permission is currently granted.
+     * Uses the local permission cache which is kept in sync with the host
+     * via `permission_changed` messages — no RPC roundtrip needed.
+     */
+    has(permission: string): boolean;
+    /**
      * Register a handler invoked whenever a gated operation is blocked
      * because the required permission has not been granted.
      * Returns an unsubscribe function.
      */
     onDenied(handler: (detail: PermissionDeniedDetail) => void): () => void;
+    /**
+     * Register a handler invoked whenever a permission is granted or revoked
+     * at runtime (without requiring a restart). The handler receives the
+     * permission name, whether it was granted, and the full list of currently
+     * granted permissions.
+     * Returns an unsubscribe function.
+     */
+    onChanged(handler: (detail: PermissionChangedDetail) => void): () => void;
   };
 
   /** Make a CORS-proxied HTTP request */

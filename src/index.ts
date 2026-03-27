@@ -22,6 +22,7 @@ export type {
   RequestInitDTO,
   ConnectionProfileDTO,
   PermissionDeniedDetail,
+  PermissionChangedDetail,
   CharacterDTO,
   CharacterCreateDTO,
   CharacterUpdateDTO,
