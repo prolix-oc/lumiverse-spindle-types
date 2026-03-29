@@ -640,6 +640,53 @@ export type SpindleModalItemDTO =
   /** A themed card/container that groups child items. */
   | { type: "card"; items: SpindleModalItemDTO[] };
 
+// ─── Command Palette DTOs ──────────────────────────────────────────────
+
+/**
+ * Command registration payload sent by extensions to add entries
+ * to the Lumiverse command palette (Cmd/Ctrl+K).
+ *
+ * Commands are contextual — extensions can register different sets
+ * based on the current chat, page, or app state by calling
+ * `spindle.commands.register()` with an updated list at any time.
+ * Each call replaces all previously registered commands from that extension.
+ */
+export interface SpindleCommandDTO {
+  /** Unique identifier for this command within the extension (e.g. `"summarize-chat"`). */
+  id: string;
+  /** Display label shown in the command palette. Max 80 characters. */
+  label: string;
+  /** Description shown below the label. Max 200 characters. */
+  description: string;
+  /** Optional search keywords for fuzzy matching. Max 10 keywords, 30 chars each. */
+  keywords?: string[];
+  /**
+   * Scope restriction controlling when the command appears.
+   * - `'global'` — always visible (default)
+   * - `'chat'` — only when viewing a chat
+   * - `'chat-idle'` — only when in a chat and not streaming
+   * - `'landing'` — only on the home page
+   * - `'character'` — only on character pages
+   */
+  scope?: "global" | "chat" | "chat-idle" | "landing" | "character";
+}
+
+/**
+ * Context snapshot sent to the extension when a command is invoked
+ * from the command palette. Contains the frontend's current UI state
+ * so the extension can act on the right chat/character/page.
+ */
+export interface SpindleCommandContextDTO {
+  /** Current route path (e.g. `"/chat/abc-123"`, `"/"`, `"/characters/xyz"`). */
+  route: string;
+  /** Active chat ID, if the user is in a chat view. */
+  chatId?: string;
+  /** Active character ID, if available. */
+  characterId?: string;
+  /** Whether the active chat is a group chat. */
+  isGroupChat?: boolean;
+}
+
 // ─── Worker → Host messages ──────────────────────────────────────────────
 
 export type WorkerToHost =
@@ -883,7 +930,10 @@ export type WorkerToHost =
   | { type: "theme_clear"; requestId: string; userId?: string }
   | { type: "theme_get_current"; requestId: string; userId?: string }
   // ─── Color Extraction (gated: "app_manipulation") ─────────────────────
-  | { type: "color_extract"; requestId: string; imageId: string; userId?: string };
+  | { type: "color_extract"; requestId: string; imageId: string; userId?: string }
+  // ─── Commands (free tier) ──────────────────────────────────────────────
+  | { type: "commands_register"; commands: SpindleCommandDTO[] }
+  | { type: "commands_unregister"; commandIds: string[] };
 
 // ─── Host → Worker messages ──────────────────────────────────────────────
 
@@ -930,4 +980,10 @@ export type HostToWorker =
       type: "oauth_callback";
       requestId: string;
       params: Record<string, string>;
+    }
+  | {
+      type: "command_invoked";
+      commandId: string;
+      context: SpindleCommandContextDTO;
+      userId: string;
     };

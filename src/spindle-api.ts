@@ -34,6 +34,8 @@ import type {
   ThemeInfoDTO,
   ColorExtractionResult,
   SpindleModalItemDTO,
+  SpindleCommandDTO,
+  SpindleCommandContextDTO,
 } from "./api";
 
 /** The global `spindle` object available in backend extension workers */
@@ -726,6 +728,71 @@ export interface SpindleAPI {
       /** `true` if the user clicked confirm, `false` if cancelled or dismissed. */
       confirmed: boolean;
     }>;
+  };
+
+  /**
+   * Command palette integration (free tier — no permission needed).
+   * Register commands that appear in the Lumiverse command palette
+   * (Cmd/Ctrl+K). Commands are contextual — call `register()` with
+   * an updated list whenever the available commands should change
+   * (e.g. based on active chat, character, or extension state).
+   *
+   * Each `register()` call **replaces** all previously registered
+   * commands from this extension. To add commands incrementally,
+   * maintain your own list and pass the full set each time.
+   *
+   * @example
+   * ```ts
+   * // Register commands
+   * spindle.commands.register([
+   *   {
+   *     id: 'summarize-chat',
+   *     label: 'Summarize Chat',
+   *     description: 'Generate a summary of the current conversation',
+   *     keywords: ['summary', 'recap', 'tldr'],
+   *     scope: 'chat',
+   *   },
+   * ])
+   *
+   * // Handle invocations
+   * spindle.commands.onInvoked((commandId, context) => {
+   *   if (commandId === 'summarize-chat') {
+   *     // context.chatId, context.characterId, etc.
+   *   }
+   * })
+   *
+   * // Update commands based on context
+   * spindle.on('CHAT_CHANGED', () => {
+   *   spindle.commands.register(getCommandsForCurrentState())
+   * })
+   *
+   * // Remove all commands
+   * spindle.commands.unregister()
+   * ```
+   */
+  commands: {
+    /**
+     * Register (or replace) the extension's command palette entries.
+     * Each call replaces the full set — pass the complete list of
+     * commands you want visible. Max 20 commands per extension.
+     */
+    register(commands: SpindleCommandDTO[]): void;
+    /**
+     * Remove specific commands by ID, or all commands if no IDs given.
+     */
+    unregister(commandIds?: string[]): void;
+    /**
+     * Register a handler called when the user selects one of this
+     * extension's commands from the palette. The handler receives
+     * the command ID and a snapshot of the frontend's current state.
+     * Returns an unsubscribe function.
+     */
+    onInvoked(
+      handler: (
+        commandId: string,
+        context: SpindleCommandContextDTO,
+      ) => void | Promise<void>,
+    ): () => void;
   };
 
   /** This extension's manifest */

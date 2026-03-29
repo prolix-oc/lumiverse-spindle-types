@@ -57,6 +57,8 @@ export type {
   ColorRGB,
   ColorHSL,
   SpindleModalItemDTO,
+  SpindleCommandDTO,
+  SpindleCommandContextDTO,
   WorkerToHost,
   HostToWorker,
 } from "./api";
