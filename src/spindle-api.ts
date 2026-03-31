@@ -32,6 +32,7 @@ import type {
   ImageGenProviderDTO,
   ThemeOverrideDTO,
   ThemeInfoDTO,
+  ThemeVariablesConfigDTO,
   ColorExtractionResult,
   SpindleModalItemDTO,
   SpindleCommandDTO,
@@ -635,6 +636,27 @@ export interface SpindleAPI {
      * @param imageId - ID of an image in the images table
      */
     extractColors(imageId: string, userId?: string): Promise<ColorExtractionResult>;
+    /**
+     * Generate the full set of Lumiverse CSS variables from a theme config.
+     *
+     * Returns a `Record<string, string>` containing every CSS variable the
+     * theme engine would produce — primary accent variants, backgrounds,
+     * borders, text, glass tokens, shadows, radii, prose tokens, and more
+     * (~80+ variables). The result can be passed directly to `apply()` for a
+     * complete, coherent theme override.
+     *
+     * @example
+     * ```ts
+     * // Extract palette from an image, then generate + apply a full theme
+     * const palette = await spindle.theme.extractColors(imageId)
+     * const vars = await spindle.theme.generateVariables({
+     *   accent: palette.dominantHsl,
+     *   mode: 'dark',
+     * })
+     * await spindle.theme.apply({ variables: vars })
+     * ```
+     */
+    generateVariables(config: ThemeVariablesConfigDTO): Promise<Record<string, string>>;
   };
 
   /**

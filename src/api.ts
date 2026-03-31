@@ -623,6 +623,48 @@ export interface ThemeInfoDTO {
   characterAware: boolean;
 }
 
+/**
+ * Input config for `spindle.theme.generateVariables()`.
+ *
+ * Mirrors the inputs that Lumiverse's theme engine uses to produce the full
+ * set of ~80+ CSS variables. Extensions can use the result as a complete,
+ * coherent override set for `spindle.theme.apply()`.
+ */
+export interface ThemeVariablesConfigDTO {
+  /** Primary accent color in HSL. */
+  accent: { h: number; s: number; l: number };
+  /** Resolved color mode. */
+  mode: "dark" | "light";
+  /** Enable glassmorphic backdrop-filter tokens (default: `true`). */
+  enableGlass?: boolean;
+  /** Border radius multiplier (default: `1`). */
+  radiusScale?: number;
+  /** Font size multiplier (default: `1`). */
+  fontScale?: number;
+  /** Full UI zoom multiplier (default: `1`). */
+  uiScale?: number;
+  /** Optional base color overrides. Each value is a CSS color string. */
+  baseColors?: {
+    primary?: string;
+    secondary?: string;
+    background?: string;
+    text?: string;
+    danger?: string;
+    success?: string;
+    warning?: string;
+    /** Dialogue / speech color override. */
+    speech?: string;
+    /** Italic / thoughts color override. */
+    thoughts?: string;
+  };
+  /** Status color overrides (danger, success, warning). */
+  statusColors?: {
+    danger?: string;
+    success?: string;
+    warning?: string;
+  };
+}
+
 // ─── Modal content items (used by backend-initiated modals) ─────────────
 
 /**
@@ -933,6 +975,8 @@ export type WorkerToHost =
   | { type: "theme_get_current"; requestId: string; userId?: string }
   // ─── Color Extraction (gated: "app_manipulation") ─────────────────────
   | { type: "color_extract"; requestId: string; imageId: string; userId?: string }
+  // ─── Theme Variable Generation (gated: "app_manipulation") ────────────
+  | { type: "theme_generate_variables"; requestId: string; config: ThemeVariablesConfigDTO }
   // ─── Commands (free tier) ──────────────────────────────────────────────
   | { type: "commands_register"; commands: SpindleCommandDTO[] }
   | { type: "commands_unregister"; commandIds: string[] };

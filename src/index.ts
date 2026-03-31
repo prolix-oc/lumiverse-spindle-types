@@ -53,6 +53,7 @@ export type {
   ImageGenResultDTO,
   ThemeOverrideDTO,
   ThemeInfoDTO,
+  ThemeVariablesConfigDTO,
   ColorExtractionResult,
   ColorRGB,
   ColorHSL,
