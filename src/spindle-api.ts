@@ -730,8 +730,12 @@ export interface SpindleAPI {
       /** How the modal was dismissed. */
       dismissedBy: "user" | "extension" | "cleanup";
     }>;
-    /** Close a modal that was opened with `spindle.modal.open()`. */
-    close(requestId: string): Promise<void>;
+    /**
+     * Programmatically close a modal that was opened with `spindle.modal.open()`.
+     * `openRequestId` is the request ID returned alongside the modal handle.
+     * Resolves immediately after the dismiss event is emitted.
+     */
+    close(openRequestId: string, userId?: string): Promise<void>;
     /**
      * Show a confirmation modal and wait for the user's response.
      * The host renders a themed dialog with a message, variant-colored
