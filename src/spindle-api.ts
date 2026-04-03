@@ -1,6 +1,7 @@
 import type { SpindleManifest } from "./manifest";
 import type {
   LlmMessageDTO,
+  InterceptorResultDTO,
   MacroDefinitionDTO,
   ToolRegistrationDTO,
   GenerationRequestDTO,
@@ -57,12 +58,22 @@ export interface SpindleAPI {
    */
   updateMacroValue(name: string, value: string): void;
 
-  /** Register an interceptor for pre-generation prompt modification */
+  /**
+   * Register an interceptor for pre-generation prompt modification.
+   *
+   * The handler receives the assembled messages and a context object, and may
+   * return either a plain `LlmMessageDTO[]` (backwards-compatible) or an
+   * `InterceptorResultDTO` to also inject generation parameters into the
+   * outgoing LLM request.
+   *
+   * Returning `parameters` requires the `generation_parameters` permission.
+   * Without it, returned parameters are silently stripped.
+   */
   registerInterceptor(
     handler: (
       messages: LlmMessageDTO[],
       context: unknown
-    ) => Promise<LlmMessageDTO[]>,
+    ) => Promise<LlmMessageDTO[] | InterceptorResultDTO>,
     priority?: number
   ): void;
 

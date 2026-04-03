@@ -8,6 +8,17 @@ export interface LlmMessageDTO {
   name?: string;
 }
 
+/**
+ * Return type for interceptor handlers.
+ * Interceptors may return either a plain `LlmMessageDTO[]` (backwards-compatible)
+ * or this object to also inject generation parameters (requires `generation_parameters` permission).
+ */
+export interface InterceptorResultDTO {
+  messages: LlmMessageDTO[];
+  /** Provider parameters merged into the outgoing LLM request. Requires `generation_parameters` permission. */
+  parameters?: Record<string, unknown>;
+}
+
 export interface MacroDefinitionDTO {
   name: string;
   category: string;
@@ -753,7 +764,7 @@ export type WorkerToHost =
   | { type: "unregister_macro"; name: string }
   | { type: "update_macro_value"; name: string; value: string }
   | { type: "register_interceptor"; priority?: number }
-  | { type: "intercept_result"; requestId: string; messages: LlmMessageDTO[] }
+  | { type: "intercept_result"; requestId: string; messages: LlmMessageDTO[]; parameters?: Record<string, unknown> }
   | { type: "register_tool"; tool: ToolRegistrationDTO }
   | { type: "unregister_tool"; name: string }
   | { type: "request_generation"; requestId: string; input: GenerationRequestDTO }

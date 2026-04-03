@@ -9,6 +9,7 @@
  * - "tools"            — register LLM tools
  * - "cors_proxy"       — use CORS proxy
  * - "context_handler"  — register global context middleware
+ * - "generation_parameters" — inject parameters into in-flight generations via interceptors
  * - "characters"       — CRUD on character cards
  * - "chats"            — CRUD on chat sessions
  * - "personas"         — CRUD on personas
@@ -30,7 +31,8 @@ export type SpindlePermission =
   | "world_books"
   | "personas"
   | "push_notification"
-  | "image_gen";
+  | "image_gen"
+  | "generation_parameters";
 
 export const ALL_PERMISSIONS: readonly SpindlePermission[] = [
   "generation",
@@ -50,6 +52,7 @@ export const ALL_PERMISSIONS: readonly SpindlePermission[] = [
   "personas",
   "push_notification",
   "image_gen",
+  "generation_parameters",
 ] as const;
 
 export function isValidPermission(p: string): p is SpindlePermission {
