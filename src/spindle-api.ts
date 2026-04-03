@@ -727,6 +727,7 @@ export interface SpindleAPI {
       /** For operator-scoped extensions only. */
       userId?: string;
     }): Promise<{
+      openRequestId: string;
       /** How the modal was dismissed. */
       dismissedBy: "user" | "extension" | "cleanup";
     }>;
