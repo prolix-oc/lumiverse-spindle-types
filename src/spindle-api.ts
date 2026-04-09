@@ -307,8 +307,9 @@ export interface SpindleAPI {
   };
 
   /**
-   * Local (chat-scoped) and global variable access (free tier — no permission needed).
-   * Uses the same storage as built-in {{getvar}}/{{setgvar}} macros.
+   * Local (transient), global (user-scoped), and chat (persisted) variable access
+   * (free tier — no permission needed).
+   * Uses the same storage as built-in {{getvar}}/{{setgvar}}/{{getchatvar}} macros.
    */
   variables: {
     local: {
@@ -324,6 +325,15 @@ export interface SpindleAPI {
       delete(key: string, userId?: string): Promise<void>;
       list(userId?: string): Promise<Record<string, string>>;
       has(key: string, userId?: string): Promise<boolean>;
+    };
+    /** Chat-scoped persisted variables — stored in chat.metadata.chat_variables.
+     *  Persists across generations within the same chat. */
+    chat: {
+      get(chatId: string, key: string): Promise<string>;
+      set(chatId: string, key: string, value: string): Promise<void>;
+      delete(chatId: string, key: string): Promise<void>;
+      list(chatId: string): Promise<Record<string, string>>;
+      has(chatId: string, key: string): Promise<boolean>;
     };
   };
 

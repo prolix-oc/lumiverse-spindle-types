@@ -933,6 +933,11 @@ export type WorkerToHost =
   | { type: "vars_delete_global"; requestId: string; key: string; userId?: string }
   | { type: "vars_list_global"; requestId: string; userId?: string }
   | { type: "vars_has_global"; requestId: string; key: string; userId?: string }
+  | { type: "vars_get_chat"; requestId: string; chatId: string; key: string }
+  | { type: "vars_set_chat"; requestId: string; chatId: string; key: string; value: string }
+  | { type: "vars_delete_chat"; requestId: string; chatId: string; key: string }
+  | { type: "vars_list_chat"; requestId: string; chatId: string }
+  | { type: "vars_has_chat"; requestId: string; chatId: string; key: string }
   // ─── Characters (gated: "characters") ──────────────────────────────
   | { type: "characters_list"; requestId: string; limit?: number; offset?: number; userId?: string }
   | { type: "characters_get"; requestId: string; characterId: string; userId?: string }
