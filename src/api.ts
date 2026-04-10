@@ -1077,7 +1077,7 @@ export type WorkerToHost =
       result?: string;
       error?: string;
     }
-  | { type: "frontend_message"; payload: unknown }
+  | { type: "frontend_message"; payload: unknown; userId?: string }
   | { type: "user_storage_read"; requestId: string; path: string; userId?: string }
   | { type: "user_storage_write"; requestId: string; path: string; data: string; userId?: string }
   | { type: "user_storage_delete"; requestId: string; path: string; userId?: string }

@@ -515,8 +515,21 @@ export interface SpindleAPI {
     priority?: number
   ): void;
 
-  /** Send a message to the frontend module */
-  sendToFrontend(payload: unknown): void;
+  /**
+   * Send a message to the frontend module.
+   *
+   * @param payload  Arbitrary JSON-serializable data delivered to the
+   *                 extension's frontend module via the `SPINDLE_FRONTEND_MSG`
+   *                 WebSocket event.
+   * @param userId   Optional target user. When omitted on operator-scoped
+   *                 extensions the message is broadcast to **every connected
+   *                 user**, which is rarely what you want — pass the userId
+   *                 from the original `onFrontendMessage` handler (or any
+   *                 other API call site that surfaced one) to route the reply
+   *                 only to that user. User-scoped extensions always deliver
+   *                 to their installer regardless of this argument.
+   */
+  sendToFrontend(payload: unknown, userId?: string): void;
   /** Receive messages from the frontend module (userId is the sender) */
   onFrontendMessage(handler: (payload: unknown, userId: string) => void): () => void;
 
