@@ -220,6 +220,13 @@ export interface SpindleAPI {
       role: "system" | "user" | "assistant";
       content: string;
       metadata?: Record<string, unknown>;
+      /** Index of the active swipe in `swipes`. `0` when the message has no alternates. */
+      swipe_id: number;
+      /**
+       * All swipe variants for this message, including the currently active one.
+       * `swipes[swipe_id]` always equals `content`.
+       */
+      swipes: string[];
     }>>;
     appendMessage(
       chatId: string,
