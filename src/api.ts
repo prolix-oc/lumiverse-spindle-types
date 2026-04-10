@@ -755,6 +755,74 @@ export interface SpindleCommandContextDTO {
   isGroupChat?: boolean;
 }
 
+// ─── Generation Event Payload DTOs ──────────────────────────────────────
+
+/** Payload for `GENERATION_STARTED` events. */
+export interface GenerationStartedPayloadDTO {
+  generationId: string;
+  chatId: string;
+  model: string;
+  targetMessageId?: string;
+  characterId?: string;
+  characterName?: string;
+}
+
+/** Payload for `STREAM_TOKEN_RECEIVED` events. */
+export interface StreamTokenPayloadDTO {
+  generationId: string;
+  chatId: string;
+  /** The token text chunk. */
+  token: string;
+  /** Monotonic sequence number for deduplication on reconnect. */
+  seq: number;
+  /** Present and set to `"reasoning"` for chain-of-thought tokens. */
+  type?: "reasoning";
+}
+
+/** Payload for `GENERATION_ENDED` events. */
+export interface GenerationEndedPayloadDTO {
+  generationId: string;
+  chatId: string;
+  /** ID of the saved message (absent on error). */
+  messageId?: string;
+  /** Final generated content (absent on error). */
+  content?: string;
+  /** Error message when the generation failed. */
+  error?: string;
+}
+
+/** Payload for `GENERATION_STOPPED` events (user-initiated stop). */
+export interface GenerationStoppedPayloadDTO {
+  generationId: string;
+  chatId: string;
+  /** Partial content accumulated before the stop. */
+  content?: string;
+}
+
+/**
+ * Observer handle returned by `spindle.generate.observe()`.
+ * Provides a high-level API for watching an in-flight generation on a
+ * specific chat, with automatic token accumulation and lifecycle callbacks.
+ */
+export interface GenerationObserver {
+  /** Register a callback for when a generation starts on the observed chat. */
+  onStart(handler: (info: GenerationStartedPayloadDTO) => void): void;
+  /** Register a callback for each streamed token (content or reasoning). */
+  onToken(handler: (token: StreamTokenPayloadDTO) => void): void;
+  /** Register a callback for when the generation completes (success or error). */
+  onEnd(handler: (result: GenerationEndedPayloadDTO) => void): void;
+  /** Register a callback for when the generation is stopped by the user. */
+  onStop(handler: (result: GenerationStoppedPayloadDTO) => void): void;
+  /** Accumulated content tokens so far. */
+  readonly content: string;
+  /** Accumulated reasoning tokens so far. */
+  readonly reasoning: string;
+  /** The active generation ID, or `null` if idle. */
+  readonly generationId: string | null;
+  /** Stop observing and unsubscribe from all events. */
+  dispose(): void;
+}
+
 // ─── Worker → Host messages ──────────────────────────────────────────────
 
 export type WorkerToHost =

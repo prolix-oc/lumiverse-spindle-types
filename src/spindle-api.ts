@@ -39,11 +39,24 @@ import type {
   SpindleModalItemDTO,
   SpindleCommandDTO,
   SpindleCommandContextDTO,
+  GenerationStartedPayloadDTO,
+  StreamTokenPayloadDTO,
+  GenerationEndedPayloadDTO,
+  GenerationStoppedPayloadDTO,
+  GenerationObserver,
 } from "./api";
 
 /** The global `spindle` object available in backend extension workers */
 export interface SpindleAPI {
-  /** Subscribe to a Lumiverse event */
+  /** Subscribe to generation-started events (requires `generation` permission). */
+  on(event: "GENERATION_STARTED", handler: (payload: GenerationStartedPayloadDTO) => void): () => void;
+  /** Subscribe to streamed token events (requires `generation` permission). */
+  on(event: "STREAM_TOKEN_RECEIVED", handler: (payload: StreamTokenPayloadDTO) => void): () => void;
+  /** Subscribe to generation-ended events (requires `generation` permission). */
+  on(event: "GENERATION_ENDED", handler: (payload: GenerationEndedPayloadDTO) => void): () => void;
+  /** Subscribe to generation-stopped events (requires `generation` permission). */
+  on(event: "GENERATION_STOPPED", handler: (payload: GenerationStoppedPayloadDTO) => void): () => void;
+  /** Subscribe to a Lumiverse event. */
   on(event: string, handler: (payload: unknown) => void): () => void;
 
   /** Register a macro */
@@ -89,6 +102,27 @@ export interface SpindleAPI {
     batch(input: GenerationRequestDTO): Promise<unknown>;
     /** Run a dry-run prompt assembly without calling the LLM. */
     dryRun(input: DryRunRequestDTO, userId?: string): Promise<DryRunResultDTO>;
+    /**
+     * Observe an in-flight generation on a chat.
+     *
+     * Returns a {@link GenerationObserver} that subscribes to the generation
+     * lifecycle events for the given `chatId` and accumulates streamed
+     * content/reasoning automatically. Call `.dispose()` when done.
+     *
+     * Requires the `generation` permission.
+     *
+     * @example
+     * ```ts
+     * const obs = spindle.generate.observe("chat-uuid");
+     * obs.onStart((info) => console.log("Started:", info.model));
+     * obs.onToken((t) => console.log("Token:", t.token));
+     * obs.onEnd((r) => {
+     *   console.log("Done:", obs.content);
+     *   obs.dispose();
+     * });
+     * ```
+     */
+    observe(chatId: string): GenerationObserver;
   };
 
   /** Scoped storage (per-extension virtual disk) */

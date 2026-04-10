@@ -62,6 +62,11 @@ export type {
   SpindleModalItemDTO,
   SpindleCommandDTO,
   SpindleCommandContextDTO,
+  GenerationStartedPayloadDTO,
+  StreamTokenPayloadDTO,
+  GenerationEndedPayloadDTO,
+  GenerationStoppedPayloadDTO,
+  GenerationObserver,
   WorkerToHost,
   HostToWorker,
 } from "./api";
