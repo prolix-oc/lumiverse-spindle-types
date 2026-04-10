@@ -67,6 +67,9 @@ export type {
   GenerationEndedPayloadDTO,
   GenerationStoppedPayloadDTO,
   GenerationObserver,
+  ChatMessageDTO,
+  MessageSwipeAction,
+  MessageSwipedPayloadDTO,
   WorkerToHost,
   HostToWorker,
 } from "./api";

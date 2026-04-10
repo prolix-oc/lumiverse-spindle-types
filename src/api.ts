@@ -799,6 +799,81 @@ export interface GenerationStoppedPayloadDTO {
   content?: string;
 }
 
+// ─── Chat Message Event Payload DTOs ────────────────────────────────────
+
+/**
+ * Wire shape of a chat message as delivered in WebSocket event payloads
+ * (e.g. `MESSAGE_SENT`, `MESSAGE_EDITED`, `MESSAGE_SWIPED`).
+ *
+ * This is the raw backend message shape and is distinct from the normalized
+ * `{ id, role, content, ... }` object returned by `spindle.chat.getMessages()`,
+ * which collapses `is_user`/`name` into a `role` discriminator.
+ */
+export interface ChatMessageDTO {
+  id: string;
+  chat_id: string;
+  index_in_chat: number;
+  is_user: boolean;
+  name: string;
+  /** The currently active swipe content (mirrors `swipes[swipe_id]`). */
+  content: string;
+  send_date: number;
+  /** Index of the active swipe in `swipes`. `0` when the message has no alternates. */
+  swipe_id: number;
+  /** All swipe variants for this message, including the currently active one. */
+  swipes: string[];
+  /** Per-swipe creation timestamps (unix epoch seconds), aligned with `swipes`. */
+  swipe_dates: number[];
+  /** Free-form metadata bag (attachments, spindle metadata, reasoning, etc.). */
+  extra: Record<string, unknown>;
+  parent_message_id: string | null;
+  branch_id: string | null;
+  created_at: number;
+}
+
+/**
+ * Distinguishes the four ways a `MESSAGE_SWIPED` event can be triggered.
+ *
+ *  - `'added'`     — a new swipe variant was created (e.g. regenerate, manual add)
+ *  - `'updated'`   — an existing swipe's content was edited in place
+ *  - `'deleted'`   — a swipe variant was removed from the message
+ *  - `'navigated'` — the user (or an extension) cycled the active swipe slot
+ */
+export type MessageSwipeAction = "added" | "updated" | "deleted" | "navigated";
+
+/**
+ * Payload for `MESSAGE_SWIPED` events.
+ *
+ * The discriminator fields (`action`, `swipeId`, `previousSwipeId`) let
+ * extensions tell the four swipe operations apart and maintain swipe-keyed
+ * state correctly without diffing the `swipes` array on every event.
+ */
+export interface MessageSwipedPayloadDTO {
+  chatId: string;
+  /** The full message after the mutation. */
+  message: ChatMessageDTO;
+  /** Distinguishes which swipe operation produced this event. */
+  action: MessageSwipeAction;
+  /**
+   * The swipe index this event concerns. Semantics depend on `action`:
+   *
+   *  - `'added'`     — index of the new swipe (equal to `message.swipe_id` post-add)
+   *  - `'updated'`   — index of the edited swipe (may or may not equal `message.swipe_id`)
+   *  - `'deleted'`   — index that was removed. Note: this slot is no longer present
+   *                    in `message.swipes`, and `message.swipe_id` may have shifted
+   *                    if the deleted slot was at or before the previously active one.
+   *  - `'navigated'` — destination index (equal to `message.swipe_id`)
+   */
+  swipeId: number;
+  /**
+   * For `'navigated'` and `'deleted'` events: the active swipe index *before*
+   * the change. Useful for direction detection on navigation, and for detecting
+   * whether the active slot was the one removed on deletion. Omitted for
+   * `'added'` and `'updated'`.
+   */
+  previousSwipeId?: number;
+}
+
 /**
  * Observer handle returned by `spindle.generate.observe()`.
  * Provides a high-level API for watching an in-flight generation on a

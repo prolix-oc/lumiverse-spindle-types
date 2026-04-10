@@ -44,6 +44,7 @@ import type {
   GenerationEndedPayloadDTO,
   GenerationStoppedPayloadDTO,
   GenerationObserver,
+  MessageSwipedPayloadDTO,
 } from "./api";
 
 /** The global `spindle` object available in backend extension workers */
@@ -56,6 +57,12 @@ export interface SpindleAPI {
   on(event: "GENERATION_ENDED", handler: (payload: GenerationEndedPayloadDTO) => void): () => void;
   /** Subscribe to generation-stopped events (requires `generation` permission). */
   on(event: "GENERATION_STOPPED", handler: (payload: GenerationStoppedPayloadDTO) => void): () => void;
+  /**
+   * Subscribe to swipe lifecycle events. The payload's `action` discriminator
+   * tells you whether a swipe was added, updated, deleted, or navigated, and
+   * `swipeId` identifies which slot the event concerns.
+   */
+  on(event: "MESSAGE_SWIPED", handler: (payload: MessageSwipedPayloadDTO) => void): () => void;
   /** Subscribe to a Lumiverse event. */
   on(event: string, handler: (payload: unknown) => void): () => void;
 
