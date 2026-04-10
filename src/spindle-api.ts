@@ -252,6 +252,27 @@ export interface SpindleAPI {
       }
     ): Promise<void>;
     deleteMessage(chatId: string, messageId: string): Promise<void>;
+    /**
+     * Mark a single message as hidden or visible. Hidden messages are
+     * excluded from chat memory embeddings (vector retrieval) but, in the
+     * current build, are still included in chat history during prompt
+     * assembly. See `chat-mutation.md` for the full semantics.
+     *
+     * Requires the `chat_mutation` permission.
+     */
+    setMessageHidden(chatId: string, messageId: string, hidden: boolean): Promise<void>;
+    /**
+     * Bulk variant of {@link setMessageHidden}. Capped at 500 message IDs
+     * per call (matching the underlying service limit).
+     *
+     * Requires the `chat_mutation` permission.
+     */
+    setMessagesHidden(chatId: string, messageIds: string[], hidden: boolean): Promise<void>;
+    /**
+     * Read the hidden flag for a single message. Returns `false` for messages
+     * that have never had the flag set. Requires the `chat_mutation` permission.
+     */
+    isMessageHidden(chatId: string, messageId: string): Promise<boolean>;
   };
 
   /** Extension-level telemetry */

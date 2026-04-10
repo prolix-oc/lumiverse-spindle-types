@@ -169,7 +169,8 @@ export interface ImageGenResultDTO {
 
 /**
  * Safe representation of a character exposed to extensions.
- * Omits raw extensions blob — only exposes user-facing fields.
+ * Omits the raw `extensions` blob — only exposes user-facing fields plus
+ * a small allowlist of structured extension state (e.g. `world_book_ids`).
  */
 export interface CharacterDTO {
   id: string;
@@ -186,6 +187,11 @@ export interface CharacterDTO {
   alternate_greetings: string[];
   creator: string;
   image_id: string | null;
+  /**
+   * IDs of world books attached directly to this character. The legacy
+   * single-id form is auto-migrated, so consumers can rely on the array.
+   */
+  world_book_ids: string[];
   created_at: number;
   updated_at: number;
 }
@@ -203,6 +209,8 @@ export interface CharacterCreateDTO {
   tags?: string[];
   alternate_greetings?: string[];
   creator?: string;
+  /** Optional initial world book attachments. */
+  world_book_ids?: string[];
 }
 
 export interface CharacterUpdateDTO {
@@ -218,6 +226,11 @@ export interface CharacterUpdateDTO {
   tags?: string[];
   alternate_greetings?: string[];
   creator?: string;
+  /**
+   * Replace the character's world book attachments. Pass an empty array to
+   * detach all books. Omit the field to leave attachments unchanged.
+   */
+  world_book_ids?: string[];
 }
 
 // ─── Chat DTOs ──────────────────────────────────────────────────────────
@@ -987,6 +1000,26 @@ export type WorkerToHost =
     }
   | {
       type: "chat_delete_message";
+      requestId: string;
+      chatId: string;
+      messageId: string;
+    }
+  | {
+      type: "chat_set_message_hidden";
+      requestId: string;
+      chatId: string;
+      messageId: string;
+      hidden: boolean;
+    }
+  | {
+      type: "chat_set_messages_hidden";
+      requestId: string;
+      chatId: string;
+      messageIds: string[];
+      hidden: boolean;
+    }
+  | {
+      type: "chat_is_message_hidden";
       requestId: string;
       chatId: string;
       messageId: string;
