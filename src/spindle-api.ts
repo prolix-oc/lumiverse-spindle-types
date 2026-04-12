@@ -50,21 +50,21 @@ import type {
 /** The global `spindle` object available in backend extension workers */
 export interface SpindleAPI {
   /** Subscribe to generation-started events (requires `generation` permission). */
-  on(event: "GENERATION_STARTED", handler: (payload: GenerationStartedPayloadDTO) => void): () => void;
+  on(event: "GENERATION_STARTED", handler: (payload: GenerationStartedPayloadDTO, userId?: string) => void): () => void;
   /** Subscribe to streamed token events (requires `generation` permission). */
-  on(event: "STREAM_TOKEN_RECEIVED", handler: (payload: StreamTokenPayloadDTO) => void): () => void;
+  on(event: "STREAM_TOKEN_RECEIVED", handler: (payload: StreamTokenPayloadDTO, userId?: string) => void): () => void;
   /** Subscribe to generation-ended events (requires `generation` permission). */
-  on(event: "GENERATION_ENDED", handler: (payload: GenerationEndedPayloadDTO) => void): () => void;
+  on(event: "GENERATION_ENDED", handler: (payload: GenerationEndedPayloadDTO, userId?: string) => void): () => void;
   /** Subscribe to generation-stopped events (requires `generation` permission). */
-  on(event: "GENERATION_STOPPED", handler: (payload: GenerationStoppedPayloadDTO) => void): () => void;
+  on(event: "GENERATION_STOPPED", handler: (payload: GenerationStoppedPayloadDTO, userId?: string) => void): () => void;
   /**
    * Subscribe to swipe lifecycle events. The payload's `action` discriminator
    * tells you whether a swipe was added, updated, deleted, or navigated, and
    * `swipeId` identifies which slot the event concerns.
    */
-  on(event: "MESSAGE_SWIPED", handler: (payload: MessageSwipedPayloadDTO) => void): () => void;
+  on(event: "MESSAGE_SWIPED", handler: (payload: MessageSwipedPayloadDTO, userId?: string) => void): () => void;
   /** Subscribe to a Lumiverse event. */
-  on(event: string, handler: (payload: unknown) => void): () => void;
+  on(event: string, handler: (payload: unknown, userId?: string) => void): () => void;
 
   /** Register a macro */
   registerMacro(def: MacroDefinitionDTO): void;

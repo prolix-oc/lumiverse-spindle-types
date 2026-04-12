@@ -1193,7 +1193,7 @@ export type WorkerToHost =
 
 export type HostToWorker =
   | { type: "init"; manifest: SpindleManifest; storagePath: string }
-  | { type: "event"; event: string; payload: unknown }
+  | { type: "event"; event: string; payload: unknown; userId?: string }
   | {
       type: "intercept_request";
       requestId: string;
