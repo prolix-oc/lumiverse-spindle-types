@@ -992,6 +992,18 @@ export interface SpindleAPI {
     ): () => void;
   };
 
+  /**
+   * Lumiverse version info (free tier — no permission needed).
+   * Returns the semantic version strings reported by the backend server
+   * and frontend bundle. Useful for feature gating or compatibility checks.
+   */
+  version: {
+    /** Get the backend server's semantic version (e.g. `"0.8.7"`). */
+    getBackend(): Promise<string>;
+    /** Get the frontend's semantic version (e.g. `"0.8.7"`). */
+    getFrontend(): Promise<string>;
+  };
+
   /** This extension's manifest */
   manifest: SpindleManifest;
 }

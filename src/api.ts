@@ -1187,7 +1187,10 @@ export type WorkerToHost =
   | { type: "theme_generate_variables"; requestId: string; config: ThemeVariablesConfigDTO }
   // ─── Commands (free tier) ──────────────────────────────────────────────
   | { type: "commands_register"; commands: SpindleCommandDTO[] }
-  | { type: "commands_unregister"; commandIds: string[] };
+  | { type: "commands_unregister"; commandIds: string[] }
+  // ─── Version (free tier) ───────────────────────────────────────────────
+  | { type: "version_get_backend"; requestId: string }
+  | { type: "version_get_frontend"; requestId: string };
 
 // ─── Host → Worker messages ──────────────────────────────────────────────
 
