@@ -45,6 +45,7 @@ import type {
   GenerationStoppedPayloadDTO,
   GenerationObserver,
   MessageSwipedPayloadDTO,
+  StreamChunkDTO,
 } from "./api";
 
 /** The global `spindle` object available in backend extension workers */
@@ -102,11 +103,76 @@ export interface SpindleAPI {
   /** Unregister an LLM tool */
   unregisterTool(name: string): void;
 
-  /** Generation helpers */
+  /**
+   * Generation helpers.
+   *
+   * All three entry points (`raw`, `quiet`, `batch`) accept a standard
+   * `AbortSignal` via `input.signal`. Aborting the signal tears down the
+   * upstream LLM HTTP request and rejects the returned promise with an
+   * `AbortError` (`err.name === "AbortError"`). This is the same pattern
+   * `fetch()` uses, so it composes with `AbortSignal.timeout()` and
+   * `AbortSignal.any([...])`.
+   *
+   * @example
+   * ```ts
+   * const controller = new AbortController()
+   * const result = spindle.generate.raw({
+   *   provider: "openai",
+   *   model: "gpt-4o-mini",
+   *   messages,
+   *   signal: controller.signal,
+   * })
+   * // Cancel from elsewhere — e.g. user closed the panel
+   * controller.abort()
+   * ```
+   */
   generate: {
     raw(input: GenerationRequestDTO): Promise<unknown>;
     quiet(input: GenerationRequestDTO): Promise<unknown>;
     batch(input: GenerationRequestDTO): Promise<unknown>;
+    /**
+     * Streaming variant of {@link raw}. Returns an async generator that
+     * yields incremental {@link StreamChunkDTO} values:
+     *
+     *  - `{ type: 'token', token }`     — content chunk
+     *  - `{ type: 'reasoning', token }` — chain-of-thought chunk
+     *  - `{ type: 'done', ... }`        — final aggregated response (emitted exactly once)
+     *
+     * Tool-call deltas, finish reason, and token usage live on the terminal
+     * `done` chunk. If the upstream call fails or the request is aborted
+     * via `input.signal`, the generator rejects with the underlying error
+     * (`AbortError` for cancellations).
+     *
+     * @example
+     * ```ts
+     * const ctrl = new AbortController()
+     * setTimeout(() => ctrl.abort(), 30_000)
+     * try {
+     *   for await (const chunk of spindle.generate.rawStream({
+     *     provider: 'openai',
+     *     model: 'gpt-4o-mini',
+     *     messages,
+     *     signal: ctrl.signal,
+     *   })) {
+     *     if (chunk.type === 'token') process.stdout.write(chunk.token)
+     *     else if (chunk.type === 'done') usage = chunk.usage
+     *   }
+     * } catch (err) {
+     *   if (err instanceof Error && err.name === 'AbortError') return
+     *   throw err
+     * }
+     * ```
+     */
+    rawStream(input: GenerationRequestDTO): AsyncGenerator<StreamChunkDTO, void, void>;
+    /**
+     * Streaming variant of {@link quiet}. Same chunk schema and abort
+     * semantics as {@link rawStream}.
+     *
+     * Note: streaming is not exposed for `batch` — compose multiple
+     * `rawStream` / `quietStream` calls yourself if you need parallel
+     * streamed responses.
+     */
+    quietStream(input: GenerationRequestDTO): AsyncGenerator<StreamChunkDTO, void, void>;
     /** Run a dry-run prompt assembly without calling the LLM. */
     dryRun(input: DryRunRequestDTO, userId?: string): Promise<DryRunResultDTO>;
     /**

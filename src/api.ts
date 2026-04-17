@@ -66,7 +66,66 @@ export interface GenerationRequestDTO {
    * is inferred from the extension owner and can be omitted.
    */
   userId?: string;
+  /**
+   * Optional `AbortSignal` to cancel an in-flight generation. When the
+   * signal fires, the upstream LLM HTTP request is torn down and the
+   * returned promise rejects with an `AbortError` (`err.name === "AbortError"`).
+   *
+   * The signal is consumed inside the extension worker and never crosses
+   * the host boundary — it is stripped before the RPC message is posted.
+   * The worker notifies the host via an internal `cancel_generation`
+   * message so the host can abort the in-flight request.
+   *
+   * @example
+   * ```ts
+   * const controller = new AbortController()
+   * const timer = setTimeout(() => controller.abort(), 10_000)
+   * try {
+   *   const result = await spindle.generate.raw({
+   *     provider: "openai",
+   *     model: "gpt-4o-mini",
+   *     messages: [{ role: "user", content: "hello" }],
+   *     signal: controller.signal,
+   *   })
+   * } catch (err) {
+   *   if (err instanceof Error && err.name === "AbortError") {
+   *     // user/timeout cancelled — not an error condition
+   *   }
+   * } finally {
+   *   clearTimeout(timer)
+   * }
+   * ```
+   */
+  signal?: AbortSignal;
 }
+
+/**
+ * Streamed chunk yielded by `spindle.generate.rawStream()` and
+ * `spindle.generate.quietStream()`.
+ *
+ * The stream emits one or more `token` / `reasoning` chunks and then
+ * exactly one terminal `done` chunk carrying the aggregated response.
+ * If the stream fails or is aborted, the async generator rejects instead
+ * of emitting `done`.
+ */
+export type StreamChunkDTO =
+  /** Incremental content token. */
+  | { type: "token"; token: string }
+  /** Incremental chain-of-thought / reasoning token. */
+  | { type: "reasoning"; token: string }
+  /** Terminal chunk — emitted exactly once, on successful completion. */
+  | {
+      type: "done";
+      content: string;
+      reasoning?: string;
+      finish_reason: string;
+      tool_calls?: ToolCallDTO[];
+      usage?: {
+        prompt_tokens: number;
+        completion_tokens: number;
+        total_tokens: number;
+      };
+    };
 
 export interface RequestInitDTO {
   method?: string;
@@ -924,6 +983,18 @@ export type WorkerToHost =
   | { type: "register_tool"; tool: ToolRegistrationDTO }
   | { type: "unregister_tool"; name: string }
   | { type: "request_generation"; requestId: string; input: GenerationRequestDTO }
+  /**
+   * Start a streaming generation. The host responds asynchronously with
+   * one or more `generation_stream_chunk` messages, terminating with a
+   * `done` chunk on success or a `generation_stream_error` on failure.
+   */
+  | { type: "request_generation_stream"; requestId: string; input: GenerationRequestDTO }
+  /**
+   * Cancel an in-flight generation started via `request_generation` or
+   * `request_generation_stream`. `requestId` matches the original request.
+   * The host aborts the upstream LLM fetch and responds with an `AbortError`.
+   */
+  | { type: "cancel_generation"; requestId: string }
   | { type: "storage_read"; requestId: string; path: string }
   | { type: "storage_write"; requestId: string; path: string; data: string }
   | { type: "storage_read_binary"; requestId: string; path: string }
@@ -1243,4 +1314,16 @@ export type HostToWorker =
       commandId: string;
       context: SpindleCommandContextDTO;
       userId: string;
-    };
+    }
+  /**
+   * One streamed chunk for a generation started via
+   * `request_generation_stream`. Multiple `token` / `reasoning` chunks
+   * may arrive, terminating with exactly one `done` chunk on success.
+   */
+  | { type: "generation_stream_chunk"; requestId: string; chunk: StreamChunkDTO }
+  /**
+   * Terminal failure for a generation started via
+   * `request_generation_stream`. Mutually exclusive with the `done`
+   * chunk in `generation_stream_chunk`. Aborts surface here too.
+   */
+  | { type: "generation_stream_error"; requestId: string; error: string };

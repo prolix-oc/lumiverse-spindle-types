@@ -20,6 +20,7 @@ export type {
   ToolSchemaDTO,
   ToolCallDTO,
   GenerationRequestDTO,
+  StreamChunkDTO,
   RequestInitDTO,
   ConnectionProfileDTO,
   PermissionDeniedDetail,
