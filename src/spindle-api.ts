@@ -45,6 +45,7 @@ import type {
   GenerationStoppedPayloadDTO,
   GenerationObserver,
   MessageSwipedPayloadDTO,
+  ToolInvocationPayloadDTO,
   StreamChunkDTO,
 } from "./api";
 
@@ -64,6 +65,21 @@ export interface SpindleAPI {
    * `swipeId` identifies which slot the event concerns.
    */
   on(event: "MESSAGE_SWIPED", handler: (payload: MessageSwipedPayloadDTO, userId?: string) => void): () => void;
+  /**
+   * Receive invocations for tools registered via {@link SpindleAPI.registerTool}.
+   *
+   * The handler must return the tool's textual result (or a promise thereof).
+   * Undefined / null returns are coerced to an empty string by the host.
+   *
+   * When the invocation originates from a council execution cycle, the payload
+   * includes a `councilMember` snapshot describing the assigned member
+   * (identity, role, chance, avatar URL, and Lumia personality fields) so the
+   * extension can tailor its tool output to that member's voice.
+   */
+  on(
+    event: "TOOL_INVOCATION",
+    handler: (payload: ToolInvocationPayloadDTO) => string | Promise<string> | void | Promise<void>
+  ): () => void;
   /** Subscribe to a Lumiverse event. */
   on(event: string, handler: (payload: unknown, userId?: string) => void): () => void;
 

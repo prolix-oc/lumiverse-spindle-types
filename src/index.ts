@@ -71,6 +71,7 @@ export type {
   ChatMessageDTO,
   MessageSwipeAction,
   MessageSwipedPayloadDTO,
+  ToolInvocationPayloadDTO,
   WorkerToHost,
   HostToWorker,
 } from "./api";
@@ -114,6 +115,7 @@ export type { SpindleAPI } from "./spindle-api";
 
 export type {
   CouncilMember,
+  CouncilMemberContext,
   SidecarConfig,
   CouncilSidecarConfig,
   CouncilToolsSettings,

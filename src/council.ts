@@ -77,6 +77,47 @@ export interface CouncilSettings {
   toolsSettings: CouncilToolsSettings;
 }
 
+// ---- Tool Invocation Context ----
+
+/**
+ * Personality snapshot of the council member that triggered a tool invocation.
+ *
+ * Delivered to extension `TOOL_INVOCATION` handlers when an extension-provided
+ * council tool is executed as part of a council cycle. Allows extensions to
+ * personalise their tool pipeline with the assigned member's identity, role,
+ * and Lumia personality fields.
+ *
+ * This field is optional — it is only populated when the tool is invoked via
+ * the council execution path. Tools invoked outside council (e.g. future
+ * inline function calling) will not see this context.
+ */
+export interface CouncilMemberContext {
+  /** Unique council member id (council settings row id). */
+  memberId: string;
+  /** Source Lumia item id this member is backed by. */
+  itemId: string;
+  /** Pack id the Lumia item lives in. */
+  packId: string;
+  /** Pack name the Lumia item lives in. */
+  packName: string;
+  /** Display name of the Lumia item (also used as the member name). */
+  name: string;
+  /** Freeform role description assigned by the user (e.g. "Plot Enforcer"). */
+  role: string;
+  /** Probability (0–100) that this member participates each generation. */
+  chance: number;
+  /** Relative URL to the member's avatar (e.g. `/api/v1/images/{id}`), or null. */
+  avatarUrl: string | null;
+  /** Lumia item "definition" field — physical/identity description. */
+  definition: string;
+  /** Lumia item "personality" field. */
+  personality: string;
+  /** Lumia item "behavior" field — behavioural patterns. */
+  behavior: string;
+  /** Gender identity marker (0=unspecified, 1=feminine, 2=masculine). */
+  genderIdentity: 0 | 1 | 2;
+}
+
 // ---- Execution Results ----
 
 /** Result of a single tool invocation for a single member. */

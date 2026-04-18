@@ -1,4 +1,5 @@
 import type { SpindleManifest } from "./manifest";
+import type { CouncilMemberContext } from "./council";
 
 // ─── DTO types for messages ──────────────────────────────────────────────
 
@@ -947,6 +948,29 @@ export interface MessageSwipedPayloadDTO {
 }
 
 /**
+ * Payload delivered to `spindle.on("TOOL_INVOCATION", ...)` handlers.
+ *
+ * Fires whenever an extension-registered tool is invoked by Lumiverse. Handlers
+ * must return a string (or promise thereof) with the tool's result — the host
+ * coerces `undefined` / `null` to an empty string.
+ *
+ * `councilMember` is populated when the invocation originates from a council
+ * execution cycle, providing the assigned member's identity, role, chance,
+ * avatar URL, and Lumia personality fields. It is `undefined` for all other
+ * invocation paths.
+ */
+export interface ToolInvocationPayloadDTO {
+  /** The bare (unqualified) tool name, matching what was passed to `registerTool`. */
+  toolName: string;
+  /** Arguments delivered to the tool. Shape depends on the tool's JSON Schema. */
+  args: Record<string, unknown>;
+  /** Host-side correlation id for this invocation. */
+  requestId: string;
+  /** Council member snapshot when invoked via council — otherwise `undefined`. */
+  councilMember?: CouncilMemberContext;
+}
+
+/**
  * Observer handle returned by `spindle.generate.observe()`.
  * Provides a high-level API for watching an in-flight generation on a
  * specific chat, with automatic token accumulation and lifecycle callbacks.
@@ -1301,6 +1325,15 @@ export type HostToWorker =
       requestId: string;
       toolName: string;
       args: Record<string, unknown>;
+      /**
+       * Populated when the invocation originates from a council execution
+       * cycle — carries the assigned council member's identity, role, chance,
+       * avatar URL, and Lumia personality fields so the extension can tailor
+       * its tool pipeline to the member on whose behalf it is running.
+       *
+       * Undefined for non-council invocation paths.
+       */
+      councilMember?: CouncilMemberContext;
     }
   | { type: "shutdown" }
   | { type: "frontend_message"; payload: unknown; userId: string }
