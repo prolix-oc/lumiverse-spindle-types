@@ -948,6 +948,28 @@ export interface MessageSwipedPayloadDTO {
 }
 
 /**
+ * Payload for `SWIPE_EDITED` events.
+ *
+ * Fires when `spindle.chat.updateMessage()` explicitly supplies one or more
+ * swipe-shaped fields (`swipes`, `swipe_id`, or `swipe_dates`). Plain content
+ * edits that mirror into the active swipe slot continue to emit only
+ * `MESSAGE_EDITED` — this event is for extension-driven rewrites of the
+ * swipe array itself, index navigation, or date-array rewrites.
+ *
+ * `MESSAGE_SWIPED` still fires for the dedicated swipe REST routes
+ * (`addSwipe`, `updateSwipe`, `deleteSwipe`, `cycleSwipe`) with its
+ * `action` discriminator. Consumers that need fine-grained action semantics
+ * should prefer `MESSAGE_SWIPED`; `SWIPE_EDITED` is intentionally coarser.
+ */
+export interface SwipeEditedPayloadDTO {
+  chatId: string;
+  /** The full message after the mutation. */
+  message: ChatMessageDTO;
+  /** Active swipe index before the mutation. Equals `message.swipe_id` when navigation did not occur. */
+  previousSwipeId: number;
+}
+
+/**
  * Payload delivered to `spindle.on("TOOL_INVOCATION", ...)` handlers.
  *
  * Fires whenever an extension-registered tool is invoked by Lumiverse. Handlers

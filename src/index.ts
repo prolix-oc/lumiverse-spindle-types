@@ -71,6 +71,7 @@ export type {
   ChatMessageDTO,
   MessageSwipeAction,
   MessageSwipedPayloadDTO,
+  SwipeEditedPayloadDTO,
   ToolInvocationPayloadDTO,
   WorkerToHost,
   HostToWorker,

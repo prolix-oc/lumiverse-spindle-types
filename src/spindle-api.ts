@@ -45,6 +45,7 @@ import type {
   GenerationStoppedPayloadDTO,
   GenerationObserver,
   MessageSwipedPayloadDTO,
+  SwipeEditedPayloadDTO,
   ToolInvocationPayloadDTO,
   StreamChunkDTO,
 } from "./api";
@@ -65,6 +66,15 @@ export interface SpindleAPI {
    * `swipeId` identifies which slot the event concerns.
    */
   on(event: "MESSAGE_SWIPED", handler: (payload: MessageSwipedPayloadDTO, userId?: string) => void): () => void;
+  /**
+   * Subscribe to `SWIPE_EDITED` events. Emitted when {@link SpindleAPI.chat.updateMessage}
+   * explicitly rewrites one or more swipe-shaped fields (`swipes`, `swipe_id`,
+   * or `swipe_dates`). Plain content-only edits continue to emit `MESSAGE_EDITED`
+   * only. This event is coarser than `MESSAGE_SWIPED` by design — use
+   * `MESSAGE_SWIPED` when you need the `added`/`updated`/`deleted`/`navigated`
+   * discriminator.
+   */
+  on(event: "SWIPE_EDITED", handler: (payload: SwipeEditedPayloadDTO, userId?: string) => void): () => void;
   /**
    * Receive invocations for tools registered via {@link SpindleAPI.registerTool}.
    *
@@ -308,6 +318,12 @@ export interface SpindleAPI {
       id: string;
       role: "system" | "user" | "assistant";
       content: string;
+      /**
+       * The free-form `extra` bag minus `spindle_metadata` (which is surfaced
+       * separately on `metadata`). Carries reasoning text/duration, attachments,
+       * and any host-owned housekeeping fields.
+       */
+      extra: Record<string, unknown>;
       metadata?: Record<string, unknown>;
       /** Index of the active swipe in `swipes`. `0` when the message has no alternates. */
       swipe_id: number;
@@ -316,6 +332,8 @@ export interface SpindleAPI {
        * `swipes[swipe_id]` always equals `content`.
        */
       swipes: string[];
+      /** Per-swipe creation timestamps (unix epoch seconds), aligned with `swipes`. */
+      swipe_dates: number[];
     }>>;
     appendMessage(
       chatId: string,
@@ -325,12 +343,36 @@ export interface SpindleAPI {
         metadata?: Record<string, unknown>;
       }
     ): Promise<{ id: string }>;
+    /**
+     * Patch an existing message. All fields are optional; `undefined` leaves
+     * the field untouched. Precedence rules:
+     *
+     *  - If `content` is supplied, it overwrites both `messages.content` and
+     *    `swipes[swipe_id]` (the active slot).
+     *  - If `swipes` is supplied without `content`, the new active content is
+     *    derived from `swipes[swipe_id]` (either the supplied `swipe_id` or
+     *    the existing one).
+     *  - If only `swipe_id` is supplied, it acts as a navigation and content
+     *    is re-derived from the existing swipes array.
+     *  - `reasoning.text === null` clears `extra.reasoning`; `reasoning.duration
+     *    === null` clears `extra.reasoning_duration`. The two are independent.
+     *
+     * When any of `swipes`/`swipe_id`/`swipe_dates` are supplied, a
+     * `SWIPE_EDITED` event is emitted alongside (or instead of) `MESSAGE_EDITED`.
+     */
     updateMessage(
       chatId: string,
       messageId: string,
       patch: {
         content?: string;
         metadata?: Record<string, unknown>;
+        swipes?: string[];
+        swipe_id?: number;
+        swipe_dates?: number[];
+        reasoning?: {
+          text?: string | null;
+          duration?: number | null;
+        };
       }
     ): Promise<void>;
     deleteMessage(chatId: string, messageId: string): Promise<void>;
