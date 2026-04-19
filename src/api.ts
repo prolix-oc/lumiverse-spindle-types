@@ -958,6 +958,13 @@ export interface MessageSwipedPayloadDTO {
  * execution cycle, providing the assigned member's identity, role, chance,
  * avatar URL, and Lumia personality fields. It is `undefined` for all other
  * invocation paths.
+ *
+ * `contextMessages` is populated when the invocation originates from a council
+ * execution cycle — carrying the structured chat context (system enrichment +
+ * chat history) that was assembled for this member. Extensions can inspect
+ * role boundaries directly instead of re-parsing the flattened `args.context`
+ * string. Multi-part message content is flattened to its text portion before
+ * being delivered. `undefined` for non-council invocation paths.
  */
 export interface ToolInvocationPayloadDTO {
   /** The bare (unqualified) tool name, matching what was passed to `registerTool`. */
@@ -968,6 +975,12 @@ export interface ToolInvocationPayloadDTO {
   requestId: string;
   /** Council member snapshot when invoked via council — otherwise `undefined`. */
   councilMember?: CouncilMemberContext;
+  /**
+   * Structured chat context for council invocations — preserves role
+   * boundaries lost by the flattened `args.context` string. `undefined` for
+   * non-council paths.
+   */
+  contextMessages?: LlmMessageDTO[];
 }
 
 /**
@@ -1334,6 +1347,13 @@ export type HostToWorker =
        * Undefined for non-council invocation paths.
        */
       councilMember?: CouncilMemberContext;
+      /**
+       * Structured chat context for council invocations — the same messages
+       * that populated `args.context` (flattened string), but with role
+       * boundaries preserved so extensions can re-render or filter them
+       * without parsing. Undefined for non-council invocation paths.
+       */
+      contextMessages?: LlmMessageDTO[];
     }
   | { type: "shutdown" }
   | { type: "frontend_message"; payload: unknown; userId: string }
