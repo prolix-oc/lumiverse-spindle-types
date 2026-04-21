@@ -1031,16 +1031,22 @@ export interface GenerationObserver {
 
 // ─── Token Count DTOs ───────────────────────────────────────────────────
 
-/** Which configured model should be used for server-side token counting. */
-export type TokenModelSourceDTO = "main" | "sidecar";
+/** Where the model used for server-side token counting came from. */
+export type TokenModelSourceDTO = "main" | "sidecar" | "explicit";
 
 /** Optional settings for Spindle token count helpers. */
 export interface TokenCountOptionsDTO {
   /**
+   * Explicit model ID to resolve the tokenizer against.
+   *
+   * When provided, this takes precedence over `modelSource`.
+   */
+  model?: string;
+  /**
    * Which configured model to use when resolving the tokenizer.
    *
-   * - `"main"`    → the user's default main connection profile model
-   * - `"sidecar"` → the user's selected sidecar model (or its backing connection model)
+    * - `"main"`    → the user's default main connection profile model
+    * - `"sidecar"` → the user's selected sidecar model (or its backing connection model)
    *
    * Defaults to `"main"`.
    */
@@ -1054,7 +1060,7 @@ export interface TokenCountResultDTO {
   total_tokens: number;
   /** Model ID that was actually used to resolve the tokenizer. */
   model: string;
-  /** Whether the model came from the main connection or the sidecar selection. */
+  /** Whether the model came from the main connection, sidecar selection, or an explicit override. */
   modelSource: TokenModelSourceDTO;
   /** Null when no exact tokenizer match was found and an approximate fallback was used. */
   tokenizer_id: string | null;
@@ -1360,6 +1366,7 @@ export type WorkerToHost =
       type: "tokens_count_text";
       requestId: string;
       text: string;
+      model?: string;
       modelSource?: TokenModelSourceDTO;
       userId?: string;
     }
@@ -1367,6 +1374,7 @@ export type WorkerToHost =
       type: "tokens_count_messages";
       requestId: string;
       messages: Array<Pick<LlmMessageDTO, "role" | "content">>;
+      model?: string;
       modelSource?: TokenModelSourceDTO;
       userId?: string;
     }
@@ -1374,6 +1382,7 @@ export type WorkerToHost =
       type: "tokens_count_chat";
       requestId: string;
       chatId: string;
+      model?: string;
       modelSource?: TokenModelSourceDTO;
       userId?: string;
     };

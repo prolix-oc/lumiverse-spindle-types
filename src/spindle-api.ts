@@ -469,20 +469,20 @@ export interface SpindleAPI {
 
   /** Server-side token counting helpers (free tier). */
   tokens: {
-    /** Count tokens for an arbitrary text string. */
+    /** Count tokens for an arbitrary text string. `options.model` overrides `options.modelSource`. */
     countText(text: string, options?: TokenCountOptionsDTO): Promise<TokenCountResultDTO>;
     /**
      * Count tokens for an array of chat-style messages.
      *
      * This accepts any array whose items expose `{ role, content }`, so the
      * normalized output of `spindle.chat.getMessages(chatId)` can be passed
-     * directly without reshaping.
+     * directly without reshaping. `options.model` overrides `options.modelSource`.
      */
     countMessages(
       messages: Array<Pick<LlmMessageDTO, "role" | "content">>,
       options?: TokenCountOptionsDTO
     ): Promise<TokenCountResultDTO>;
-    /** Count tokens for a live stored chat by ID. */
+    /** Count tokens for a live stored chat by ID. `options.model` overrides `options.modelSource`. */
     countChat(chatId: string, options?: TokenCountOptionsDTO): Promise<TokenCountResultDTO>;
   };
 
