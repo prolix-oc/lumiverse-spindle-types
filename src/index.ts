@@ -27,6 +27,7 @@ export type {
   PermissionChangedDetail,
   CharacterDTO,
   CharacterCreateDTO,
+  CharacterAvatarUploadDTO,
   CharacterUpdateDTO,
   ChatDTO,
   ChatUpdateDTO,

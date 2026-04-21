@@ -11,6 +11,7 @@ import type {
   PermissionChangedDetail,
   CharacterDTO,
   CharacterCreateDTO,
+  CharacterAvatarUploadDTO,
   CharacterUpdateDTO,
   ChatDTO,
   ChatUpdateDTO,
@@ -561,6 +562,7 @@ export interface SpindleAPI {
     list(options?: { limit?: number; offset?: number; userId?: string }): Promise<{ data: CharacterDTO[]; total: number }>;
     get(characterId: string, userId?: string): Promise<CharacterDTO | null>;
     create(input: CharacterCreateDTO, userId?: string): Promise<CharacterDTO>;
+    setAvatar(characterId: string, avatar: CharacterAvatarUploadDTO, userId?: string): Promise<CharacterDTO>;
     update(characterId: string, input: CharacterUpdateDTO, userId?: string): Promise<CharacterDTO>;
     delete(characterId: string, userId?: string): Promise<boolean>;
   };

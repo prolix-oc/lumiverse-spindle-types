@@ -293,6 +293,15 @@ export interface CharacterUpdateDTO {
   world_book_ids?: string[];
 }
 
+export interface CharacterAvatarUploadDTO {
+  /** Raw avatar bytes. Extensions can source these from fetch(), storage, etc. */
+  data: Uint8Array;
+  /** Optional filename used to preserve the extension/MIME when storing the image. */
+  filename?: string;
+  /** Optional content type for the uploaded avatar. Defaults to image/png. */
+  mime_type?: string;
+}
+
 // ─── Chat DTOs ──────────────────────────────────────────────────────────
 
 /**
@@ -1288,6 +1297,7 @@ export type WorkerToHost =
   | { type: "characters_list"; requestId: string; limit?: number; offset?: number; userId?: string }
   | { type: "characters_get"; requestId: string; characterId: string; userId?: string }
   | { type: "characters_create"; requestId: string; input: CharacterCreateDTO; userId?: string }
+  | { type: "characters_set_avatar"; requestId: string; characterId: string; avatar: CharacterAvatarUploadDTO; userId?: string }
   | { type: "characters_update"; requestId: string; characterId: string; input: CharacterUpdateDTO; userId?: string }
   | { type: "characters_delete"; requestId: string; characterId: string; userId?: string }
   // ─── Chats (gated: "chats") ────────────────────────────────────────
