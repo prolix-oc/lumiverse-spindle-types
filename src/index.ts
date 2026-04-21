@@ -73,6 +73,9 @@ export type {
   MessageSwipedPayloadDTO,
   SwipeEditedPayloadDTO,
   ToolInvocationPayloadDTO,
+  TokenModelSourceDTO,
+  TokenCountOptionsDTO,
+  TokenCountResultDTO,
   WorkerToHost,
   HostToWorker,
 } from "./api";

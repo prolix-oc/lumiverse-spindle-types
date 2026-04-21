@@ -62,6 +62,7 @@ export interface SpindleDrawerTabHandle {
   setBadge(text: string | null): void;
   activate(): void;
   destroy(): void;
+  /** Register a callback fired when the active drawer tab switches to this tab. Returns an unsubscribe function. */
   onActivate(handler: () => void): () => void;
 }
 

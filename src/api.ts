@@ -1029,6 +1029,40 @@ export interface GenerationObserver {
   dispose(): void;
 }
 
+// ─── Token Count DTOs ───────────────────────────────────────────────────
+
+/** Which configured model should be used for server-side token counting. */
+export type TokenModelSourceDTO = "main" | "sidecar";
+
+/** Optional settings for Spindle token count helpers. */
+export interface TokenCountOptionsDTO {
+  /**
+   * Which configured model to use when resolving the tokenizer.
+   *
+   * - `"main"`    → the user's default main connection profile model
+   * - `"sidecar"` → the user's selected sidecar model (or its backing connection model)
+   *
+   * Defaults to `"main"`.
+   */
+  modelSource?: TokenModelSourceDTO;
+  /** For operator-scoped extensions. */
+  userId?: string;
+}
+
+/** Server-resolved token count result for a text or chat payload. */
+export interface TokenCountResultDTO {
+  total_tokens: number;
+  /** Model ID that was actually used to resolve the tokenizer. */
+  model: string;
+  /** Whether the model came from the main connection or the sidecar selection. */
+  modelSource: TokenModelSourceDTO;
+  /** Null when no exact tokenizer match was found and an approximate fallback was used. */
+  tokenizer_id: string | null;
+  tokenizer_name: string;
+  /** True when Lumiverse had to fall back to its approximate char/4 heuristic. */
+  approximate: boolean;
+}
+
 // ─── Worker → Host messages ──────────────────────────────────────────────
 
 export type WorkerToHost =
@@ -1320,7 +1354,29 @@ export type WorkerToHost =
   | { type: "commands_unregister"; commandIds: string[] }
   // ─── Version (free tier) ───────────────────────────────────────────────
   | { type: "version_get_backend"; requestId: string }
-  | { type: "version_get_frontend"; requestId: string };
+  | { type: "version_get_frontend"; requestId: string }
+  // ─── Token Counting (free tier) ───────────────────────────────────────
+  | {
+      type: "tokens_count_text";
+      requestId: string;
+      text: string;
+      modelSource?: TokenModelSourceDTO;
+      userId?: string;
+    }
+  | {
+      type: "tokens_count_messages";
+      requestId: string;
+      messages: Array<Pick<LlmMessageDTO, "role" | "content">>;
+      modelSource?: TokenModelSourceDTO;
+      userId?: string;
+    }
+  | {
+      type: "tokens_count_chat";
+      requestId: string;
+      chatId: string;
+      modelSource?: TokenModelSourceDTO;
+      userId?: string;
+    };
 
 // ─── Host → Worker messages ──────────────────────────────────────────────
 

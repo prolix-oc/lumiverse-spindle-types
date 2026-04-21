@@ -48,6 +48,8 @@ import type {
   SwipeEditedPayloadDTO,
   ToolInvocationPayloadDTO,
   StreamChunkDTO,
+  TokenCountOptionsDTO,
+  TokenCountResultDTO,
 } from "./api";
 
 /** The global `spindle` object available in backend extension workers */
@@ -463,6 +465,25 @@ export interface SpindleAPI {
      * Returns null if the connection doesn't exist or isn't accessible.
      */
     get(connectionId: string, userId?: string): Promise<ConnectionProfileDTO | null>;
+  };
+
+  /** Server-side token counting helpers (free tier). */
+  tokens: {
+    /** Count tokens for an arbitrary text string. */
+    countText(text: string, options?: TokenCountOptionsDTO): Promise<TokenCountResultDTO>;
+    /**
+     * Count tokens for an array of chat-style messages.
+     *
+     * This accepts any array whose items expose `{ role, content }`, so the
+     * normalized output of `spindle.chat.getMessages(chatId)` can be passed
+     * directly without reshaping.
+     */
+    countMessages(
+      messages: Array<Pick<LlmMessageDTO, "role" | "content">>,
+      options?: TokenCountOptionsDTO
+    ): Promise<TokenCountResultDTO>;
+    /** Count tokens for a live stored chat by ID. */
+    countChat(chatId: string, options?: TokenCountOptionsDTO): Promise<TokenCountResultDTO>;
   };
 
   /**
