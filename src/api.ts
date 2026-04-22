@@ -1280,10 +1280,20 @@ export type WorkerToHost =
   | { type: "frontend_message"; payload: unknown; userId?: string }
   | { type: "user_storage_read"; requestId: string; path: string; userId?: string }
   | { type: "user_storage_write"; requestId: string; path: string; data: string; userId?: string }
+  | { type: "user_storage_read_binary"; requestId: string; path: string; userId?: string }
+  | {
+      type: "user_storage_write_binary";
+      requestId: string;
+      path: string;
+      data: Uint8Array;
+      userId?: string;
+    }
   | { type: "user_storage_delete"; requestId: string; path: string; userId?: string }
   | { type: "user_storage_list"; requestId: string; prefix?: string; userId?: string }
   | { type: "user_storage_exists"; requestId: string; path: string; userId?: string }
   | { type: "user_storage_mkdir"; requestId: string; path: string; userId?: string }
+  | { type: "user_storage_move"; requestId: string; from: string; to: string; userId?: string }
+  | { type: "user_storage_stat"; requestId: string; path: string; userId?: string }
   | { type: "enclave_put"; requestId: string; key: string; value: string; userId?: string }
   | { type: "enclave_get"; requestId: string; key: string; userId?: string }
   | { type: "enclave_delete"; requestId: string; key: string; userId?: string }
