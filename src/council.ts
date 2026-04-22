@@ -161,16 +161,32 @@ export type CouncilToolCategory =
   | "content"
   | "extension";
 
+export type CouncilToolExecution =
+  | "llm"
+  | "host"
+  | "extension"
+  | "mcp";
+
 /** Canonical definition of a council tool (built-in or DLC). */
 export interface CouncilToolDefinition {
   name: string;
   displayName: string;
   description: string;
   category: CouncilToolCategory;
-  /** The prompt sent to the sidecar LLM when invoking this tool. */
-  prompt: string;
-  /** JSON Schema describing the tool's expected output structure. */
-  inputSchema: Record<string, unknown>;
+  /** Optional explicit runtime. When omitted, the host may infer one from the tool source. */
+  execution?: CouncilToolExecution;
+  /** The prompt sent to the sidecar LLM when invoking prompt-style LLM tools. */
+  prompt?: string;
+  /**
+   * JSON Schema describing the prompt-style tool's expected output structure.
+   *
+   * Historically this field was also used as the callable argument schema for
+   * extension / MCP tools. New host-callable tools should prefer `argsSchema`
+   * instead so invocation arguments and returned content are not conflated.
+   */
+  inputSchema?: Record<string, unknown>;
+  /** JSON Schema describing the callable arguments for host / extension / MCP tools. */
+  argsSchema?: Record<string, unknown>;
   /** If set, the tool's result is stored under this variable name for macro access. */
   resultVariable?: string;
   /** Whether this tool's output appears in the deliberation block (default true). */

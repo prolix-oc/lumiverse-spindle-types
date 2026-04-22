@@ -132,6 +132,7 @@ export type {
   CouncilExecutionResult,
   CachedCouncilResult,
   CouncilToolCategory,
+  CouncilToolExecution,
   CouncilToolDefinition,
 } from "./council";
 export {
