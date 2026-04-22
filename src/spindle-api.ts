@@ -255,10 +255,20 @@ export interface SpindleAPI {
   userStorage: {
     read(path: string, userId?: string): Promise<string>;
     write(path: string, data: string, userId?: string): Promise<void>;
+    readBinary(path: string, userId?: string): Promise<Uint8Array>;
+    writeBinary(path: string, data: Uint8Array, userId?: string): Promise<void>;
     delete(path: string, userId?: string): Promise<void>;
     list(prefix?: string, userId?: string): Promise<string[]>;
     exists(path: string, userId?: string): Promise<boolean>;
     mkdir(path: string, userId?: string): Promise<void>;
+    move(from: string, to: string, userId?: string): Promise<void>;
+    stat(path: string, userId?: string): Promise<{
+      exists: boolean;
+      isFile: boolean;
+      isDirectory: boolean;
+      sizeBytes: number;
+      modifiedAt: string;
+    }>;
     getJson<T>(path: string, options?: { fallback?: T; userId?: string }): Promise<T>;
     setJson(path: string, value: unknown, options?: { indent?: number; userId?: string }): Promise<void>;
   };
