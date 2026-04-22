@@ -29,6 +29,27 @@ export interface MacroDefinitionDTO {
   handler: string; // serialized function body (executed in worker context)
 }
 
+/** Minimal shape exposed to extension macro handlers. Additional fields may be present. */
+export interface MacroInvocationContextDTO {
+  /** False when the host is performing a dry / non-committing resolve. */
+  commit: boolean;
+  [key: string]: unknown;
+}
+
+export interface MacroResolveOptionsDTO {
+  chatId?: string;
+  characterId?: string;
+  /** For operator-scoped extensions only. */
+  userId?: string;
+  /** Defaults to true. Set false to request a dry / non-committing resolve. */
+  commit?: boolean;
+}
+
+export interface MacroResolveResultDTO {
+  text: string;
+  diagnostics: Array<{ message: string; offset: number; length: number }>;
+}
+
 export interface ToolRegistrationDTO {
   name: string;
   display_name: string;
@@ -1349,7 +1370,7 @@ export type WorkerToHost =
   | { type: "confirm_open"; requestId: string; title: string; message: string; variant?: "info" | "warning" | "danger" | "success"; confirmLabel?: string; cancelLabel?: string; userId?: string }
   | { type: "input_prompt_open"; requestId: string; title: string; message?: string; placeholder?: string; defaultValue?: string; submitLabel?: string; cancelLabel?: string; multiline?: boolean; userId?: string }
   // ─── Macro Resolution (free tier) ──────────────────────────────────
-  | { type: "macros_resolve"; requestId: string; template: string; chatId?: string; characterId?: string; userId?: string }
+  | { type: "macros_resolve"; requestId: string; template: string; chatId?: string; characterId?: string; userId?: string; commit?: boolean }
   // ─── Image Generation (gated: "image_gen") ──────────────────────────
   | { type: "image_gen_generate"; requestId: string; input: ImageGenRequestDTO }
   | { type: "image_gen_providers"; requestId: string; userId?: string }

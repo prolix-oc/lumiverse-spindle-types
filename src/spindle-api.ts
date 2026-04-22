@@ -3,6 +3,8 @@ import type {
   LlmMessageDTO,
   InterceptorResultDTO,
   MacroDefinitionDTO,
+  MacroResolveOptionsDTO,
+  MacroResolveResultDTO,
   ToolRegistrationDTO,
   GenerationRequestDTO,
   RequestInitDTO,
@@ -96,7 +98,7 @@ export interface SpindleAPI {
   /** Subscribe to a Lumiverse event. */
   on(event: string, handler: (payload: unknown, userId?: string) => void): () => void;
 
-  /** Register a macro */
+  /** Register a macro. Handler contexts expose `commit === false` during dry resolves. */
   registerMacro(def: MacroDefinitionDTO): void;
   /** Unregister a macro */
   unregisterMacro(name: string): void;
@@ -763,6 +765,8 @@ export interface SpindleAPI {
      * Resolve all macros in the given template string.
      * Provide `chatId` and/or `characterId` for full context resolution.
      * Without them, only context-free macros (time, random, etc.) resolve.
+     * Set `commit: false` for a dry / non-committing resolve; extension macro
+     * handlers will receive `ctx.commit === false`.
      *
      * @example
      * ```ts
@@ -774,16 +778,8 @@ export interface SpindleAPI {
      */
     resolve(
       template: string,
-      options?: {
-        chatId?: string;
-        characterId?: string;
-        /** For operator-scoped extensions only. */
-        userId?: string;
-      },
-    ): Promise<{
-      text: string;
-      diagnostics: Array<{ message: string; offset: number; length: number }>;
-    }>;
+      options?: MacroResolveOptionsDTO,
+    ): Promise<MacroResolveResultDTO>;
   };
 
   /**
