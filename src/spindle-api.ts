@@ -57,13 +57,13 @@ import type {
 
 /** The global `spindle` object available in backend extension workers */
 export interface SpindleAPI {
-  /** Subscribe to generation-started events (requires `generation` permission). */
+  /** Subscribe to generation-started events (requires `generation` permission). The optional `userId` identifies which user triggered the event. */
   on(event: "GENERATION_STARTED", handler: (payload: GenerationStartedPayloadDTO, userId?: string) => void): () => void;
-  /** Subscribe to streamed token events (requires `generation` permission). */
+  /** Subscribe to streamed token events (requires `generation` permission). The optional `userId` identifies which user triggered the event. */
   on(event: "STREAM_TOKEN_RECEIVED", handler: (payload: StreamTokenPayloadDTO, userId?: string) => void): () => void;
-  /** Subscribe to generation-ended events (requires `generation` permission). */
+  /** Subscribe to generation-ended events (requires `generation` permission). The optional `userId` identifies which user triggered the event. */
   on(event: "GENERATION_ENDED", handler: (payload: GenerationEndedPayloadDTO, userId?: string) => void): () => void;
-  /** Subscribe to generation-stopped events (requires `generation` permission). */
+  /** Subscribe to generation-stopped events (requires `generation` permission). The optional `userId` identifies which user triggered the event. */
   on(event: "GENERATION_STOPPED", handler: (payload: GenerationStoppedPayloadDTO, userId?: string) => void): () => void;
   /**
    * Subscribe to swipe lifecycle events. The payload's `action` discriminator
@@ -95,7 +95,7 @@ export interface SpindleAPI {
     event: "TOOL_INVOCATION",
     handler: (payload: ToolInvocationPayloadDTO) => string | Promise<string> | void | Promise<void>
   ): () => void;
-  /** Subscribe to a Lumiverse event. */
+  /** Subscribe to a Lumiverse event. Multi-user extensions should use the optional `userId` to keep per-user state and notifications isolated. */
   on(event: string, handler: (payload: unknown, userId?: string) => void): () => void;
 
   /** Register a macro. Handler contexts expose `commit === false` during dry resolves. */
@@ -708,6 +708,8 @@ export interface SpindleAPI {
     /**
      * Send a push notification to a user's registered devices.
      * Only delivered when the app is not focused (avoids double-notification).
+     * Operator-scoped extensions should pass the `userId` from the triggering
+     * frontend message or event handler to avoid cross-user delivery.
      */
     send(input: {
       title: string;
@@ -810,10 +812,10 @@ export interface SpindleAPI {
 
   /** Show toast notifications in the frontend UI (free tier — no permission needed) */
   toast: {
-    success(message: string, options?: { title?: string; duration?: number }): void;
-    warning(message: string, options?: { title?: string; duration?: number }): void;
-    error(message: string, options?: { title?: string; duration?: number }): void;
-    info(message: string, options?: { title?: string; duration?: number }): void;
+    success(message: string, options?: { title?: string; duration?: number; /** For operator-scoped extensions only. */ userId?: string }): void;
+    warning(message: string, options?: { title?: string; duration?: number; /** For operator-scoped extensions only. */ userId?: string }): void;
+    error(message: string, options?: { title?: string; duration?: number; /** For operator-scoped extensions only. */ userId?: string }): void;
+    info(message: string, options?: { title?: string; duration?: number; /** For operator-scoped extensions only. */ userId?: string }): void;
   };
 
   /** OAuth callback handling (permission: "oauth") */

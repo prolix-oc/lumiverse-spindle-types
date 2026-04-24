@@ -1366,7 +1366,7 @@ export type WorkerToHost =
   // ─── Chat Memories (gated: "chats") ───────────────────────────────
   | { type: "chats_get_memories"; requestId: string; chatId: string; topK?: number; userId?: string }
   // ─── Toast (free tier) ───────────────────────────────────────────────
-  | { type: "toast_show"; toastType: "success" | "warning" | "error" | "info"; message: string; title?: string; duration?: number }
+  | { type: "toast_show"; toastType: "success" | "warning" | "error" | "info"; message: string; title?: string; duration?: number; userId?: string }
   // ─── Push Notifications (gated: "push_notification") ────────────────
   | { type: "push_send"; requestId: string; title: string; body: string; tag?: string; url?: string; userId?: string; icon?: string; rawTitle?: boolean; image?: string }
   | { type: "push_get_status"; requestId: string; userId?: string }
