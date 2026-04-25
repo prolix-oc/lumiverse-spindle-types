@@ -116,7 +116,9 @@ export interface SpindleAPI {
    * The handler receives the assembled messages and a context object, and may
    * return either a plain `LlmMessageDTO[]` (backwards-compatible) or an
    * `InterceptorResultDTO` to also inject generation parameters into the
-   * outgoing LLM request.
+   * outgoing LLM request. `InterceptorResultDTO.breakdown` can be used to mark
+   * specific injected messages as Prompt Breakdown entries so dry-run/live UI
+   * and saved breakdowns can attribute them back to the extension.
    *
    * Returning `parameters` requires the `generation_parameters` permission.
    * Without it, returned parameters are silently stripped.

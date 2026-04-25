@@ -10,6 +10,21 @@ export interface LlmMessageDTO {
 }
 
 /**
+ * Optional metadata returned by an interceptor so Lumiverse can surface
+ * extension-injected prompt messages as first-class items in Prompt Breakdown.
+ *
+ * `messageIndex` points at the message inside the interceptor's returned
+ * `messages` array. The host resolves role/content/extension attribution from
+ * that message and from the installed extension manifest, so extensions only
+ * need to identify which injected messages should appear in the breakdown.
+ */
+export interface InterceptorBreakdownEntryDTO {
+  messageIndex: number;
+  /** Optional human label for this injected prompt block. */
+  name?: string;
+}
+
+/**
  * Return type for interceptor handlers.
  * Interceptors may return either a plain `LlmMessageDTO[]` (backwards-compatible)
  * or this object to also inject generation parameters (requires `generation_parameters` permission).
@@ -18,6 +33,8 @@ export interface InterceptorResultDTO {
   messages: LlmMessageDTO[];
   /** Provider parameters merged into the outgoing LLM request. Requires `generation_parameters` permission. */
   parameters?: Record<string, unknown>;
+  /** Optional prompt-breakdown entries for injected messages. */
+  breakdown?: InterceptorBreakdownEntryDTO[];
 }
 
 export interface MacroDefinitionDTO {
@@ -522,6 +539,8 @@ export interface AssemblyBreakdownEntryDTO {
   firstMessageIndex?: number;
   preCountedTokens?: number;
   excludeFromTotal?: boolean;
+  extensionId?: string;
+  extensionName?: string;
 }
 
 export interface ActivationStatsDTO {
@@ -552,7 +571,14 @@ export interface MemoryStatsDTO {
 
 export interface DryRunTokenCountDTO {
   total_tokens: number;
-  breakdown: Array<{ name: string; type: string; tokens: number; role?: string }>;
+  breakdown: Array<{
+    name: string;
+    type: string;
+    tokens: number;
+    role?: string;
+    extensionId?: string;
+    extensionName?: string;
+  }>;
   tokenizer_id: string | null;
   tokenizer_name: string | null;
 }
@@ -868,6 +894,7 @@ export interface GenerationStartedPayloadDTO {
   targetMessageId?: string;
   characterId?: string;
   characterName?: string;
+  breakdown?: AssemblyBreakdownEntryDTO[];
 }
 
 /** Payload for `STREAM_TOKEN_RECEIVED` events. */
@@ -1108,7 +1135,13 @@ export type WorkerToHost =
   | { type: "unregister_macro"; name: string }
   | { type: "update_macro_value"; name: string; value: string }
   | { type: "register_interceptor"; priority?: number }
-  | { type: "intercept_result"; requestId: string; messages: LlmMessageDTO[]; parameters?: Record<string, unknown> }
+  | {
+      type: "intercept_result";
+      requestId: string;
+      messages: LlmMessageDTO[];
+      parameters?: Record<string, unknown>;
+      breakdown?: InterceptorBreakdownEntryDTO[];
+    }
   | { type: "register_tool"; tool: ToolRegistrationDTO }
   | { type: "unregister_tool"; name: string }
   | { type: "request_generation"; requestId: string; input: GenerationRequestDTO }

@@ -14,6 +14,7 @@ export { SpindleEvent, CoreEventType } from "./events";
 
 export type {
   LlmMessageDTO,
+  InterceptorBreakdownEntryDTO,
   InterceptorResultDTO,
   MacroDefinitionDTO,
   MacroInvocationContextDTO,
