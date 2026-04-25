@@ -135,6 +135,7 @@ export interface SpindleAppMountHandle {
 export interface SpindleInputBarActionOptions {
   id: string;
   label: string;
+  subtitle?: string;
   iconSvg?: string;
   iconUrl?: string;
   enabled?: boolean;
@@ -143,6 +144,7 @@ export interface SpindleInputBarActionOptions {
 export interface SpindleInputBarActionHandle {
   actionId: string;
   setLabel(label: string): void;
+  setSubtitle(subtitle?: string): void;
   setEnabled(enabled: boolean): void;
   onClick(handler: () => void): () => void;
   destroy(): void;
