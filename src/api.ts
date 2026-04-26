@@ -373,8 +373,8 @@ export interface ImageGenResultDTO {
 
 /**
  * Safe representation of a character exposed to extensions.
- * Omits the raw `extensions` blob — only exposes user-facing fields plus
- * a small allowlist of structured extension state (e.g. `world_book_ids`).
+ * Includes the full `extensions` blob so extensions can read and write
+ * their own namespaced keys alongside the allowlisted `world_book_ids`.
  */
 export interface CharacterDTO {
   id: string;
@@ -396,6 +396,8 @@ export interface CharacterDTO {
    * single-id form is auto-migrated, so consumers can rely on the array.
    */
   world_book_ids: string[];
+  /** The raw extensions object. Extensions should namespace their keys. */
+  extensions: Record<string, any>;
   created_at: number;
   updated_at: number;
 }
@@ -415,6 +417,8 @@ export interface CharacterCreateDTO {
   creator?: string;
   /** Optional initial world book attachments. */
   world_book_ids?: string[];
+  /** Optional initial extension data. */
+  extensions?: Record<string, any>;
 }
 
 export interface CharacterUpdateDTO {
@@ -435,6 +439,12 @@ export interface CharacterUpdateDTO {
    * detach all books. Omit the field to leave attachments unchanged.
    */
   world_book_ids?: string[];
+  /**
+   * Shallow-merged into the character's existing extensions.
+   * Extension-provided keys overwrite existing ones; omitting a key leaves it
+   * untouched. Pass an empty object to make no changes, or omit entirely.
+   */
+  extensions?: Record<string, any>;
 }
 
 export interface CharacterAvatarUploadDTO {
