@@ -81,6 +81,13 @@ export type {
   TokenModelSourceDTO,
   TokenCountOptionsDTO,
   TokenCountResultDTO,
+  MacroInterceptorPhase,
+  MacroInterceptorEnvDTO,
+  MacroInterceptorCtxDTO,
+  MacroInterceptorResultDTO,
+  MessageContentProcessorOrigin,
+  MessageContentProcessorCtxDTO,
+  MessageContentProcessorResultDTO,
   WorkerToHost,
   HostToWorker,
 } from "./api";

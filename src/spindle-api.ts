@@ -53,6 +53,10 @@ import type {
   StreamChunkDTO,
   TokenCountOptionsDTO,
   TokenCountResultDTO,
+  MacroInterceptorCtxDTO,
+  MacroInterceptorResultDTO,
+  MessageContentProcessorCtxDTO,
+  MessageContentProcessorResultDTO,
 } from "./api";
 
 /** The global `spindle` object available in backend extension workers */
@@ -673,6 +677,82 @@ export interface SpindleAPI {
   /** Register a context handler for enriching generation context */
   registerContextHandler(
     handler: (context: unknown) => Promise<unknown>,
+    priority?: number
+  ): void;
+
+  /**
+   * Register a macro interceptor (permission: `macro_interceptor`).
+   *
+   * Runs at the top of `MacroEvaluator.evaluate()`, once per fixed-point
+   * iteration, before Lumiverse parses the template. Receives the raw
+   * template plus a read-only env snapshot and returns either a transformed
+   * template or `void` to pass through.
+   *
+   * Use this when per-macro RPC cost dominates iteration-heavy templates
+   * (e.g. `{{#each LARGE_LIST}}…{{my_macro}}…{{/each}}`). For single macros
+   * without iteration, prefer {@link SpindleAPI.registerMacro}.
+   *
+   * Each invocation runs inside a 10-second wall-clock budget on the host.
+   * On timeout or thrown error the chain logs the failure and forwards the
+   * previous template to the next handler — macro evaluation itself never
+   * aborts. A second registration from the same extension replaces the
+   * previous handler.
+   *
+   * @param handler  Returns the transformed template, or `void` to pass through.
+   * @param priority Lower values run first. Default `100`.
+   *
+   * @example
+   * ```ts
+   * spindle.registerMacroInterceptor(async (ctx) => {
+   *   if (!ctx.template.includes('{{my_macro')) return
+   *   return resolveInWorker(ctx.template, ctx.env)
+   * }, 100)
+   * ```
+   */
+  registerMacroInterceptor(
+    handler: (
+      ctx: MacroInterceptorCtxDTO
+    ) => Promise<MacroInterceptorResultDTO>,
+    priority?: number
+  ): void;
+
+  /**
+   * Register a message content processor (permission: `chat_mutation`).
+   *
+   * Runs synchronously inside every user-initiated message-write REST
+   * route (create, update, swipe add/update) and the auto-greeting path,
+   * before the row reaches SQLite. The returned patch transforms both the
+   * stored row and every `MESSAGE_SENT` / `MESSAGE_EDITED` / `MESSAGE_SWIPED`
+   * subscriber on first paint.
+   *
+   * Not invoked for `spindle.chat.*` mutations — those paths intentionally
+   * bypass the processor chain to avoid loops on an extension's own writes.
+   *
+   * Each invocation runs inside a 10-second wall-clock budget on the host.
+   * On timeout or thrown error the chain logs the failure and forwards the
+   * previous content to the next handler — the write still proceeds. A
+   * second registration from the same extension replaces the previous
+   * handler.
+   *
+   * Every millisecond of handler work is visible latency on send/edit/swipe.
+   * Keep handlers tight.
+   *
+   * @param handler  Receives the about-to-be-committed content; returns a
+   *                 patch, or `void` to pass through.
+   * @param priority Lower values run first. Default `100`.
+   *
+   * @example
+   * ```ts
+   * spindle.registerMessageContentProcessor(async (ctx) => {
+   *   if (!ctx.content.includes('{{my_macro}}')) return
+   *   return { content: ctx.content.replaceAll('{{my_macro}}', 'resolved') }
+   * }, 50)
+   * ```
+   */
+  registerMessageContentProcessor(
+    handler: (
+      ctx: MessageContentProcessorCtxDTO
+    ) => Promise<MessageContentProcessorResultDTO | void>,
     priority?: number
   ): void;
 

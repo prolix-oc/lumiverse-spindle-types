@@ -67,6 +67,112 @@ export interface MacroResolveResultDTO {
   diagnostics: Array<{ message: string; offset: number; length: number }>;
 }
 
+// ─── Macro Interceptor (permission: "macro_interceptor") ────────────────
+
+/**
+ * Where a macro evaluation originated. Useful for interceptors that only
+ * want to fire for certain call sites (e.g. prompt assembly vs. response
+ * post-processing vs. display-time resolution).
+ */
+export type MacroInterceptorPhase =
+  | "prompt"
+  | "display"
+  | "response"
+  | "other";
+
+/**
+ * Structured-clone snapshot of the live macro evaluation environment,
+ * passed to a macro interceptor. All values are read-only copies — mutating
+ * them has no effect on the real environment. Persist state via
+ * `spindle.variables.*` helpers instead.
+ */
+export interface MacroInterceptorEnvDTO {
+  readonly commit: boolean;
+  readonly names: Record<string, string>;
+  readonly character: Record<string, unknown>;
+  readonly chat: Record<string, unknown>;
+  readonly system: Record<string, unknown>;
+  readonly variables: {
+    readonly local: Record<string, string>;
+    readonly global: Record<string, string>;
+    readonly chat: Record<string, string>;
+  };
+  readonly extra: Record<string, unknown>;
+}
+
+/**
+ * Context passed to a macro interceptor handler on every iteration of
+ * `MacroEvaluator.evaluate()`. The handler receives the current raw
+ * template (already transformed by any earlier interceptors in the chain)
+ * and returns either a transformed template string or `void` to pass through.
+ */
+export interface MacroInterceptorCtxDTO {
+  readonly template: string;
+  readonly env: MacroInterceptorEnvDTO;
+  readonly commit: boolean;
+  readonly phase: MacroInterceptorPhase;
+  readonly sourceHint?: string;
+  /**
+   * User ID that initiated the macro resolution (when available). Relevant
+   * for operator-scoped extensions that need to route work through other
+   * Spindle APIs on that user's behalf.
+   */
+  readonly userId?: string;
+}
+
+/**
+ * Return value of a macro interceptor handler.
+ *  - `string` replaces the template for subsequent interceptors + parsing.
+ *  - `void` / `undefined` passes the template through unchanged.
+ */
+export type MacroInterceptorResultDTO = string | void;
+
+// ─── Message Content Processor (permission: "chat_mutation") ───────────
+
+/**
+ * Which content-write path triggered a message content processor run.
+ * `"create"` covers both user-initiated `POST .../messages` writes and
+ * auto-inserted greeting rows.
+ */
+export type MessageContentProcessorOrigin =
+  | "create"
+  | "update"
+  | "swipe_add"
+  | "swipe_update";
+
+/**
+ * Context passed to a message content processor before a user-initiated
+ * message write reaches SQLite. Handlers can inspect this and return a
+ * patch (new `content` / merged `extra`) to transform what is stored and
+ * what WebSocket subscribers observe on first paint.
+ */
+export interface MessageContentProcessorCtxDTO {
+  chatId: string;
+  /** Undefined for `"create"` origins (the row doesn't exist yet). */
+  messageId?: string;
+  content: string;
+  extra?: Record<string, unknown>;
+  origin: MessageContentProcessorOrigin;
+  /** Set for `"swipe_update"` only — the zero-based index of the swipe being rewritten. */
+  swipeIndex?: number;
+  /** Owning user for the write. Pass this through to operator-scoped Spindle calls. */
+  userId: string;
+}
+
+/**
+ * Return value for a message content processor handler. Return `undefined`
+ * / `void` to pass through, or a partial patch to modify the write:
+ *  - `content` (if present) replaces the content for downstream processors
+ *    and the DB write.
+ *  - `extra` (if present) shallow-merges into the existing `extra` — keys
+ *    you omit are preserved. Ignored on swipe origins (swipes share the
+ *    parent message's `extra`).
+ */
+export interface MessageContentProcessorResultDTO {
+  content?: string;
+  extra?: Record<string, unknown>;
+}
+
 export interface ToolRegistrationDTO {
   name: string;
   display_name: string;
@@ -1304,6 +1410,20 @@ export type WorkerToHost =
       requestId: string;
       context: unknown;
     }
+  // ─── Macro Interceptor (gated: "macro_interceptor") ────────────────
+  | { type: "register_macro_interceptor"; priority?: number }
+  | {
+      type: "macro_interceptor_result";
+      requestId: string;
+      result: MacroInterceptorResultDTO;
+    }
+  // ─── Message Content Processor (gated: "chat_mutation") ────────────
+  | { type: "register_message_content_processor"; priority?: number }
+  | {
+      type: "message_content_processor_result";
+      requestId: string;
+      result: MessageContentProcessorResultDTO | void;
+    }
   | {
       type: "macro_result";
       requestId: string;
@@ -1476,6 +1596,16 @@ export type HostToWorker =
       type: "context_handler_request";
       requestId: string;
       context: unknown;
+    }
+  | {
+      type: "macro_interceptor_request";
+      requestId: string;
+      ctx: MacroInterceptorCtxDTO;
+    }
+  | {
+      type: "message_content_processor_request";
+      requestId: string;
+      ctx: MessageContentProcessorCtxDTO;
     }
   | {
       type: "response";
