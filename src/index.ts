@@ -42,6 +42,7 @@ export type {
   WorldBookEntryCreateDTO,
   WorldBookEntryUpdateDTO,
   PersonaDTO,
+  LumiaItemDTO,
   PersonaCreateDTO,
   PersonaUpdateDTO,
   ActivatedWorldInfoEntryDTO,

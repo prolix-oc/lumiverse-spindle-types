@@ -585,6 +585,22 @@ export type WorldBookEntryUpdateDTO = WorldBookEntryCreateDTO;
  * Safe representation of a persona exposed to extensions.
  * Omits avatar_path (internal filesystem path) — use image_id for avatar access.
  */
+export interface LumiaItemDTO {
+  id: string;
+  pack_id: string;
+  name: string;
+  avatar_url: string | null;
+  author_name: string;
+  definition: string;
+  personality: string;
+  behavior: string;
+  gender_identity: 0 | 1 | 2 | 3; // 0=feminine, 1=masculine, 2=neutral, 3=any
+  version: string;
+  sort_order: number;
+  created_at: number;
+  updated_at: number;
+}
+
 export interface PersonaDTO {
   id: string;
   name: string;
@@ -1522,6 +1538,10 @@ export type WorkerToHost =
   | { type: "personas_delete"; requestId: string; personaId: string; userId?: string }
   | { type: "personas_switch"; requestId: string; personaId: string | null; userId?: string }
   | { type: "personas_get_world_book"; requestId: string; personaId: string; userId?: string }
+  // ─── Council (free tier, read-only) ──────────────────────────────
+  | { type: "council_get_settings"; requestId: string; userId?: string }
+  | { type: "council_get_members"; requestId: string; userId?: string }
+  | { type: "council_get_available_lumia_items"; requestId: string; userId?: string }
   // ─── Activated World Info (gated: "world_books") ───────────────────
   | { type: "world_books_get_activated"; requestId: string; chatId: string; userId?: string }
   // ─── Dry Run (gated: "generation") ────────────────────────────────

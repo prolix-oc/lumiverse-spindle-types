@@ -1,5 +1,9 @@
 import type { SpindleManifest } from "./manifest";
 import type {
+  CouncilMemberContext,
+  CouncilSettings,
+} from "./council";
+import type {
   LlmMessageDTO,
   InterceptorResultDTO,
   MacroDefinitionDTO,
@@ -24,6 +28,7 @@ import type {
   WorldBookEntryCreateDTO,
   WorldBookEntryUpdateDTO,
   PersonaDTO,
+  LumiaItemDTO,
   PersonaCreateDTO,
   PersonaUpdateDTO,
   ActivatedWorldInfoEntryDTO,
@@ -631,6 +636,15 @@ export interface SpindleAPI {
    * For user-scoped extensions, userId is inferred from the extension owner.
    * For operator-scoped extensions, pass userId to scope to a specific user.
    */
+  council: {
+    /** Get the user's active council configuration (settings and members) */
+    getSettings(options?: { userId?: string }): Promise<CouncilSettings>;
+    /** Retrieve the current list of council members set up by the user with their full definitions */
+    getMembers(options?: { userId?: string }): Promise<CouncilMemberContext[]>;
+    /** Retrieve all Lumia items generally available to the user (e.g. from packs) */
+    getAvailableLumiaItems(options?: { userId?: string }): Promise<LumiaItemDTO[]>;
+  };
+
   personas: {
     list(options?: { limit?: number; offset?: number; userId?: string }): Promise<{ data: PersonaDTO[]; total: number }>;
     get(personaId: string, userId?: string): Promise<PersonaDTO | null>;
