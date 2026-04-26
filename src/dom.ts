@@ -77,6 +77,9 @@ export interface SpindleFloatWidgetOptions {
   /** Strip default container chrome (border, background, shadow, border-radius).
    *  The extension fully owns the visual presentation. */
   chromeless?: boolean;
+  /** When true, the widget is created in fullscreen mode anchored to the
+   *  viewport origin (0,0) and sized to fill the entire viewport. */
+  fullscreen?: boolean;
 }
 
 export interface SpindleFloatWidgetHandle {
@@ -86,6 +89,12 @@ export interface SpindleFloatWidgetHandle {
   getPosition(): { x: number; y: number };
   setVisible(visible: boolean): void;
   isVisible(): boolean;
+  /** Toggle fullscreen mode. When enabled the host resizes the widget to
+   *  fill the viewport and anchors it at (0,0). Disabling restores the
+   *  previous size and position. */
+  setFullscreen(fullscreen: boolean): void;
+  /** Returns true when the widget is currently in fullscreen mode. */
+  isFullscreen(): boolean;
   destroy(): void;
   onDragEnd(handler: (pos: { x: number; y: number }) => void): () => void;
 }
