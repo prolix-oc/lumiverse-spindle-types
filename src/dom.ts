@@ -87,6 +87,8 @@ export interface SpindleFloatWidgetHandle {
   widgetId: string;
   moveTo(x: number, y: number): void;
   getPosition(): { x: number; y: number };
+  /** Update the widget's rendered width/height in the host container. */
+  setSize(width: number, height: number): void;
   setVisible(visible: boolean): void;
   isVisible(): boolean;
   /** Toggle fullscreen mode. When enabled the host resizes the widget to
