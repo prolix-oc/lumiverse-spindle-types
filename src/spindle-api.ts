@@ -27,6 +27,12 @@ import type {
   WorldBookEntryDTO,
   WorldBookEntryCreateDTO,
   WorldBookEntryUpdateDTO,
+  DatabankDTO,
+  DatabankCreateDTO,
+  DatabankUpdateDTO,
+  DatabankDocumentDTO,
+  DatabankDocumentCreateDTO,
+  DatabankDocumentUpdateDTO,
   PersonaDTO,
   LumiaItemDTO,
   PersonaCreateDTO,
@@ -628,6 +634,27 @@ export interface SpindleAPI {
     };
     /** Get activated world info entries (keyword + vector) for a chat. */
     getActivated(chatId: string, userId?: string): Promise<ActivatedWorldInfoEntryDTO[]>;
+  };
+
+  /**
+   * Databank CRUD (permission: "databanks").
+   * Manage databanks plus the documents they contain.
+   */
+  databanks: {
+    list(options?: { limit?: number; offset?: number; scope?: "global" | "character" | "chat"; scopeId?: string | null; userId?: string }): Promise<{ data: DatabankDTO[]; total: number }>;
+    get(databankId: string, userId?: string): Promise<DatabankDTO | null>;
+    create(input: DatabankCreateDTO, userId?: string): Promise<DatabankDTO>;
+    update(databankId: string, input: DatabankUpdateDTO, userId?: string): Promise<DatabankDTO>;
+    delete(databankId: string, userId?: string): Promise<boolean>;
+    documents: {
+      list(databankId: string, options?: { limit?: number; offset?: number; userId?: string }): Promise<{ data: DatabankDocumentDTO[]; total: number }>;
+      get(documentId: string, userId?: string): Promise<DatabankDocumentDTO | null>;
+      create(databankId: string, input: DatabankDocumentCreateDTO, userId?: string): Promise<DatabankDocumentDTO>;
+      update(documentId: string, input: DatabankDocumentUpdateDTO, userId?: string): Promise<DatabankDocumentDTO>;
+      delete(documentId: string, userId?: string): Promise<boolean>;
+      getContent(documentId: string, userId?: string): Promise<{ content: string } | null>;
+      reprocess(documentId: string, userId?: string): Promise<{ success: true; status: "processing" }>;
+    };
   };
 
   /**

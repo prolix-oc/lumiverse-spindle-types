@@ -13,6 +13,7 @@
  * - "characters"           — CRUD on character cards
  * - "chats"                — CRUD on chat sessions
  * - "personas"             — CRUD on personas
+ * - "databanks"            — CRUD on databanks and their documents
  * - "macro_interceptor"    — transform raw templates before macro parsing/dispatch
  */
 export type SpindlePermission =
@@ -30,6 +31,7 @@ export type SpindlePermission =
   | "characters"
   | "chats"
   | "world_books"
+  | "databanks"
   | "personas"
   | "push_notification"
   | "image_gen"
@@ -51,6 +53,7 @@ export const ALL_PERMISSIONS: readonly SpindlePermission[] = [
   "characters",
   "chats",
   "world_books",
+  "databanks",
   "personas",
   "push_notification",
   "image_gen",

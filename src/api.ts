@@ -579,6 +579,71 @@ export interface WorldBookEntryCreateDTO {
 
 export type WorldBookEntryUpdateDTO = WorldBookEntryCreateDTO;
 
+// ─── Databank DTOs ───────────────────────────────────────────────────────
+
+export type DatabankScopeDTO = "global" | "character" | "chat";
+export type DatabankDocumentStatusDTO = "pending" | "processing" | "ready" | "error";
+
+/** Safe representation of a databank exposed to extensions. */
+export interface DatabankDTO {
+  id: string;
+  name: string;
+  description: string;
+  scope: DatabankScopeDTO;
+  scope_id: string | null;
+  enabled: boolean;
+  metadata: Record<string, unknown>;
+  document_count?: number;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface DatabankCreateDTO {
+  name: string;
+  description?: string;
+  scope: DatabankScopeDTO;
+  scope_id?: string | null;
+}
+
+export interface DatabankUpdateDTO {
+  name?: string;
+  description?: string;
+  enabled?: boolean;
+}
+
+/** Safe representation of a databank document exposed to extensions. */
+export interface DatabankDocumentDTO {
+  id: string;
+  databank_id: string;
+  name: string;
+  slug: string;
+  mime_type: string;
+  file_size: number;
+  content_hash: string;
+  total_chunks: number;
+  status: DatabankDocumentStatusDTO;
+  error_message: string | null;
+  metadata: Record<string, unknown>;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface DatabankDocumentCreateDTO {
+  /** Raw file bytes. */
+  data: Uint8Array;
+  /** Original filename including extension. */
+  filename: string;
+  /** Optional MIME type recorded on the document. */
+  mime_type?: string;
+  /** Optional display name override. Defaults to the filename without extension. */
+  name?: string;
+}
+
+export interface DatabankDocumentUpdateDTO {
+  /** Renames the document display name (and derived slug). */
+  name: string;
+}
+
 // ─── Persona DTOs ──────────────────────────────────────────────────────
 
 /**
@@ -1528,6 +1593,20 @@ export type WorkerToHost =
   | { type: "world_book_entries_create"; requestId: string; worldBookId: string; input: WorldBookEntryCreateDTO; userId?: string }
   | { type: "world_book_entries_update"; requestId: string; entryId: string; input: WorldBookEntryUpdateDTO; userId?: string }
   | { type: "world_book_entries_delete"; requestId: string; entryId: string; userId?: string }
+  // ─── Databanks (gated: "databanks") ───────────────────────────────────
+  | { type: "databanks_list"; requestId: string; limit?: number; offset?: number; scope?: DatabankScopeDTO; scopeId?: string | null; userId?: string }
+  | { type: "databanks_get"; requestId: string; databankId: string; userId?: string }
+  | { type: "databanks_create"; requestId: string; input: DatabankCreateDTO; userId?: string }
+  | { type: "databanks_update"; requestId: string; databankId: string; input: DatabankUpdateDTO; userId?: string }
+  | { type: "databanks_delete"; requestId: string; databankId: string; userId?: string }
+  // ─── Databank Documents (gated: "databanks") ─────────────────────────
+  | { type: "databank_documents_list"; requestId: string; databankId: string; limit?: number; offset?: number; userId?: string }
+  | { type: "databank_documents_get"; requestId: string; documentId: string; userId?: string }
+  | { type: "databank_documents_create"; requestId: string; databankId: string; input: DatabankDocumentCreateDTO; userId?: string }
+  | { type: "databank_documents_update"; requestId: string; documentId: string; input: DatabankDocumentUpdateDTO; userId?: string }
+  | { type: "databank_documents_delete"; requestId: string; documentId: string; userId?: string }
+  | { type: "databank_documents_get_content"; requestId: string; documentId: string; userId?: string }
+  | { type: "databank_documents_reprocess"; requestId: string; documentId: string; userId?: string }
   // ─── Personas (gated: "personas") ────────────────────────────────────
   | { type: "personas_list"; requestId: string; limit?: number; offset?: number; userId?: string }
   | { type: "personas_get"; requestId: string; personaId: string; userId?: string }
