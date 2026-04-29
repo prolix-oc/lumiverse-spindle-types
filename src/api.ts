@@ -1008,7 +1008,8 @@ export interface ThemeVariablesConfigDTO {
  * This is the safe, presentation-owned path for live extension theming.
  * Extensions provide palette intent only; Lumiverse preserves the user's
  * radius, glass, font, and UI-scale settings and generates the final
- * mode-aware variable maps itself.
+ * mode-aware variable maps itself. Pass `null` to clear a previously applied
+ * palette override when no valid color data is available.
  */
 export interface ThemePaletteConfigDTO {
   /** Primary accent color in HSL. */
@@ -1079,6 +1080,93 @@ export interface SpindleCommandContextDTO {
   characterId?: string;
   /** Whether the active chat is a group chat. */
   isGroupChat?: boolean;
+}
+
+// ─── Frontend Process Lifecycle DTOs ────────────────────────────────────
+
+/** High-level lifecycle state for a frontend process tracked by the backend host. */
+export type FrontendProcessStateDTO =
+  | "starting"
+  | "running"
+  | "stopping"
+  | "stopped"
+  | "completed"
+  | "failed"
+  | "timed_out";
+
+/** Terminal reason attached to lifecycle events and snapshots when available. */
+export type FrontendProcessExitReasonDTO =
+  | "completed"
+  | "failed"
+  | "stopped"
+  | "timed_out"
+  | "frontend_unloaded"
+  | "backend_unloaded"
+  | "replaced";
+
+/** Options used when spawning a tracked frontend process from the backend worker. */
+export interface FrontendProcessSpawnOptionsDTO {
+  /** Frontend handler key registered via `ctx.processes.register(kind, ...)`. */
+  kind: string;
+  /** Optional extension-defined stable key used for dedupe / replacement semantics. */
+  key?: string;
+  /** Optional process-scoped startup payload delivered to the frontend handler. */
+  payload?: unknown;
+  /** Arbitrary metadata stored alongside the process snapshot for backend bookkeeping. */
+  metadata?: Record<string, unknown>;
+  /** For operator-scoped extensions only. */
+  userId?: string;
+  /** Reject spawn if the frontend does not call `process.ready()` within this window. */
+  startupTimeoutMs?: number;
+  /** Mark the process timed out if the frontend stops heartbeating for this long after ready. */
+  heartbeatTimeoutMs?: number;
+  /** Replace any existing process with the same `key` for the target user. */
+  replaceExisting?: boolean;
+}
+
+/** Filter used for controller list queries. */
+export interface FrontendProcessListOptionsDTO {
+  userId?: string;
+  kind?: string;
+  key?: string;
+  state?: FrontendProcessStateDTO;
+}
+
+/** Current host-tracked snapshot of a frontend process. */
+export interface FrontendProcessInfoDTO {
+  processId: string;
+  kind: string;
+  key?: string;
+  state: FrontendProcessStateDTO;
+  userId?: string;
+  metadata?: Record<string, unknown>;
+  startedAt: string;
+  readyAt?: string;
+  lastHeartbeatAt?: string;
+  endedAt?: string;
+  exitReason?: FrontendProcessExitReasonDTO;
+  error?: string;
+}
+
+/** Lifecycle event emitted to backend workers for tracked frontend processes. */
+export interface FrontendProcessLifecycleEventDTO {
+  processId: string;
+  kind: string;
+  key?: string;
+  userId?: string;
+  state: FrontendProcessStateDTO;
+  previousState?: FrontendProcessStateDTO;
+  at: string;
+  exitReason?: FrontendProcessExitReasonDTO;
+  error?: string;
+  metadata?: Record<string, unknown>;
+}
+
+/** Options for graceful process termination. */
+export interface FrontendProcessStopOptionsDTO {
+  userId?: string;
+  /** Optional reason surfaced to the frontend process' stop handler. */
+  reason?: string;
 }
 
 // ─── Generation Event Payload DTOs ──────────────────────────────────────
@@ -1641,6 +1729,12 @@ export type WorkerToHost =
   | { type: "modal_close"; requestId: string; openRequestId: string; userId?: string }
   | { type: "confirm_open"; requestId: string; title: string; message: string; variant?: "info" | "warning" | "danger" | "success"; confirmLabel?: string; cancelLabel?: string; userId?: string }
   | { type: "input_prompt_open"; requestId: string; title: string; message?: string; placeholder?: string; defaultValue?: string; submitLabel?: string; cancelLabel?: string; multiline?: boolean; userId?: string }
+  // ─── Frontend Process Lifecycle (free tier) ───────────────────────────
+  | { type: "frontend_process_spawn"; requestId: string; options: FrontendProcessSpawnOptionsDTO }
+  | { type: "frontend_process_list"; requestId: string; filter?: FrontendProcessListOptionsDTO }
+  | { type: "frontend_process_get"; requestId: string; processId: string }
+  | { type: "frontend_process_stop"; requestId: string; processId: string; options?: FrontendProcessStopOptionsDTO }
+  | { type: "frontend_process_send"; processId: string; payload: unknown; userId?: string }
   // ─── Macro Resolution (free tier) ──────────────────────────────────
   | { type: "macros_resolve"; requestId: string; template: string; chatId?: string; characterId?: string; userId?: string; commit?: boolean }
   // ─── Image Generation (gated: "image_gen") ──────────────────────────
@@ -1651,7 +1745,7 @@ export type WorkerToHost =
   | { type: "image_gen_models"; requestId: string; connectionId: string; userId?: string }
   // ─── Theme (gated: "app_manipulation") ──────────────────────────────────
   | { type: "theme_apply"; requestId: string; overrides: ThemeOverrideDTO; userId?: string }
-  | { type: "theme_apply_palette"; requestId: string; palette: ThemePaletteConfigDTO; userId?: string }
+  | { type: "theme_apply_palette"; requestId: string; palette: ThemePaletteConfigDTO | null; userId?: string }
   | { type: "theme_clear"; requestId: string; userId?: string }
   | { type: "theme_get_current"; requestId: string; userId?: string }
   // ─── Color Extraction (gated: "app_manipulation") ─────────────────────
@@ -1757,6 +1851,8 @@ export type HostToWorker =
     }
   | { type: "shutdown" }
   | { type: "frontend_message"; payload: unknown; userId: string }
+  | { type: "frontend_process_lifecycle"; event: FrontendProcessLifecycleEventDTO }
+  | { type: "frontend_process_message"; processId: string; payload: unknown; userId: string }
   | {
       type: "oauth_callback";
       requestId: string;

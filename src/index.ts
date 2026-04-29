@@ -75,9 +75,16 @@ export type {
   ColorRGB,
   ColorHSL,
   SpindleModalItemDTO,
-  SpindleCommandDTO,
-  SpindleCommandContextDTO,
-  GenerationStartedPayloadDTO,
+   SpindleCommandDTO,
+   SpindleCommandContextDTO,
+   FrontendProcessStateDTO,
+   FrontendProcessExitReasonDTO,
+   FrontendProcessSpawnOptionsDTO,
+   FrontendProcessListOptionsDTO,
+   FrontendProcessInfoDTO,
+   FrontendProcessLifecycleEventDTO,
+   FrontendProcessStopOptionsDTO,
+   GenerationStartedPayloadDTO,
   StreamTokenPayloadDTO,
   GenerationEndedPayloadDTO,
   GenerationStoppedPayloadDTO,
@@ -129,14 +136,16 @@ export type {
   SpindleContextMenuResult,
   SpindleModalOptions,
   SpindleModalHandle,
-  SpindleConfirmVariant,
-  SpindleConfirmOptions,
-  SpindleConfirmResult,
+   SpindleConfirmVariant,
+   SpindleConfirmOptions,
+   SpindleConfirmResult,
+   SpindleFrontendProcessContext,
+   SpindleFrontendProcessRegistry,
 } from "./dom";
 
 export type { ExtensionInfo } from "./extension-info";
 
-export type { SpindleAPI } from "./spindle-api";
+export type { SpindleAPI, FrontendProcessHandle } from "./spindle-api";
 
 export type {
   CouncilMember,

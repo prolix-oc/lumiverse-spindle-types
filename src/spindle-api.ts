@@ -53,6 +53,11 @@ import type {
   SpindleModalItemDTO,
   SpindleCommandDTO,
   SpindleCommandContextDTO,
+  FrontendProcessSpawnOptionsDTO,
+  FrontendProcessListOptionsDTO,
+  FrontendProcessInfoDTO,
+  FrontendProcessLifecycleEventDTO,
+  FrontendProcessStopOptionsDTO,
   GenerationStartedPayloadDTO,
   StreamTokenPayloadDTO,
   GenerationEndedPayloadDTO,
@@ -69,6 +74,23 @@ import type {
   MessageContentProcessorCtxDTO,
   MessageContentProcessorResultDTO,
 } from "./api";
+
+export interface FrontendProcessHandle {
+  /** Host-assigned process ID unique within the extension runtime. */
+  readonly processId: string;
+  /** Frontend handler key the process was spawned against. */
+  readonly kind: string;
+  /** Optional extension-defined stable key. */
+  readonly key?: string;
+  /** Current known snapshot at the time the handle was created or last refreshed. */
+  readonly info: FrontendProcessInfoDTO;
+  /** Send a process-scoped message to the frontend instance. */
+  send(payload: unknown): void;
+  /** Request graceful termination. */
+  stop(options?: FrontendProcessStopOptionsDTO): Promise<void>;
+  /** Fetch the latest authoritative snapshot from the host. */
+  refresh(): Promise<FrontendProcessInfoDTO | null>;
+}
 
 /** The global `spindle` object available in backend extension workers */
 export interface SpindleAPI {
@@ -815,6 +837,39 @@ export interface SpindleAPI {
   /** Receive messages from the frontend module (userId is the sender) */
   onFrontendMessage(handler: (payload: unknown, userId: string) => void): () => void;
 
+  /**
+   * Backend-owned lifecycle controller for tracked frontend processes.
+   *
+   * Use this when the frontend needs to run one or more long-lived loops,
+   * workers, or UI-adjacent controllers whose liveness must be observable from
+   * the backend runtime. The frontend side registers handlers by `kind` via
+   * `ctx.processes.register(kind, handler)`.
+   *
+   * This is layered on top of the existing backend/frontend messaging model,
+   * but adds startup acknowledgement, heartbeat timeouts, process-scoped
+   * messaging, and structured lifecycle events.
+   */
+  frontendProcesses: {
+    /**
+     * Spawn a frontend process and wait for the frontend handler to call
+     * `process.ready()`. If `startupTimeoutMs` elapses first, the promise
+     * rejects and the process transitions to `timed_out`.
+     */
+    spawn(options: FrontendProcessSpawnOptionsDTO): Promise<FrontendProcessHandle>;
+    /** List tracked frontend processes visible to this extension runtime. */
+    list(filter?: FrontendProcessListOptionsDTO): Promise<FrontendProcessInfoDTO[]>;
+    /** Get a single tracked process by ID. Returns `null` if it no longer exists. */
+    get(processId: string): Promise<FrontendProcessInfoDTO | null>;
+    /** Request graceful termination of a tracked process. */
+    stop(processId: string, options?: FrontendProcessStopOptionsDTO): Promise<void>;
+    /** Subscribe to lifecycle transitions (`starting`, `running`, `timed_out`, etc.). */
+    onLifecycle(handler: (event: FrontendProcessLifecycleEventDTO) => void): () => void;
+    /** Receive process-scoped messages sent from the frontend side. */
+    onMessage(
+      handler: (event: { processId: string; payload: unknown; userId: string }) => void,
+    ): () => void;
+  };
+
   /** Logging */
   log: {
     info(msg: string): void;
@@ -1005,14 +1060,15 @@ export interface SpindleAPI {
      * Unlike `apply()`, this method does not let extensions push raw CSS
      * variables. Lumiverse derives the full light/dark variable maps from the
      * provided accent and preserves the user's glass, radius, font, and UI
-     * scale settings.
+     * scale settings. Pass `null` to clear the extension's active palette
+     * override when no valid color data is available.
      */
-    applyPalette(palette: ThemePaletteConfigDTO, userId?: string): Promise<void>;
+    applyPalette(palette: ThemePaletteConfigDTO | null, userId?: string): Promise<void>;
     /**
      * Remove all CSS variable overrides previously applied by this extension.
      * The UI reverts to the user's base theme.
      */
-    clear(): Promise<void>;
+    clear(userId?: string): Promise<void>;
     /**
      * Get a read-only snapshot of the user's current theme configuration.
      * Returns the base theme info (not including any extension overrides).

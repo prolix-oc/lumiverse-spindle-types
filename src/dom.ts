@@ -326,6 +326,53 @@ export interface SpindleConfirmResult {
   confirmed: boolean;
 }
 
+// ── Frontend Process Lifecycle ──
+
+/** Controller passed to a frontend process instance spawned by the backend runtime. */
+export interface SpindleFrontendProcessContext {
+  /** Host-assigned ID unique within the extension runtime. */
+  processId: string;
+  /** Frontend handler key used when the backend called `spindle.frontendProcesses.spawn()`. */
+  kind: string;
+  /** Optional extension-defined stable key passed at spawn time. */
+  key?: string;
+  /** Arbitrary spawn payload provided by the backend. */
+  payload: unknown;
+  /** Optional backend-side bookkeeping metadata snapshot. */
+  metadata?: Record<string, unknown>;
+  /** Signal that startup completed successfully. Required for startup watchdogs. */
+  ready(): void;
+  /** Refresh the host-side heartbeat timer for long-lived loops. */
+  heartbeat(): void;
+  /** Send a process-scoped message back to the backend runtime. */
+  send(payload: unknown): void;
+  /** Subscribe to process-scoped messages from the backend runtime. */
+  onMessage(handler: (payload: unknown) => void): () => void;
+  /** Mark the process as completed and release host tracking. */
+  complete(result?: unknown): void;
+  /** Mark the process as failed. */
+  fail(error: string): void;
+  /** Called when the backend requests graceful termination. */
+  onStop(handler: (detail: { reason?: string }) => void): () => void;
+}
+
+/** Registry exposed to frontend modules for backend-spawned frontend processes. */
+export interface SpindleFrontendProcessRegistry {
+  /**
+   * Register a process handler for the given `kind`.
+   *
+   * The returned cleanup function unregisters the handler. If the handler
+   * itself returns a cleanup function, the host should call it when the
+   * process is stopped, replaced, or the extension is unloaded.
+   */
+  register(
+    kind: string,
+    handler: (
+      process: SpindleFrontendProcessContext,
+    ) => void | (() => void) | Promise<void | (() => void)>,
+  ): () => void;
+}
+
 /** Context object provided to frontend extension modules */
 export interface SpindleFrontendContext {
   dom: SpindleDOMHelper;
@@ -416,6 +463,8 @@ export interface SpindleFrontendContext {
   getActiveChat(): { chatId: string | null; characterId: string | null };
   sendToBackend(payload: unknown): void;
   onBackendMessage(handler: (payload: unknown) => void): () => void;
+  /** Structured lifecycle hooks for backend-spawned frontend processes. */
+  processes: SpindleFrontendProcessRegistry;
   messages: {
     registerTagInterceptor(
       options: SpindleMessageTagInterceptorOptions,
