@@ -58,6 +58,11 @@ import type {
   FrontendProcessInfoDTO,
   FrontendProcessLifecycleEventDTO,
   FrontendProcessStopOptionsDTO,
+  BackendProcessSpawnOptionsDTO,
+  BackendProcessListOptionsDTO,
+  BackendProcessInfoDTO,
+  BackendProcessLifecycleEventDTO,
+  BackendProcessStopOptionsDTO,
   GenerationStartedPayloadDTO,
   StreamTokenPayloadDTO,
   GenerationEndedPayloadDTO,
@@ -91,6 +96,62 @@ export interface FrontendProcessHandle {
   /** Fetch the latest authoritative snapshot from the host. */
   refresh(): Promise<FrontendProcessInfoDTO | null>;
 }
+
+export interface BackendProcessHandle {
+  /** Host-assigned process ID unique within the extension runtime. */
+  readonly processId: string;
+  /** Built subprocess entry file spawned by the host. */
+  readonly entry: string;
+  /** Logical process kind used for filtering and dedupe semantics. */
+  readonly kind: string;
+  /** Optional extension-defined stable key. */
+  readonly key?: string;
+  /** Current known snapshot at the time the handle was created or last refreshed. */
+  readonly info: BackendProcessInfoDTO;
+  /** Send a process-scoped message to the isolated subprocess. */
+  send(payload: unknown): void;
+  /** Request graceful termination. */
+  stop(options?: BackendProcessStopOptionsDTO): Promise<void>;
+  /** Fetch the latest authoritative snapshot from the host. */
+  refresh(): Promise<BackendProcessInfoDTO | null>;
+}
+
+/** Controller passed to a backend subprocess entry exported by the extension. */
+export interface SpindleBackendProcessContext {
+  /** Host-assigned ID unique within the extension runtime. */
+  processId: string;
+  /** Built entry file the host spawned. */
+  entry: string;
+  /** Logical process kind supplied during spawn. */
+  kind: string;
+  /** Optional extension-defined stable key passed at spawn time. */
+  key?: string;
+  /** Arbitrary spawn payload provided by the parent backend runtime. */
+  payload: unknown;
+  /** Optional backend-side bookkeeping metadata snapshot. */
+  metadata?: Record<string, unknown>;
+  /** Target user for operator-scoped spawns. */
+  userId?: string;
+  /** Signal that startup completed successfully. Required for startup watchdogs. */
+  ready(): void;
+  /** Refresh the host-side heartbeat timer for long-lived loops. */
+  heartbeat(): void;
+  /** Send a process-scoped message back to the parent backend runtime. */
+  send(payload: unknown): void;
+  /** Subscribe to process-scoped messages from the parent backend runtime. */
+  onMessage(handler: (payload: unknown) => void): () => void;
+  /** Mark the subprocess as completed and release host tracking. */
+  complete(result?: unknown): void;
+  /** Mark the subprocess as failed. */
+  fail(error: string): void;
+  /** Called when the parent backend runtime requests graceful termination. */
+  onStop(handler: (detail: { reason?: string }) => void): () => void;
+}
+
+export type SpindleBackendProcessModule = {
+  default?: (process: SpindleBackendProcessContext) => void | (() => void) | Promise<void | (() => void)>;
+  run?: (process: SpindleBackendProcessContext) => void | (() => void) | Promise<void | (() => void)>;
+};
 
 /** The global `spindle` object available in backend extension workers */
 export interface SpindleAPI {
@@ -865,6 +926,36 @@ export interface SpindleAPI {
     /** Subscribe to lifecycle transitions (`starting`, `running`, `timed_out`, etc.). */
     onLifecycle(handler: (event: FrontendProcessLifecycleEventDTO) => void): () => void;
     /** Receive process-scoped messages sent from the frontend side. */
+    onMessage(
+      handler: (event: { processId: string; payload: unknown; userId: string }) => void,
+    ): () => void;
+  };
+
+  /**
+   * Host-owned lifecycle controller for isolated backend subprocesses.
+   *
+   * Use this when one slice of backend extension logic may block or hang and
+   * you need the host to retain kill authority via startup and heartbeat
+   * watchdogs. The spawned entry receives a
+   * {@link SpindleBackendProcessContext} and communicates only with its parent
+   * backend runtime through process-scoped messages.
+   */
+  backendProcesses: {
+    /**
+     * Spawn an isolated backend subprocess and wait for the entry to call
+     * `process.ready()`. If `startupTimeoutMs` elapses first, the promise
+     * rejects and the process transitions to `timed_out`.
+     */
+    spawn(options: BackendProcessSpawnOptionsDTO): Promise<BackendProcessHandle>;
+    /** List tracked backend subprocesses visible to this extension runtime. */
+    list(filter?: BackendProcessListOptionsDTO): Promise<BackendProcessInfoDTO[]>;
+    /** Get a single tracked subprocess by ID. Returns `null` if it no longer exists. */
+    get(processId: string): Promise<BackendProcessInfoDTO | null>;
+    /** Request graceful termination of a tracked subprocess. */
+    stop(processId: string, options?: BackendProcessStopOptionsDTO): Promise<void>;
+    /** Subscribe to lifecycle transitions (`starting`, `running`, `timed_out`, etc.). */
+    onLifecycle(handler: (event: BackendProcessLifecycleEventDTO) => void): () => void;
+    /** Receive process-scoped messages sent from the subprocess entry. */
     onMessage(
       handler: (event: { processId: string; payload: unknown; userId: string }) => void,
     ): () => void;

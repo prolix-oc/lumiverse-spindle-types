@@ -1169,6 +1169,96 @@ export interface FrontendProcessStopOptionsDTO {
   reason?: string;
 }
 
+// ─── Backend Process Lifecycle DTOs ─────────────────────────────────────
+
+/** High-level lifecycle state for an isolated backend subprocess tracked by the host. */
+export type BackendProcessStateDTO =
+  | "starting"
+  | "running"
+  | "stopping"
+  | "stopped"
+  | "completed"
+  | "failed"
+  | "timed_out";
+
+/** Terminal reason attached to backend-process lifecycle events and snapshots when available. */
+export type BackendProcessExitReasonDTO =
+  | "completed"
+  | "failed"
+  | "stopped"
+  | "timed_out"
+  | "backend_unloaded"
+  | "replaced";
+
+/** Options used when spawning an isolated backend subprocess from the backend worker. */
+export interface BackendProcessSpawnOptionsDTO {
+  /** Built JS entry file under the extension repo, typically in `dist/`. */
+  entry: string;
+  /** Optional logical label used for lifecycle filtering and dedupe semantics. Defaults to `entry`. */
+  kind?: string;
+  /** Optional extension-defined stable key used for dedupe / replacement semantics. */
+  key?: string;
+  /** Optional process-scoped startup payload delivered to the subprocess entry. */
+  payload?: unknown;
+  /** Arbitrary metadata stored alongside the process snapshot for backend bookkeeping. */
+  metadata?: Record<string, unknown>;
+  /** For operator-scoped extensions only. */
+  userId?: string;
+  /** Reject spawn if the subprocess does not call `process.ready()` within this window. */
+  startupTimeoutMs?: number;
+  /** Mark the subprocess timed out if it stops heartbeating for this long after ready. */
+  heartbeatTimeoutMs?: number;
+  /** Replace any existing process with the same `key` for the target user. */
+  replaceExisting?: boolean;
+}
+
+/** Filter used for backend subprocess list queries. */
+export interface BackendProcessListOptionsDTO {
+  userId?: string;
+  kind?: string;
+  key?: string;
+  state?: BackendProcessStateDTO;
+}
+
+/** Current host-tracked snapshot of an isolated backend subprocess. */
+export interface BackendProcessInfoDTO {
+  processId: string;
+  entry: string;
+  kind: string;
+  key?: string;
+  state: BackendProcessStateDTO;
+  userId?: string;
+  metadata?: Record<string, unknown>;
+  startedAt: string;
+  readyAt?: string;
+  lastHeartbeatAt?: string;
+  endedAt?: string;
+  exitReason?: BackendProcessExitReasonDTO;
+  error?: string;
+}
+
+/** Lifecycle event emitted to backend workers for isolated backend subprocesses. */
+export interface BackendProcessLifecycleEventDTO {
+  processId: string;
+  entry: string;
+  kind: string;
+  key?: string;
+  userId?: string;
+  state: BackendProcessStateDTO;
+  previousState?: BackendProcessStateDTO;
+  at: string;
+  exitReason?: BackendProcessExitReasonDTO;
+  error?: string;
+  metadata?: Record<string, unknown>;
+}
+
+/** Options for graceful isolated-backend-process termination. */
+export interface BackendProcessStopOptionsDTO {
+  userId?: string;
+  /** Optional reason surfaced to the subprocess stop handler. */
+  reason?: string;
+}
+
 // ─── Generation Event Payload DTOs ──────────────────────────────────────
 
 /** Payload for `GENERATION_STARTED` events. */
@@ -1735,6 +1825,12 @@ export type WorkerToHost =
   | { type: "frontend_process_get"; requestId: string; processId: string }
   | { type: "frontend_process_stop"; requestId: string; processId: string; options?: FrontendProcessStopOptionsDTO }
   | { type: "frontend_process_send"; processId: string; payload: unknown; userId?: string }
+  // ─── Backend Process Lifecycle (free tier) ────────────────────────────
+  | { type: "backend_process_spawn"; requestId: string; options: BackendProcessSpawnOptionsDTO }
+  | { type: "backend_process_list"; requestId: string; filter?: BackendProcessListOptionsDTO }
+  | { type: "backend_process_get"; requestId: string; processId: string }
+  | { type: "backend_process_stop"; requestId: string; processId: string; options?: BackendProcessStopOptionsDTO }
+  | { type: "backend_process_send"; processId: string; payload: unknown; userId?: string }
   // ─── Macro Resolution (free tier) ──────────────────────────────────
   | { type: "macros_resolve"; requestId: string; template: string; chatId?: string; characterId?: string; userId?: string; commit?: boolean }
   // ─── Image Generation (gated: "image_gen") ──────────────────────────
@@ -1853,6 +1949,8 @@ export type HostToWorker =
   | { type: "frontend_message"; payload: unknown; userId: string }
   | { type: "frontend_process_lifecycle"; event: FrontendProcessLifecycleEventDTO }
   | { type: "frontend_process_message"; processId: string; payload: unknown; userId: string }
+  | { type: "backend_process_lifecycle"; event: BackendProcessLifecycleEventDTO }
+  | { type: "backend_process_message"; processId: string; payload: unknown; userId: string }
   | {
       type: "oauth_callback";
       requestId: string;

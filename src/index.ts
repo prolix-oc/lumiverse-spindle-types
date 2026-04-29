@@ -84,7 +84,14 @@ export type {
    FrontendProcessInfoDTO,
    FrontendProcessLifecycleEventDTO,
    FrontendProcessStopOptionsDTO,
-   GenerationStartedPayloadDTO,
+   BackendProcessStateDTO,
+   BackendProcessExitReasonDTO,
+   BackendProcessSpawnOptionsDTO,
+   BackendProcessListOptionsDTO,
+   BackendProcessInfoDTO,
+   BackendProcessLifecycleEventDTO,
+   BackendProcessStopOptionsDTO,
+    GenerationStartedPayloadDTO,
   StreamTokenPayloadDTO,
   GenerationEndedPayloadDTO,
   GenerationStoppedPayloadDTO,
@@ -145,7 +152,13 @@ export type {
 
 export type { ExtensionInfo } from "./extension-info";
 
-export type { SpindleAPI, FrontendProcessHandle } from "./spindle-api";
+export type {
+  SpindleAPI,
+  FrontendProcessHandle,
+  BackendProcessHandle,
+  SpindleBackendProcessContext,
+  SpindleBackendProcessModule,
+} from "./spindle-api";
 
 export type {
   CouncilMember,
