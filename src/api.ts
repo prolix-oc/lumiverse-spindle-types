@@ -475,6 +475,12 @@ export interface ChatUpdateDTO {
   metadata?: Record<string, unknown>;
 }
 
+/** Payload for `CHAT_SWITCHED` events. */
+export interface ChatSwitchedPayloadDTO {
+  /** The chat the user switched to, or `null` when returning to the home screen. */
+  chatId: string | null;
+}
+
 // ─── World Book DTOs ─────────────────────────────────────────────────────
 
 /**
