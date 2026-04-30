@@ -1,21 +1,27 @@
-/** DOM helper API provided inside isolated frontend extension modules. */
+/** DOM helper API provided to frontend extension modules. */
 export interface SpindleDOMHelper {
-  /** Create a style element inside the extension sandbox document. Returns a removal function. */
+  /** Inject sanitized HTML into the host document at the given target. */
+  inject(target: string | Element, html: string, position?: InsertPosition): Element;
+
+  /** Create a style element in the host document. Returns a removal function. */
   addStyle(css: string): () => void;
 
-  /** Create an element inside the extension sandbox document with optional attributes. */
+  /** Create an element in the host document with optional attributes. */
   createElement<K extends keyof HTMLElementTagNameMap>(
     tag: K,
     attrs?: Record<string, string>
   ): HTMLElementTagNameMap[K];
 
-  /** Query inside the extension sandbox document. */
+  /** Create a host-managed sandboxed iframe for isolated scriptable content. */
+  createSandboxFrame(options: SpindleSandboxFrameOptions): SpindleSandboxFrameHandle;
+
+  /** Query inside the extension-owned host DOM. */
   query(selector: string): Element | null;
 
-  /** Query all matches inside the extension sandbox document. */
+  /** Query all matches inside the extension-owned host DOM. */
   queryAll(selector: string): Element[];
 
-  /** Remove all DOM created inside the extension sandbox document. */
+  /** Remove all DOM created by the extension helper. */
   cleanup(): void;
 }
 
@@ -494,7 +500,7 @@ export interface SpindleFrontendContext {
    * }
    * ```
    */
-  getActiveChat(): Promise<{ chatId: string | null; characterId: string | null }>;
+  getActiveChat(): { chatId: string | null; characterId: string | null };
   sendToBackend(payload: unknown): void;
   onBackendMessage(handler: (payload: unknown) => void): () => void;
   /** Structured lifecycle hooks for backend-spawned frontend processes. */
