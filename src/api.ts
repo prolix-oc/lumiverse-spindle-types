@@ -278,6 +278,9 @@ export interface RequestInitDTO {
   method?: string;
   headers?: Record<string, string>;
   body?: string;
+  /** When `"arraybuffer"`, the response body is returned as a base64-encoded string
+   *  with `encoding: "base64"`. Used by the sandboxed-widget transparent proxy. */
+  responseType?: "text" | "arraybuffer";
 }
 
 /**

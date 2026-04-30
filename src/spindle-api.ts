@@ -921,6 +921,8 @@ export interface SpindleAPI {
     list(filter?: FrontendProcessListOptionsDTO): Promise<FrontendProcessInfoDTO[]>;
     /** Get a single tracked process by ID. Returns `null` if it no longer exists. */
     get(processId: string): Promise<FrontendProcessInfoDTO | null>;
+    /** Send a message to a specific frontend process */
+    send(processId: string, payload: unknown, userId?: string): void;
     /** Request graceful termination of a tracked process. */
     stop(processId: string, options?: FrontendProcessStopOptionsDTO): Promise<void>;
     /** Subscribe to lifecycle transitions (`starting`, `running`, `timed_out`, etc.). */
@@ -951,6 +953,8 @@ export interface SpindleAPI {
     list(filter?: BackendProcessListOptionsDTO): Promise<BackendProcessInfoDTO[]>;
     /** Get a single tracked subprocess by ID. Returns `null` if it no longer exists. */
     get(processId: string): Promise<BackendProcessInfoDTO | null>;
+    /** Send a message to a specific backend process */
+    send(processId: string, payload: unknown, userId?: string): void;
     /** Request graceful termination of a tracked subprocess. */
     stop(processId: string, options?: BackendProcessStopOptionsDTO): Promise<void>;
     /** Subscribe to lifecycle transitions (`starting`, `running`, `timed_out`, etc.). */
