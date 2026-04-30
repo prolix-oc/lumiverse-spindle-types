@@ -16,6 +16,15 @@ export interface SpindleDOMHelper {
     attrs?: Record<string, string>
   ): HTMLElementTagNameMap[K];
 
+  /**
+   * Create a host-managed sandboxed iframe for extension-owned HTML/CSS/JS.
+   *
+   * The host always applies `sandbox="allow-scripts"` without
+   * `allow-same-origin`, plus a strict child-document CSP and a narrow
+   * postMessage bridge. Use this instead of creating raw iframes.
+   */
+  createSandboxFrame(options: SpindleSandboxFrameOptions): SpindleSandboxFrameHandle;
+
   /** Query within this extension's own injected elements only */
   query(selector: string): Element | null;
 
@@ -158,6 +167,34 @@ export interface SpindleInputBarActionHandle {
   setSubtitle(subtitle?: string): void;
   setEnabled(enabled: boolean): void;
   onClick(handler: () => void): () => void;
+  destroy(): void;
+}
+
+// ── Sandboxed Frame ──
+
+export interface SpindleSandboxFrameOptions {
+  /** HTML document or fragment rendered inside the sandboxed iframe. */
+  html: string;
+  /** Automatically resize the host iframe to fit the child content. Default: `true`. */
+  autoResize?: boolean;
+  /** Initial host iframe height in CSS pixels. Default: `minHeight` or `40`. */
+  initialHeight?: number;
+  /** Minimum host iframe height in CSS pixels. Default: `40`. */
+  minHeight?: number;
+  /** Maximum host iframe height in CSS pixels. Default: `4000`. */
+  maxHeight?: number;
+}
+
+export interface SpindleSandboxFrameHandle {
+  /** The sandboxed iframe element. Extensions may place and style it like any other element. */
+  element: HTMLIFrameElement;
+  /** Replace the child document contents. */
+  setContent(html: string): void;
+  /** Send a message payload into the child sandbox runtime. */
+  postMessage(payload: unknown): void;
+  /** Receive payloads sent from the child sandbox runtime. */
+  onMessage(handler: (payload: unknown) => void): () => void;
+  /** Destroy the sandbox and remove the iframe from the DOM. */
   destroy(): void;
 }
 
