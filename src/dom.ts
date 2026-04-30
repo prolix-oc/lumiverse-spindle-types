@@ -494,7 +494,7 @@ export interface SpindleFrontendContext {
    * }
    * ```
    */
-  getActiveChat(): { chatId: string | null; characterId: string | null };
+  getActiveChat(): Promise<{ chatId: string | null; characterId: string | null }>;
   sendToBackend(payload: unknown): void;
   onBackendMessage(handler: (payload: unknown) => void): () => void;
   /** Structured lifecycle hooks for backend-spawned frontend processes. */
