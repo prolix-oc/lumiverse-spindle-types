@@ -179,6 +179,8 @@ export interface ToolRegistrationDTO {
   description: string;
   parameters: Record<string, unknown>; // JSON Schema
   council_eligible?: boolean;
+  /** Whether the tool is available for inline function calling during generation */
+  inline_available?: boolean;
 }
 
 /** Tool/function schema passed to LLM for inline function calling. */
@@ -1276,6 +1278,8 @@ export interface GenerationStartedPayloadDTO {
   characterId?: string;
   characterName?: string;
   breakdown?: AssemblyBreakdownEntryDTO[];
+  /** The type of generation: normal, continue, regenerate, swipe, or impersonate. */
+  generationType?: string;
 }
 
 /** Payload for `STREAM_TOKEN_RECEIVED` events. */
@@ -1300,6 +1304,8 @@ export interface GenerationEndedPayloadDTO {
   content?: string;
   /** Error message when the generation failed. */
   error?: string;
+  /** The type of generation: normal, continue, regenerate, swipe, or impersonate. */
+  generationType?: string;
 }
 
 /** Payload for `GENERATION_STOPPED` events (user-initiated stop). */
