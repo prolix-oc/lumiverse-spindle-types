@@ -142,6 +142,7 @@ export type {
    SpindleInputBarActionHandle,
    SpindleSandboxFrameOptions,
    SpindleSandboxFrameHandle,
+   SpindleSandboxAPI,
    SpindleContextMenuOptions,
    SpindleContextMenuItemDef,
    SpindleContextMenuResult,

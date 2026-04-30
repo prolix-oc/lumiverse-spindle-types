@@ -1,3 +1,5 @@
+import type { RequestInitDTO } from "./api";
+
 /** DOM helper API provided to frontend extension modules. */
 export interface SpindleDOMHelper {
   /** Inject sanitized HTML into the host document at the given target. */
@@ -186,6 +188,15 @@ export interface SpindleSandboxFrameHandle {
   onMessage(handler: (payload: unknown) => void): () => void;
   /** Destroy the sandbox and remove the iframe from the DOM. */
   destroy(): void;
+}
+
+/** API exposed inside the sandboxed iframe as `window.spindleSandbox`. */
+export interface SpindleSandboxAPI {
+  postMessage(payload: unknown): void;
+  onMessage(handler: (payload: unknown) => void): () => void;
+  requestResize(height?: number): void;
+  /** Fetch a URL through the extension's CORS proxy. Requires the `cors_proxy` permission. */
+  corsProxy(url: string, options?: RequestInitDTO): Promise<unknown>;
 }
 
 export interface SpindleUploadFile {
