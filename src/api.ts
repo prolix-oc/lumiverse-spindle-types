@@ -374,6 +374,29 @@ export interface ImageGenResultDTO {
   imageUrl?: string;
 }
 
+// ─── Image DTOs ─────────────────────────────────────────────────────────
+
+/** Safe representation of an image exposed to extensions. */
+export interface ImageDTO {
+  id: string;
+  original_filename: string;
+  mime_type: string;
+  width: number | null;
+  height: number | null;
+  has_thumbnail: boolean;
+  created_at: number;
+}
+
+/** Upload payload for `spindle.images.upload()` */
+export interface ImageUploadDTO {
+  /** Raw image bytes. */
+  data: Uint8Array;
+  /** Optional filename used to preserve the extension/MIME when storing the image. */
+  filename?: string;
+  /** Optional content type. Defaults to image/png when not inferable. */
+  mime_type?: string;
+}
+
 // ─── Character DTOs ─────────────────────────────────────────────────────
 
 /**
@@ -1854,6 +1877,12 @@ export type WorkerToHost =
   | { type: "image_gen_connections_list"; requestId: string; userId?: string }
   | { type: "image_gen_connections_get"; requestId: string; connectionId: string; userId?: string }
   | { type: "image_gen_models"; requestId: string; connectionId: string; userId?: string }
+  // ─── Images (gated: "images") ────────────────────────────────────────
+  | { type: "images_list"; requestId: string; limit?: number; offset?: number; userId?: string }
+  | { type: "images_get"; requestId: string; imageId: string; userId?: string }
+  | { type: "images_upload"; requestId: string; input: ImageUploadDTO; userId?: string }
+  | { type: "images_upload_from_data_url"; requestId: string; dataUrl: string; originalFilename?: string; userId?: string }
+  | { type: "images_delete"; requestId: string; imageId: string; userId?: string }
   // ─── Theme (gated: "app_manipulation") ──────────────────────────────────
   | { type: "theme_apply"; requestId: string; overrides: ThemeOverrideDTO; userId?: string }
   | { type: "theme_apply_palette"; requestId: string; palette: ThemePaletteConfigDTO | null; userId?: string }

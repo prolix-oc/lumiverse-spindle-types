@@ -35,6 +35,7 @@ export type SpindlePermission =
   | "personas"
   | "push_notification"
   | "image_gen"
+  | "images"
   | "generation_parameters"
   | "macro_interceptor";
 
@@ -57,6 +58,7 @@ export const ALL_PERMISSIONS: readonly SpindlePermission[] = [
   "personas",
   "push_notification",
   "image_gen",
+  "images",
   "generation_parameters",
   "macro_interceptor",
 ] as const;
