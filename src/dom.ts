@@ -1,37 +1,21 @@
-/** DOM helper API provided to frontend extension modules */
+/** DOM helper API provided inside isolated frontend extension modules. */
 export interface SpindleDOMHelper {
-  /** Inject sanitized HTML into a target area */
-  inject(
-    target: string | Element,
-    html: string,
-    position?: InsertPosition
-  ): Element;
-
-  /** Create a scoped style element. Returns a removal function. */
+  /** Create a style element inside the extension sandbox document. Returns a removal function. */
   addStyle(css: string): () => void;
 
-  /** Create an element safely with optional attributes */
+  /** Create an element inside the extension sandbox document with optional attributes. */
   createElement<K extends keyof HTMLElementTagNameMap>(
     tag: K,
     attrs?: Record<string, string>
   ): HTMLElementTagNameMap[K];
 
-  /**
-   * Create a host-managed sandboxed iframe for extension-owned HTML/CSS/JS.
-   *
-   * The host always applies `sandbox="allow-scripts"` without
-   * `allow-same-origin`, plus a strict child-document CSP and a narrow
-   * postMessage bridge. Use this instead of creating raw iframes.
-   */
-  createSandboxFrame(options: SpindleSandboxFrameOptions): SpindleSandboxFrameHandle;
-
-  /** Query within this extension's own injected elements only */
+  /** Query inside the extension sandbox document. */
   query(selector: string): Element | null;
 
-  /** Query all within this extension's own injected elements only */
+  /** Query all matches inside the extension sandbox document. */
   queryAll(selector: string): Element[];
 
-  /** Remove all DOM injections by this extension */
+  /** Remove all DOM created inside the extension sandbox document. */
   cleanup(): void;
 }
 
@@ -221,6 +205,19 @@ export interface SpindleMessageTagInterceptorOptions {
   tagName: string;
   attrs?: Record<string, string>;
   removeFromMessage?: boolean;
+}
+
+export interface SpindleMessageWidgetOptions {
+  /** Message ID that should host the widget. */
+  messageId: string;
+  /** Stable extension-defined widget ID, unique within the target message. */
+  widgetId: string;
+  /** HTML document or fragment rendered inside a host-managed opaque-origin iframe. */
+  html: string;
+  /** Minimum iframe height in CSS pixels. Default: 40. */
+  minHeight?: number;
+  /** Maximum iframe height in CSS pixels. Default: 4000. */
+  maxHeight?: number;
 }
 
 /** Options for `permissions.request()` — displayed in the system confirmation modal. */
@@ -507,6 +504,21 @@ export interface SpindleFrontendContext {
       options: SpindleMessageTagInterceptorOptions,
       handler: (payload: SpindleMessageTagIntercept) => void
     ): () => void;
+    /** Render or replace a sandboxed widget below a message. Returns a cleanup function. */
+    renderWidget(
+      options: SpindleMessageWidgetOptions,
+      handler?: (payload: unknown) => void,
+    ): () => void;
+    /** Remove a previously rendered message widget. */
+    removeWidget(messageId: string, widgetId: string): void;
+  };
+  characters: {
+    /** Read a character through the host app's authenticated API. */
+    get(characterId: string): Promise<unknown>;
+  };
+  chats: {
+    /** Update a message through the host app's authenticated API. */
+    updateMessage(chatId: string, messageId: string, input: { content?: string }): Promise<unknown>;
   };
   manifest: import("./manifest").SpindleManifest;
 }
