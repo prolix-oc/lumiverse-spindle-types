@@ -111,6 +111,7 @@ export type {
   TokenModelSourceDTO,
   TokenCountOptionsDTO,
   TokenCountResultDTO,
+  SharedRpcRequestContextDTO,
   MacroInterceptorPhase,
   MacroInterceptorEnvDTO,
   MacroInterceptorCtxDTO,

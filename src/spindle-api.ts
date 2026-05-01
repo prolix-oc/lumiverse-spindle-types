@@ -83,6 +83,7 @@ import type {
   MacroInterceptorResultDTO,
   MessageContentProcessorCtxDTO,
   MessageContentProcessorResultDTO,
+  SharedRpcRequestContextDTO,
 } from "./api";
 
 export interface FrontendProcessHandle {
@@ -814,6 +815,37 @@ export interface SpindleAPI {
      * Returns an unsubscribe function.
      */
     onChanged(handler: (detail: PermissionChangedDetail) => void): () => void;
+  };
+
+  /**
+   * Shared RPC pool (free tier).
+   *
+   * Use this to expose lightweight cross-extension state behind a stable
+   * `<extension_id>.<channel>` endpoint. Owner methods accept either the bare
+   * channel suffix (`status.current`) or the fully-qualified endpoint.
+   */
+  rpcPool: {
+    /**
+     * Publish the latest value for an endpoint. Replaces any previous on-demand
+     * handler for the same endpoint.
+     *
+     * Returns the fully-qualified endpoint name.
+     */
+    sync(endpoint: string, value: unknown): string;
+    /**
+     * Register an on-demand endpoint handler. Replaces any previously synced
+     * value or handler for the same endpoint.
+     *
+     * Returns the fully-qualified endpoint name.
+     */
+    handle(
+      endpoint: string,
+      handler: (ctx: SharedRpcRequestContextDTO) => unknown | Promise<unknown>
+    ): string;
+    /** Read the latest value from another extension's fully-qualified endpoint. */
+    read<T = unknown>(endpoint: string): Promise<T>;
+    /** Remove an endpoint owned by this extension. */
+    unregister(endpoint: string): void;
   };
 
   /** Make a CORS-proxied HTTP request */

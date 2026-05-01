@@ -1593,6 +1593,14 @@ export interface TokenCountResultDTO {
   approximate: boolean;
 }
 
+/** Context delivered to an on-request shared RPC endpoint handler. */
+export interface SharedRpcRequestContextDTO {
+  /** Fully-qualified endpoint name (for example `weather_ext.status.current`). */
+  endpoint: string;
+  /** Identifier of the extension requesting the value. */
+  requesterExtensionId: string;
+}
+
 // ─── Worker → Host messages ──────────────────────────────────────────────
 
 export type WorkerToHost =
@@ -1675,6 +1683,16 @@ export type WorkerToHost =
       reservationId: string;
     }
   | { type: "permissions_get_granted"; requestId: string }
+  | { type: "rpc_pool_sync"; endpoint: string; value: unknown }
+  | { type: "rpc_pool_register_handler"; endpoint: string }
+  | { type: "rpc_pool_unregister"; endpoint: string }
+  | { type: "rpc_pool_read"; requestId: string; endpoint: string }
+  | {
+      type: "rpc_pool_handler_result";
+      requestId: string;
+      result?: unknown;
+      error?: string;
+    }
   | { type: "connections_list"; requestId: string; userId?: string }
   | { type: "connections_get"; requestId: string; connectionId: string; userId?: string }
   | { type: "chat_get_messages"; requestId: string; chatId: string }
@@ -2010,6 +2028,12 @@ export type WorkerToHost =
 export type HostToWorker =
   | { type: "init"; manifest: SpindleManifest; storagePath: string }
   | { type: "event"; event: string; payload: unknown; userId?: string }
+  | {
+      type: "rpc_pool_request";
+      requestId: string;
+      endpoint: string;
+      requesterExtensionId: string;
+    }
   | {
       type: "intercept_request";
       requestId: string;
