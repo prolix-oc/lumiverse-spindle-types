@@ -45,8 +45,11 @@ import type {
   ImageGenResultDTO,
   ImageGenConnectionDTO,
   ImageGenProviderDTO,
+  ImageGetOptionsDTO,
   ImageDTO,
+  ImageListOptionsDTO,
   ImageUploadDTO,
+  ImageUploadFromDataUrlOptionsDTO,
   ThemeOverrideDTO,
   ThemeInfoDTO,
   ThemePaletteConfigDTO,
@@ -642,10 +645,12 @@ export interface SpindleAPI {
    * For operator-scoped extensions, pass userId to scope to a specific user.
    */
   images: {
-    list(options?: { limit?: number; offset?: number; userId?: string }): Promise<{ data: ImageDTO[]; total: number }>;
+    list(options?: ImageListOptionsDTO): Promise<{ data: ImageDTO[]; total: number }>;
     get(imageId: string, userId?: string): Promise<ImageDTO | null>;
+    get(imageId: string, options?: ImageGetOptionsDTO): Promise<ImageDTO | null>;
     upload(input: ImageUploadDTO, userId?: string): Promise<ImageDTO>;
     uploadFromDataUrl(dataUrl: string, originalFilename?: string, userId?: string): Promise<ImageDTO>;
+    uploadFromDataUrl(dataUrl: string, options?: ImageUploadFromDataUrlOptionsDTO): Promise<ImageDTO>;
     delete(imageId: string, userId?: string): Promise<boolean>;
   };
 

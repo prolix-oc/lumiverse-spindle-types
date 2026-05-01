@@ -359,6 +359,10 @@ export interface ImageGenRequestDTO {
   model?: string;
   /** Provider-specific parameters. Merged with the connection's default_parameters. */
   parameters?: Record<string, unknown>;
+  /** Optional character ownership tag for the persisted result image. */
+  owner_character_id?: string;
+  /** Optional chat ownership tag for the persisted result image. */
+  owner_chat_id?: string;
   /** For operator-scoped extensions. */
   userId?: string;
 }
@@ -376,6 +380,36 @@ export interface ImageGenResultDTO {
 
 // ─── Image DTOs ─────────────────────────────────────────────────────────
 
+export type ImageSpecificityDTO = "full" | "sm" | "lg";
+
+export interface ImageListOptionsDTO {
+  limit?: number;
+  offset?: number;
+  /** Which image URL size should be returned in each DTO. */
+  specificity?: ImageSpecificityDTO;
+  /** Restrict results to images created by the current extension. */
+  onlyOwned?: boolean;
+  /** Restrict results to images tagged to a specific character. */
+  characterId?: string;
+  /** Restrict results to images tagged to a specific chat. */
+  chatId?: string;
+  /** For operator-scoped extensions. */
+  userId?: string;
+}
+
+export interface ImageGetOptionsDTO {
+  /** Which image URL size should be returned in the DTO. */
+  specificity?: ImageSpecificityDTO;
+  /** Restrict lookup to images created by the current extension. */
+  onlyOwned?: boolean;
+  /** Restrict lookup to images tagged to a specific character. */
+  characterId?: string;
+  /** Restrict lookup to images tagged to a specific chat. */
+  chatId?: string;
+  /** For operator-scoped extensions. */
+  userId?: string;
+}
+
 /** Safe representation of an image exposed to extensions. */
 export interface ImageDTO {
   id: string;
@@ -384,6 +418,12 @@ export interface ImageDTO {
   width: number | null;
   height: number | null;
   has_thumbnail: boolean;
+  /** Relative authenticated URL for this image, already sized to `specificity`. */
+  url: string;
+  specificity: ImageSpecificityDTO;
+  owner_extension_identifier: string | null;
+  owner_character_id: string | null;
+  owner_chat_id: string | null;
   created_at: number;
 }
 
@@ -395,6 +435,20 @@ export interface ImageUploadDTO {
   filename?: string;
   /** Optional content type. Defaults to image/png when not inferable. */
   mime_type?: string;
+  /** Optional character ownership tag for the persisted image. */
+  owner_character_id?: string;
+  /** Optional chat ownership tag for the persisted image. */
+  owner_chat_id?: string;
+}
+
+export interface ImageUploadFromDataUrlOptionsDTO {
+  originalFilename?: string;
+  /** Optional character ownership tag for the persisted image. */
+  owner_character_id?: string;
+  /** Optional chat ownership tag for the persisted image. */
+  owner_chat_id?: string;
+  /** For operator-scoped extensions. */
+  userId?: string;
 }
 
 // ─── Character DTOs ─────────────────────────────────────────────────────
@@ -1878,10 +1932,37 @@ export type WorkerToHost =
   | { type: "image_gen_connections_get"; requestId: string; connectionId: string; userId?: string }
   | { type: "image_gen_models"; requestId: string; connectionId: string; userId?: string }
   // ─── Images (gated: "images") ────────────────────────────────────────
-  | { type: "images_list"; requestId: string; limit?: number; offset?: number; userId?: string }
-  | { type: "images_get"; requestId: string; imageId: string; userId?: string }
+  | {
+      type: "images_list";
+      requestId: string;
+      limit?: number;
+      offset?: number;
+      specificity?: ImageSpecificityDTO;
+      onlyOwned?: boolean;
+      characterId?: string;
+      chatId?: string;
+      userId?: string;
+    }
+  | {
+      type: "images_get";
+      requestId: string;
+      imageId: string;
+      specificity?: ImageSpecificityDTO;
+      onlyOwned?: boolean;
+      characterId?: string;
+      chatId?: string;
+      userId?: string;
+    }
   | { type: "images_upload"; requestId: string; input: ImageUploadDTO; userId?: string }
-  | { type: "images_upload_from_data_url"; requestId: string; dataUrl: string; originalFilename?: string; userId?: string }
+  | {
+      type: "images_upload_from_data_url";
+      requestId: string;
+      dataUrl: string;
+      originalFilename?: string;
+      owner_character_id?: string;
+      owner_chat_id?: string;
+      userId?: string;
+    }
   | { type: "images_delete"; requestId: string; imageId: string; userId?: string }
   // ─── Theme (gated: "app_manipulation") ──────────────────────────────────
   | { type: "theme_apply"; requestId: string; overrides: ThemeOverrideDTO; userId?: string }
