@@ -31,6 +31,7 @@ export type SpindlePermission =
   | "characters"
   | "chats"
   | "world_books"
+  | "regex_scripts"
   | "databanks"
   | "personas"
   | "push_notification"
@@ -54,6 +55,7 @@ export const ALL_PERMISSIONS: readonly SpindlePermission[] = [
   "characters",
   "chats",
   "world_books",
+  "regex_scripts",
   "databanks",
   "personas",
   "push_notification",
