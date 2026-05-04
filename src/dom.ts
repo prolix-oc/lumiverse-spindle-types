@@ -377,6 +377,83 @@ export interface SpindleConfirmResult {
   confirmed: boolean;
 }
 
+// ── UI Event Helpers ──
+
+export type SpindleUIDomActionEventType = "click" | "pointerdown" | "pointerup";
+
+export interface SpindleUIKeyboardState {
+  /** True when the host believes a virtual keyboard is currently visible. */
+  visible: boolean;
+  /** Safe bottom inset in CSS pixels that keeps content above the keyboard. */
+  insetBottom: number;
+  /** Current visual viewport width in CSS pixels. */
+  viewportWidth: number;
+  /** Current visual viewport height in CSS pixels. */
+  viewportHeight: number;
+}
+
+export interface SpindleUIDrawerState {
+  /** Whether the side drawer is currently visible. */
+  open: boolean;
+  /** Active drawer tab, if any. */
+  tabId: string | null;
+}
+
+export interface SpindleUISettingsState {
+  /** Whether the settings modal is currently visible. */
+  open: boolean;
+  /** Active settings view identifier. */
+  view: string;
+}
+
+export interface SpindleUIDomActionDetail {
+  /** Matched action identifier read from the target element. */
+  actionId: string;
+  /** DOM event type that triggered the callback. */
+  eventType: SpindleUIDomActionEventType;
+  /** Matched descendant element that carried the action identifier. */
+  element: HTMLElement;
+  /** Bound extension-owned root used for delegation. */
+  root: Element;
+  /** Native DOM event from the host document. */
+  originalEvent: Event;
+}
+
+export interface SpindleUIDomActionBindingOptions {
+  /** Attribute used to resolve action IDs. Default: `id`. */
+  attribute?: string;
+  /** Event types to listen for. Default: `["click"]`. */
+  events?: SpindleUIDomActionEventType[];
+}
+
+export interface SpindleUIEventsHelper {
+  /** Read the current virtual keyboard snapshot. */
+  getKeyboardState(): SpindleUIKeyboardState;
+  /** Subscribe to keyboard visibility / safe-area changes. */
+  onKeyboardChange(handler: (state: SpindleUIKeyboardState) => void): () => void;
+  /** Read the current side drawer snapshot. */
+  getDrawerState(): SpindleUIDrawerState;
+  /** Subscribe to side drawer open/close and tab changes. */
+  onDrawerChange(handler: (state: SpindleUIDrawerState) => void): () => void;
+  /** Read the current settings modal snapshot. */
+  getSettingsState(): SpindleUISettingsState;
+  /** Subscribe to settings modal open/close and active-view changes. */
+  onSettingsChange(handler: (state: SpindleUISettingsState) => void): () => void;
+  /**
+   * Delegate action handlers from extension-owned DOM.
+   *
+   * This is intended for non-sandbox UI where the extension injects or mounts
+   * host DOM directly and wants to react to user interaction without wiring
+   * global document listeners. By default the helper matches descendant
+   * elements by `id`, but `options.attribute` can be used instead.
+   */
+  bindActionHandlers(
+    target: string | Element,
+    handlers: Record<string, (detail: SpindleUIDomActionDetail) => void>,
+    options?: SpindleUIDomActionBindingOptions,
+  ): () => void;
+}
+
 // ── Frontend Process Lifecycle ──
 
 /** Controller passed to a frontend process instance spawned by the backend runtime. */
@@ -432,6 +509,7 @@ export interface SpindleFrontendContext {
     emit(event: string, payload: unknown): void;
   };
   ui: {
+    events: SpindleUIEventsHelper;
     mount(point: SpindleMountPoint): Element;
     registerDrawerTab(options: SpindleDrawerTabOptions): SpindleDrawerTabHandle;
     createFloatWidget(options?: SpindleFloatWidgetOptions): SpindleFloatWidgetHandle;

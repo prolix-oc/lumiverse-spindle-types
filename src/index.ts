@@ -165,11 +165,18 @@ export type {
   SpindleModalOptions,
   SpindleModalHandle,
    SpindleConfirmVariant,
-   SpindleConfirmOptions,
-   SpindleConfirmResult,
-   SpindleFrontendProcessContext,
-   SpindleFrontendProcessRegistry,
-} from "./dom";
+    SpindleConfirmOptions,
+    SpindleConfirmResult,
+    SpindleUIDomActionEventType,
+    SpindleUIKeyboardState,
+    SpindleUIDrawerState,
+    SpindleUISettingsState,
+    SpindleUIDomActionDetail,
+    SpindleUIDomActionBindingOptions,
+    SpindleUIEventsHelper,
+    SpindleFrontendProcessContext,
+    SpindleFrontendProcessRegistry,
+ } from "./dom";
 
 export type { ExtensionInfo } from "./extension-info";
 
