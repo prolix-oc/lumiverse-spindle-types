@@ -1881,6 +1881,11 @@ export type WorkerToHost =
       patch: {
         content?: string;
         metadata?: Record<string, unknown>;
+        swipes?: string[];
+        swipe_id?: number;
+        swipe_dates?: number[];
+        reasoning?: { text?: string | null; duration?: number | null };
+        skipChunkRebuild?: boolean;
       };
     }
   | {
