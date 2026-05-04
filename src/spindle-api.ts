@@ -27,6 +27,11 @@ import type {
   WorldBookEntryDTO,
   WorldBookEntryCreateDTO,
   WorldBookEntryUpdateDTO,
+  RegexScriptDTO,
+  RegexScriptCreateDTO,
+  RegexScriptUpdateDTO,
+  RegexScriptListOptionsDTO,
+  RegexScriptActiveOptionsDTO,
   DatabankDTO,
   DatabankCreateDTO,
   DatabankUpdateDTO,
@@ -739,6 +744,24 @@ export interface SpindleAPI {
     };
     /** Get activated world info entries (keyword + vector) for a chat. */
     getActivated(chatId: string, userId?: string): Promise<ActivatedWorldInfoEntryDTO[]>;
+  };
+
+  /**
+   * Regex Scripts CRUD (permission: "regex_scripts").
+   * Full access to regex scripts attached to the user's account, including
+   * global, character-scoped, and chat-scoped rules. Same shape Lumiverse uses
+   * internally during prompt assembly, response baking, and display rendering.
+   * For user-scoped extensions, userId is inferred from the extension owner.
+   * For operator-scoped extensions, pass userId to scope to a specific user.
+   */
+  regex_scripts: {
+    list(options?: RegexScriptListOptionsDTO): Promise<{ data: RegexScriptDTO[]; total: number }>;
+    get(scriptId: string, userId?: string): Promise<RegexScriptDTO | null>;
+    create(input: RegexScriptCreateDTO, userId?: string): Promise<RegexScriptDTO>;
+    update(scriptId: string, input: RegexScriptUpdateDTO, userId?: string): Promise<RegexScriptDTO>;
+    delete(scriptId: string, userId?: string): Promise<boolean>;
+    /** Resolve the enabled scripts that would actually fire for the given target + character/chat context, merged across global + character + chat scopes and ordered by scope tier then sort_order. */
+    getActive(options: RegexScriptActiveOptionsDTO): Promise<RegexScriptDTO[]>;
   };
 
   /**

@@ -667,6 +667,78 @@ export interface WorldBookEntryCreateDTO {
 
 export type WorldBookEntryUpdateDTO = WorldBookEntryCreateDTO;
 
+// ─── Regex Script DTOs ──────────────────────────────────────────────────
+
+export type RegexPlacementDTO = "user_input" | "ai_output" | "world_info" | "reasoning";
+export type RegexScopeDTO = "global" | "character" | "chat";
+export type RegexTargetDTO = "prompt" | "response" | "display";
+export type RegexMacroModeDTO = "none" | "raw" | "escaped";
+
+export interface RegexScriptDTO {
+  id: string;
+  name: string;
+  script_id: string;
+  find_regex: string;
+  replace_string: string;
+  flags: string;
+  placement: RegexPlacementDTO[];
+  scope: RegexScopeDTO;
+  scope_id: string | null;
+  target: RegexTargetDTO;
+  min_depth: number | null;
+  max_depth: number | null;
+  trim_strings: string[];
+  run_on_edit: boolean;
+  substitute_macros: RegexMacroModeDTO;
+  disabled: boolean;
+  sort_order: number;
+  description: string;
+  folder: string;
+  metadata: Record<string, unknown>;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface RegexScriptListOptionsDTO {
+  scope?: RegexScopeDTO;
+  scopeId?: string;
+  target?: RegexTargetDTO;
+  limit?: number;
+  offset?: number;
+  userId?: string;
+}
+
+export interface RegexScriptActiveOptionsDTO {
+  target: RegexTargetDTO;
+  characterId?: string;
+  chatId?: string;
+  userId?: string;
+}
+
+export interface RegexScriptCreateDTO {
+  name: string;
+  find_regex: string;
+  replace_string?: string;
+  flags?: string;
+  placement?: RegexPlacementDTO[];
+  scope?: RegexScopeDTO;
+  scope_id?: string | null;
+  target?: RegexTargetDTO;
+  min_depth?: number | null;
+  max_depth?: number | null;
+  trim_strings?: string[];
+  run_on_edit?: boolean;
+  substitute_macros?: RegexMacroModeDTO;
+  disabled?: boolean;
+  sort_order?: number;
+  description?: string;
+  folder?: string;
+  metadata?: Record<string, unknown>;
+  script_id?: string;
+}
+
+export type RegexScriptUpdateDTO = Partial<RegexScriptCreateDTO>;
+
 // ─── Databank DTOs ───────────────────────────────────────────────────────
 
 export type DatabankScopeDTO = "global" | "character" | "chat";
@@ -1911,6 +1983,13 @@ export type WorkerToHost =
   | { type: "council_get_available_lumia_items"; requestId: string; userId?: string }
   // ─── Activated World Info (gated: "world_books") ───────────────────
   | { type: "world_books_get_activated"; requestId: string; chatId: string; userId?: string }
+  // ─── Regex Scripts (gated: "regex_scripts") ────────────────────────
+  | { type: "regex_scripts_list"; requestId: string; scope?: RegexScopeDTO; scopeId?: string; target?: RegexTargetDTO; limit?: number; offset?: number; userId?: string }
+  | { type: "regex_scripts_get"; requestId: string; scriptId: string; userId?: string }
+  | { type: "regex_scripts_get_active"; requestId: string; target: RegexTargetDTO; characterId?: string; chatId?: string; userId?: string }
+  | { type: "regex_scripts_create"; requestId: string; input: RegexScriptCreateDTO; userId?: string }
+  | { type: "regex_scripts_update"; requestId: string; scriptId: string; input: RegexScriptUpdateDTO; userId?: string }
+  | { type: "regex_scripts_delete"; requestId: string; scriptId: string; userId?: string }
   // ─── Dry Run (gated: "generation") ────────────────────────────────
   | { type: "generate_dry_run"; requestId: string; input: DryRunRequestDTO; userId?: string }
   // ─── Chat Memories (gated: "chats") ───────────────────────────────
