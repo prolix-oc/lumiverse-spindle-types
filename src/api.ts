@@ -97,6 +97,12 @@ export interface MacroInterceptorEnvDTO {
     readonly global: Record<string, string>;
     readonly chat: Record<string, string>;
   };
+  /**
+   * Per-call dynamic macros injected by the caller (e.g. display-regex
+   * pre-resolution passes `chat_index` here). Keys merge into the macro
+   * lookup table for the duration of one resolve() call.
+   */
+  readonly dynamicMacros: Record<string, string>;
   readonly extra: Record<string, unknown>;
 }
 
@@ -138,7 +144,8 @@ export type MessageContentProcessorOrigin =
   | "create"
   | "update"
   | "swipe_add"
-  | "swipe_update";
+  | "swipe_update"
+  | "render";
 
 /**
  * Context passed to a message content processor before a user-initiated
