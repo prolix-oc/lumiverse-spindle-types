@@ -739,6 +739,94 @@ export interface RegexScriptCreateDTO {
 
 export type RegexScriptUpdateDTO = Partial<RegexScriptCreateDTO>;
 
+// ─── World Info Interceptor (permission: "generation") ─────────────────
+
+/**
+ * One world info entry exposed to a `registerWorldInfoInterceptor` handler.
+ * Subset of `WorldBookEntryDTO` covering the fields the interceptor needs to
+ * inspect for activation gating.
+ */
+export interface WorldInfoInterceptorEntryDTO {
+  readonly id: string;
+  readonly world_book_id: string;
+  readonly comment: string;
+  readonly disabled: boolean;
+  readonly constant: boolean;
+  readonly extensions: Readonly<Record<string, unknown>>;
+  readonly key: readonly string[];
+  readonly keysecondary: readonly string[];
+  readonly position: number;
+  readonly depth: number;
+  readonly priority: number;
+  readonly probability: number;
+  readonly use_probability: boolean;
+  readonly content: string;
+  readonly automation_id: string | null;
+  readonly selective: boolean;
+  readonly selective_logic: number;
+  readonly match_whole_words: boolean;
+  readonly case_sensitive: boolean;
+  readonly use_regex: boolean;
+  readonly prevent_recursion: boolean;
+  readonly exclude_recursion: boolean;
+  readonly delay_until_recursion: boolean;
+  readonly scan_depth: number | null;
+  readonly order_value: number;
+}
+
+/**
+ * One chat message exposed to a `registerWorldInfoInterceptor` handler.
+ * `index_in_chat` is the zero-based position in the chat's message list and
+ * `is_greeting` is true for the synthetic greeting row at index 0.
+ */
+export interface WorldInfoInterceptorMessageDTO {
+  readonly id: string;
+  readonly role: "system" | "user" | "assistant";
+  readonly content: string;
+  readonly is_user: boolean;
+  readonly is_greeting: boolean;
+  readonly greeting_index?: number;
+  readonly swipe_id: number;
+  readonly index_in_chat: number;
+}
+
+/**
+ * Context passed to a `registerWorldInfoInterceptor` handler. Fires inside
+ * `assemblePrompt` immediately before `activateWorldInfo` runs, so any
+ * `disabled` / `enabled` / `forced` votes affect activation and downstream
+ * token-budget calculation.
+ */
+export interface WorldInfoInterceptorCtxDTO {
+  readonly chatId: string;
+  readonly characterId: string;
+  readonly userId?: string;
+  readonly entries: readonly WorldInfoInterceptorEntryDTO[];
+  readonly messages: readonly WorldInfoInterceptorMessageDTO[];
+  readonly chatTurn: number;
+  readonly chatMetadata: Readonly<Record<string, unknown>>;
+}
+
+/**
+ * Per-entry content override emitted by a `registerWorldInfoInterceptor`
+ * handler. `content` replaces the entry's `content` for this prompt only.
+ */
+export interface WorldInfoInterceptorMutationDTO {
+  readonly id: string;
+  readonly content?: string;
+}
+
+/**
+ * Return value of a `registerWorldInfoInterceptor` handler. Each list is
+ * additive — handlers chain in priority order and a later handler sees the
+ * prior handlers' votes applied.
+ */
+export interface WorldInfoInterceptorResultDTO {
+  readonly disabled?: readonly string[];
+  readonly enabled?: readonly string[];
+  readonly forced?: readonly string[];
+  readonly mutated?: readonly WorldInfoInterceptorMutationDTO[];
+}
+
 // ─── Databank DTOs ───────────────────────────────────────────────────────
 
 export type DatabankScopeDTO = "global" | "character" | "chat";
@@ -1868,6 +1956,13 @@ export type WorkerToHost =
       requestId: string;
       result: MacroInterceptorResultDTO;
     }
+  // ─── World Info Interceptor (gated: "generation") ──────────────────
+  | { type: "register_world_info_interceptor"; priority?: number }
+  | {
+      type: "world_info_interceptor_result";
+      requestId: string;
+      result: WorldInfoInterceptorResultDTO | null;
+    }
   // ─── Message Content Processor (gated: "chat_mutation") ────────────
   | { type: "register_message_content_processor"; priority?: number }
   | {
@@ -2128,6 +2223,11 @@ export type HostToWorker =
       type: "macro_interceptor_request";
       requestId: string;
       ctx: MacroInterceptorCtxDTO;
+    }
+  | {
+      type: "world_info_interceptor_request";
+      requestId: string;
+      ctx: WorldInfoInterceptorCtxDTO;
     }
   | {
       type: "message_content_processor_request";

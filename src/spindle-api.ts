@@ -86,6 +86,8 @@ import type {
   TokenCountResultDTO,
   MacroInterceptorCtxDTO,
   MacroInterceptorResultDTO,
+  WorldInfoInterceptorCtxDTO,
+  WorldInfoInterceptorResultDTO,
   MessageContentProcessorCtxDTO,
   MessageContentProcessorResultDTO,
   SharedRpcRequestContextDTO,
@@ -913,6 +915,39 @@ export interface SpindleAPI {
     handler: (
       ctx: MacroInterceptorCtxDTO
     ) => Promise<MacroInterceptorResultDTO>,
+    priority?: number
+  ): void;
+
+  /**
+   * Register a world info interceptor (permission: `generation`).
+   *
+   * Fires inside `assemblePrompt` immediately before `activateWorldInfo`
+   * runs. Handlers can disable, force-enable, or content-override world info
+   * entries based on chat state, message history, or external rules.
+   * Multiple handlers chain in priority order and a later handler sees the
+   * prior handlers' votes applied — useful for cross-entry injection
+   * patterns where one entry merges into another and then disables itself.
+   *
+   * Returning `void` passes the activation set through unchanged. Per-handler
+   * 10s timeout; errors are logged and the chain continues.
+   *
+   * @param handler  Returns the disabled / enabled / forced / mutated lists, or `void`.
+   * @param priority Lower values run first. Default `100`.
+   *
+   * @example
+   * ```ts
+   * spindle.registerWorldInfoInterceptor(async (ctx) => {
+   *   const disabled = ctx.entries
+   *     .filter((e) => e.comment.startsWith("[debug]"))
+   *     .map((e) => e.id)
+   *   return { disabled }
+   * }, 100)
+   * ```
+   */
+  registerWorldInfoInterceptor(
+    handler: (
+      ctx: WorldInfoInterceptorCtxDTO
+    ) => Promise<WorldInfoInterceptorResultDTO | void>,
     priority?: number
   ): void;
 
