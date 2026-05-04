@@ -501,6 +501,8 @@ export interface SpindleAPI {
           text?: string | null;
           duration?: number | null;
         };
+        /** Internal-only escape hatch for extension/system rewrites that should not invalidate chat chunks. */
+        skipChunkRebuild?: boolean;
       }
     ): Promise<void>;
     deleteMessage(chatId: string, messageId: string): Promise<void>;
