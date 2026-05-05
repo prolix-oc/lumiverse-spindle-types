@@ -689,7 +689,7 @@ export type WorldBookEntryUpdateDTO = WorldBookEntryCreateDTO;
 export type RegexPlacementDTO = "user_input" | "ai_output" | "world_info" | "reasoning";
 export type RegexScopeDTO = "global" | "character" | "chat";
 export type RegexTargetDTO = "prompt" | "response" | "display";
-export type RegexMacroModeDTO = "none" | "raw" | "escaped";
+export type RegexMacroModeDTO = "none" | "raw" | "escaped" | "after";
 
 export interface RegexScriptDTO {
   id: string;
