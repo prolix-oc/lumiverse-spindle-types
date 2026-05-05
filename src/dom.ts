@@ -190,6 +190,37 @@ export interface SpindleSandboxFrameHandle {
   destroy(): void;
 }
 
+export interface SpindleSandboxMediaResource {
+  /** Object URL that can be assigned to sandbox-local media elements. */
+  url: string;
+  /** Response media type without parameters, e.g. `audio/mpeg`. */
+  contentType: string;
+  /** Downloaded media size in bytes. */
+  sizeBytes: number;
+  /** Revoke the object URL when it is no longer needed. */
+  revoke(): void;
+}
+
+export interface SpindleSandboxAudioOptions {
+  /** Request options passed to the permission-gated CORS proxy. */
+  request?: RequestInitDTO;
+  controls?: boolean;
+  loop?: boolean;
+  muted?: boolean;
+  preload?: "none" | "metadata" | "auto";
+  /** Clamped to the browser audio range `[0, 1]`. */
+  volume?: number;
+}
+
+export interface SpindleSandboxAudioHandle extends SpindleSandboxMediaResource {
+  /** Sandbox-local audio element backed by the fetched blob URL. */
+  element: HTMLAudioElement;
+  play(): Promise<void>;
+  pause(): void;
+  /** Pause playback, detach the element, and revoke the object URL. */
+  destroy(): void;
+}
+
 /** API exposed inside the sandboxed iframe as `window.spindleSandbox`. */
 export interface SpindleSandboxAPI {
   postMessage(payload: unknown): void;
@@ -197,6 +228,10 @@ export interface SpindleSandboxAPI {
   requestResize(height?: number): void;
   /** Fetch a URL through the extension's CORS proxy. Requires the `cors_proxy` permission. */
   corsProxy(url: string, options?: RequestInitDTO): Promise<unknown>;
+  /** Fetch remote audio through the permission-gated proxy and expose it as a blob URL. */
+  fetchAudio(url: string, options?: RequestInitDTO): Promise<SpindleSandboxMediaResource>;
+  /** Fetch remote audio through the proxy and create a sandbox-local audio element. */
+  createAudio(url: string, options?: SpindleSandboxAudioOptions): Promise<SpindleSandboxAudioHandle>;
 }
 
 export interface SpindleUploadFile {

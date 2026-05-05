@@ -290,6 +290,8 @@ export interface RequestInitDTO {
   /** When `"arraybuffer"`, the response body is returned as a base64-encoded string
    *  with `encoding: "base64"`. Used by the sandboxed-widget transparent proxy. */
   responseType?: "text" | "arraybuffer";
+  /** Restricts transparent binary proxy responses to a browser-renderable media class. */
+  mediaType?: "image" | "audio";
 }
 
 /**
