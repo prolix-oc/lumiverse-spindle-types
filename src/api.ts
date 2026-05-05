@@ -44,6 +44,8 @@ export interface MacroDefinitionDTO {
   returnType?: "string" | "integer" | "number" | "boolean";
   args?: { name: string; description?: string; required?: boolean }[];
   handler: string; // serialized function body (executed in worker context)
+  /** Set true when the macro returns different output across calls with the same args (time, randomness, idle duration). The display-regex cache will not store resolutions that include this macro. */
+  volatile?: boolean;
 }
 
 /** Minimal shape exposed to extension macro handlers. Additional fields may be present. */
@@ -568,6 +570,14 @@ export interface ChatUpdateDTO {
 export interface ChatSwitchedPayloadDTO {
   /** The chat the user switched to, or `null` when returning to the home screen. */
   chatId: string | null;
+}
+
+/** Payload for `CHAT_CHANGED` events. */
+export interface ChatChangedPayloadDTO {
+  /** The chat after the change. */
+  chat: { id: string; [key: string]: unknown };
+  /** Optional. Dot-paths of fields that differed between the prior and new chat (e.g. `metadata.macro_variables.local.foo`, `name`, `metadata.last_message_id`). Absent on events emitted by sources that don't compute the diff. */
+  changedFields?: string[];
 }
 
 // ─── World Book DTOs ─────────────────────────────────────────────────────
