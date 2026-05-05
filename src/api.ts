@@ -44,6 +44,8 @@ export interface MacroDefinitionDTO {
   returnType?: "string" | "integer" | "number" | "boolean";
   args?: { name: string; description?: string; required?: boolean }[];
   handler: string; // serialized function body (executed in worker context)
+  /** Set true when the macro returns different output across calls with the same args (time, randomness, idle duration). The display-regex cache will not store resolutions that include this macro. */
+  volatile?: boolean;
 }
 
 /** Minimal shape exposed to extension macro handlers. Additional fields may be present. */
