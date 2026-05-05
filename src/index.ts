@@ -36,6 +36,7 @@ export type {
    ChatDTO,
    ChatUpdateDTO,
    ChatSwitchedPayloadDTO,
+   ChatChangedPayloadDTO,
    WorldBookDTO,
   WorldBookCreateDTO,
   WorldBookUpdateDTO,

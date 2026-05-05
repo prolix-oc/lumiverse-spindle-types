@@ -73,6 +73,7 @@ import type {
   BackendProcessInfoDTO,
   BackendProcessLifecycleEventDTO,
   BackendProcessStopOptionsDTO,
+  ChatChangedPayloadDTO,
   GenerationStartedPayloadDTO,
   StreamTokenPayloadDTO,
   GenerationEndedPayloadDTO,
@@ -176,6 +177,8 @@ export interface SpindleAPI {
   on(event: "GENERATION_ENDED", handler: (payload: GenerationEndedPayloadDTO, userId?: string) => void): () => void;
   /** Subscribe to generation-stopped events (requires `generation` permission). The optional `userId` identifies which user triggered the event. */
   on(event: "GENERATION_STOPPED", handler: (payload: GenerationStoppedPayloadDTO, userId?: string) => void): () => void;
+  /** Subscribe to `CHAT_CHANGED` events. `changedFields` lists the dot-paths that differed when emitted by the standard `updateChat` path; absent on emits from other sources. */
+  on(event: "CHAT_CHANGED", handler: (payload: ChatChangedPayloadDTO, userId?: string) => void): () => void;
   /**
    * Subscribe to swipe lifecycle events. The payload's `action` discriminator
    * tells you whether a swipe was added, updated, deleted, or navigated, and

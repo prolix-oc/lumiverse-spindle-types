@@ -572,6 +572,14 @@ export interface ChatSwitchedPayloadDTO {
   chatId: string | null;
 }
 
+/** Payload for `CHAT_CHANGED` events. */
+export interface ChatChangedPayloadDTO {
+  /** The chat after the change. */
+  chat: { id: string; [key: string]: unknown };
+  /** Optional. Dot-paths of fields that differed between the prior and new chat (e.g. `metadata.macro_variables.local.foo`, `name`, `metadata.last_message_id`). Absent on events emitted by sources that don't compute the diff. */
+  changedFields?: string[];
+}
+
 // ─── World Book DTOs ─────────────────────────────────────────────────────
 
 /**
