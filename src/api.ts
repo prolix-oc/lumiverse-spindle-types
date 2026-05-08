@@ -255,6 +255,26 @@ export interface GenerationRequestDTO {
   signal?: AbortSignal;
 }
 
+/** Options passed to chat generation when `spindle.chat.appendMessage()` starts a normal reply. */
+export interface ChatAppendGenerationOptionsDTO {
+  connection_id?: string;
+  persona_id?: string;
+  persona_addon_states?: Record<string, boolean>;
+  preset_id?: string;
+  force_preset_id?: boolean;
+  parameters?: Record<string, unknown>;
+  target_character_id?: string;
+  retain_council?: boolean;
+}
+
+/** Optional third argument for `spindle.chat.appendMessage()`. */
+export type ChatAppendMessageOptionsDTO =
+  | boolean
+  | {
+      triggerGeneration?: boolean;
+      generation?: ChatAppendGenerationOptionsDTO;
+    };
+
 /**
  * Streamed chunk yielded by `spindle.generate.rawStream()` and
  * `spindle.generate.quietStream()`.
@@ -1884,6 +1904,7 @@ export type WorkerToHost =
         content: string;
         metadata?: Record<string, unknown>;
       };
+      options?: ChatAppendMessageOptionsDTO;
     }
   | {
       type: "chat_update_message";

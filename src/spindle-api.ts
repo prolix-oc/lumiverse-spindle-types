@@ -11,6 +11,7 @@ import type {
   MacroResolveResultDTO,
   ToolRegistrationDTO,
   GenerationRequestDTO,
+  ChatAppendMessageOptionsDTO,
   RequestInitDTO,
   ConnectionProfileDTO,
   PermissionDeniedDetail,
@@ -472,8 +473,9 @@ export interface SpindleAPI {
         role: "system" | "user" | "assistant";
         content: string;
         metadata?: Record<string, unknown>;
-      }
-    ): Promise<{ id: string }>;
+      },
+      options?: ChatAppendMessageOptionsDTO
+    ): Promise<{ id: string; generationId?: string }>;
     /**
      * Patch an existing message. All fields are optional; `undefined` leaves
      * the field untouched. Precedence rules:

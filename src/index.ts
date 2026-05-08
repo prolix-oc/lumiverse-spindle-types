@@ -24,6 +24,8 @@ export type {
   ToolSchemaDTO,
   ToolCallDTO,
   GenerationRequestDTO,
+  ChatAppendGenerationOptionsDTO,
+  ChatAppendMessageOptionsDTO,
   StreamChunkDTO,
   RequestInitDTO,
   ConnectionProfileDTO,
