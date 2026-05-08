@@ -257,9 +257,12 @@ export interface GenerationRequestDTO {
 
 /** Options passed to chat generation when `spindle.chat.appendMessage()` starts a normal reply. */
 export interface ChatAppendGenerationOptionsDTO {
+  /** Omit to use the user's default connection profile. */
   connection_id?: string;
+  /** Omit to use the user's active persona setting. */
   persona_id?: string;
   persona_addon_states?: Record<string, boolean>;
+  /** Omit to use the user's active Loom preset; if unset, the connection preset is used. */
   preset_id?: string;
   force_preset_id?: boolean;
   parameters?: Record<string, unknown>;
