@@ -9,6 +9,8 @@ export interface LlmMessageDTO {
   name?: string;
 }
 
+export type SpindleUserRoleDTO = "operator" | "admin" | "user";
+
 /**
  * Optional metadata returned by an interceptor so Lumiverse can surface
  * extension-injected prompt messages as first-class items in Prompt Breakdown.
@@ -2142,8 +2144,9 @@ export type WorkerToHost =
   // ─── Push Notifications (gated: "push_notification") ────────────────
   | { type: "push_send"; requestId: string; title: string; body: string; tag?: string; url?: string; userId?: string; icon?: string; rawTitle?: boolean; image?: string }
   | { type: "push_get_status"; requestId: string; userId?: string }
-  // ─── User Visibility (free tier) ───────────────────────────────────
+  // ─── User Context (free tier) ──────────────────────────────────────
   | { type: "user_is_visible"; requestId: string; userId?: string }
+  | { type: "user_get_role"; requestId: string; userId?: string }
   // ─── Text Editor (free tier) ───────────────────────────────────────
   | { type: "text_editor_open"; requestId: string; title?: string; value?: string; placeholder?: string; userId?: string }
   // ─── Modal (free tier) ────────────────────────────────────────────

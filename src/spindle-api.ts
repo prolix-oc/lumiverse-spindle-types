@@ -61,6 +61,7 @@ import type {
   ThemePaletteConfigDTO,
   ThemeVariablesConfigDTO,
   ColorExtractionResult,
+  SpindleUserRoleDTO,
   SpindleModalItemDTO,
   SpindleCommandDTO,
   SpindleCommandContextDTO,
@@ -1185,11 +1186,7 @@ export interface SpindleAPI {
     ): Promise<MacroResolveResultDTO>;
   };
 
-  /**
-   * User presence queries (free tier — no permission needed).
-   * Check whether a user currently has the Lumiverse app visible/focused
-   * in at least one browser tab or PWA window.
-   */
+  /** User context queries (free tier — no permission needed). */
   users: {
     /**
      * Returns true if the user has the app visible in at least one session.
@@ -1199,6 +1196,14 @@ export interface SpindleAPI {
      * For operator-scoped extensions, pass userId explicitly.
      */
     isVisible(userId?: string): Promise<boolean>;
+    /**
+     * Return the user's Lumiverse role as exposed to extensions.
+     * Internal owners are reported as `operator`; admins remain `admin`;
+     * everyone else is `user`.
+     * For user-scoped extensions, userId is inferred from the extension owner.
+     * For operator-scoped extensions, pass userId explicitly.
+     */
+    getRole(userId?: string): Promise<SpindleUserRoleDTO>;
   };
 
   /** Show toast notifications in the frontend UI (free tier — no permission needed) */
