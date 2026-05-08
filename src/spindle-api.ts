@@ -665,6 +665,10 @@ export interface SpindleAPI {
     get(imageId: string, userId?: string): Promise<ImageDTO | null>;
     get(imageId: string, options?: ImageGetOptionsDTO): Promise<ImageDTO | null>;
     upload(input: ImageUploadDTO, userId?: string): Promise<ImageDTO>;
+    uploadMany(
+      items: ImageUploadDTO[],
+      options?: { userId?: string; concurrency?: number },
+    ): Promise<Array<{ id?: string; error?: string }>>;
     uploadFromDataUrl(dataUrl: string, originalFilename?: string, userId?: string): Promise<ImageDTO>;
     uploadFromDataUrl(dataUrl: string, options?: ImageUploadFromDataUrlOptionsDTO): Promise<ImageDTO>;
     delete(imageId: string, userId?: string): Promise<boolean>;

@@ -2198,6 +2198,13 @@ export type WorkerToHost =
     }
   | { type: "images_upload"; requestId: string; input: ImageUploadDTO; userId?: string }
   | {
+      type: "images_upload_many";
+      requestId: string;
+      items: ImageUploadDTO[];
+      userId?: string;
+      concurrency?: number;
+    }
+  | {
       type: "images_upload_from_data_url";
       requestId: string;
       dataUrl: string;
