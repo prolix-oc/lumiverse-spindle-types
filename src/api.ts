@@ -1606,9 +1606,8 @@ export interface GenerationStoppedPayloadDTO {
  * Wire shape of a chat message as delivered in WebSocket event payloads
  * (e.g. `MESSAGE_SENT`, `MESSAGE_EDITED`, `MESSAGE_SWIPED`).
  *
- * This is the raw backend message shape and is distinct from the normalized
- * `{ id, role, content, ... }` object returned by `spindle.chat.getMessages()`,
- * which collapses `is_user`/`name` into a `role` discriminator.
+ * `spindle.chat.getMessages()` returns this backend shape plus normalized
+ * convenience fields such as `role` and `metadata`.
  */
 export interface ChatMessageDTO {
   id: string;

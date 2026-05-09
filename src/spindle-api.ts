@@ -76,6 +76,7 @@ import type {
   BackendProcessLifecycleEventDTO,
   BackendProcessStopOptionsDTO,
   ChatChangedPayloadDTO,
+  ChatMessageDTO,
   GenerationStartedPayloadDTO,
   StreamTokenPayloadDTO,
   GenerationEndedPayloadDTO,
@@ -447,26 +448,17 @@ export interface SpindleAPI {
 
   /** Chat mutation helpers */
   chat: {
-    getMessages(chatId: string): Promise<Array<{
-      id: string;
+    getMessages(chatId: string): Promise<Array<ChatMessageDTO & {
+      /** Normalized role derived from `is_user` and Spindle system-message metadata. */
       role: "system" | "user" | "assistant";
-      content: string;
       /**
        * The free-form `extra` bag minus `spindle_metadata` (which is surfaced
        * separately on `metadata`). Carries reasoning text/duration, attachments,
        * and any host-owned housekeeping fields.
        */
       extra: Record<string, unknown>;
+      /** Spindle-owned metadata split out from `extra.spindle_metadata`. */
       metadata?: Record<string, unknown>;
-      /** Index of the active swipe in `swipes`. `0` when the message has no alternates. */
-      swipe_id: number;
-      /**
-       * All swipe variants for this message, including the currently active one.
-       * `swipes[swipe_id]` always equals `content`.
-       */
-      swipes: string[];
-      /** Per-swipe creation timestamps (unix epoch seconds), aligned with `swipes`. */
-      swipe_dates: number[];
     }>>;
     appendMessage(
       chatId: string,
