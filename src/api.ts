@@ -3,9 +3,16 @@ import type { CouncilMemberContext } from "./council";
 
 // ─── DTO types for messages ──────────────────────────────────────────────
 
+export type LlmMessagePartDTO =
+  | { type: "text"; text: string; cache_control?: Record<string, unknown> }
+  | { type: "image"; data: string; mime_type: string; cache_control?: Record<string, unknown> }
+  | { type: "audio"; data: string; mime_type: string; cache_control?: Record<string, unknown> }
+  | { type: "tool_use"; id: string; name: string; input: Record<string, unknown>; cache_control?: Record<string, unknown> }
+  | { type: "tool_result"; tool_use_id: string; content: string; is_error?: boolean; cache_control?: Record<string, unknown> };
+
 export interface LlmMessageDTO {
   role: "system" | "user" | "assistant";
-  content: string;
+  content: string | LlmMessagePartDTO[];
   name?: string;
 }
 
