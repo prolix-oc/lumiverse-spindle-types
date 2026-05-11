@@ -232,6 +232,8 @@ export interface SpindleSandboxAPI {
   fetchAudio(url: string, options?: RequestInitDTO): Promise<SpindleSandboxMediaResource>;
   /** Fetch remote audio through the proxy and create a sandbox-local audio element. */
   createAudio(url: string, options?: SpindleSandboxAudioOptions): Promise<SpindleSandboxAudioHandle>;
+  /** Fetch a remote web font through the permission-gated proxy and expose it as a blob URL usable in `@font-face src: url(...)`. */
+  fetchFont(url: string, options?: RequestInitDTO): Promise<SpindleSandboxMediaResource>;
 }
 
 export interface SpindleUploadFile {
