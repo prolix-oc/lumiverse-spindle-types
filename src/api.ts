@@ -14,6 +14,19 @@ export interface LlmMessageDTO {
   role: "system" | "user" | "assistant";
   content: string | LlmMessagePartDTO[];
   name?: string;
+  /**
+   * Thinking-mode reasoning content from the previous assistant turn, echoed
+   * back on the next request. Required by DeepSeek's thinking-mode models
+   * (`deepseek-reasoner`, `deepseek-chat` with thinking enabled) **on
+   * tool-call continuations** — DeepSeek's API rejects a continuation when
+   * an assistant turn invoked a tool call and the echo doesn't carry its
+   * reasoning_content back. Plain-text continuations don't need this; nor
+   * do non-thinking models. Other openai-compatible providers that route
+   * DeepSeek (NanoGPT, OpenRouter, etc.) inherit the same requirement;
+   * providers without a reasoning_content notion ignore the field. Set
+   * only on `role: 'assistant'` messages.
+   */
+  reasoning_content?: string;
 }
 
 export type SpindleUserRoleDTO = "operator" | "admin" | "user";
