@@ -1822,6 +1822,14 @@ export interface SharedRpcRequestContextDTO {
   endpoint: string;
   /** Identifier of the extension requesting the value. */
   requesterExtensionId: string;
+  /** Gated permissions available while this delegated handler request is running. */
+  effectivePermissions: readonly string[];
+}
+
+/** Optional read policy for a shared RPC endpoint. Omit to require legacy owner-permission inheritance. */
+export interface SharedRpcEndpointPolicyDTO {
+  /** Gated permissions both owner and requester must have; `[]` means no gated permissions are delegated. */
+  requires?: readonly string[];
 }
 
 // ─── Worker → Host messages ──────────────────────────────────────────────
@@ -1906,15 +1914,16 @@ export type WorkerToHost =
       reservationId: string;
     }
   | { type: "permissions_get_granted"; requestId: string }
-  | { type: "rpc_pool_sync"; endpoint: string; value: unknown }
-  | { type: "rpc_pool_register_handler"; endpoint: string }
+  | { type: "rpc_pool_sync"; endpoint: string; value: unknown; policy?: SharedRpcEndpointPolicyDTO; rpcPermissionScopeId?: string }
+  | { type: "rpc_pool_register_handler"; endpoint: string; policy?: SharedRpcEndpointPolicyDTO; rpcPermissionScopeId?: string }
   | { type: "rpc_pool_unregister"; endpoint: string }
-  | { type: "rpc_pool_read"; requestId: string; endpoint: string }
+  | { type: "rpc_pool_read"; requestId: string; endpoint: string; rpcPermissionScopeId?: string }
   | {
       type: "rpc_pool_handler_result";
       requestId: string;
       result?: unknown;
       error?: string;
+      rpcPermissionScopeId?: string;
     }
   | { type: "connections_list"; requestId: string; userId?: string }
   | { type: "connections_get"; requestId: string; connectionId: string; userId?: string }
@@ -2284,6 +2293,8 @@ export type HostToWorker =
       requestId: string;
       endpoint: string;
       requesterExtensionId: string;
+      rpcPermissionScopeId: string;
+      effectivePermissions: string[];
     }
   | {
       type: "intercept_request";

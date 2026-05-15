@@ -130,6 +130,7 @@ export type {
   TokenCountOptionsDTO,
   TokenCountResultDTO,
   SharedRpcRequestContextDTO,
+  SharedRpcEndpointPolicyDTO,
   MacroInterceptorPhase,
   MacroInterceptorEnvDTO,
   MacroInterceptorCtxDTO,

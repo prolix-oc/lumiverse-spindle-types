@@ -95,6 +95,7 @@ import type {
   MessageContentProcessorCtxDTO,
   MessageContentProcessorResultDTO,
   SharedRpcRequestContextDTO,
+  SharedRpcEndpointPolicyDTO,
 } from "./api";
 
 export interface FrontendProcessHandle {
@@ -860,7 +861,7 @@ export interface SpindleAPI {
      *
      * Returns the fully-qualified endpoint name.
      */
-    sync(endpoint: string, value: unknown): string;
+    sync(endpoint: string, value: unknown, policy?: SharedRpcEndpointPolicyDTO): string;
     /**
      * Register an on-demand endpoint handler. Replaces any previously synced
      * value or handler for the same endpoint.
@@ -869,7 +870,8 @@ export interface SpindleAPI {
      */
     handle(
       endpoint: string,
-      handler: (ctx: SharedRpcRequestContextDTO) => unknown | Promise<unknown>
+      handler: (ctx: SharedRpcRequestContextDTO) => unknown | Promise<unknown>,
+      policy?: SharedRpcEndpointPolicyDTO
     ): string;
     /** Read the latest value from another extension's fully-qualified endpoint. */
     read<T = unknown>(endpoint: string): Promise<T>;
