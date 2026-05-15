@@ -627,6 +627,108 @@ export interface ChatChangedPayloadDTO {
   changedFields?: string[];
 }
 
+// ─── User Preset DTOs ───────────────────────────────────────────────────
+
+export type PromptVariableDefDTO =
+  | {
+      id: string;
+      name: string;
+      label: string;
+      type: "text";
+      defaultValue: string;
+      description?: string;
+    }
+  | {
+      id: string;
+      name: string;
+      label: string;
+      type: "textarea";
+      defaultValue: string;
+      rows?: number;
+      description?: string;
+    }
+  | {
+      id: string;
+      name: string;
+      label: string;
+      type: "number";
+      defaultValue: number;
+      min?: number;
+      max?: number;
+      step?: number;
+      description?: string;
+    }
+  | {
+      id: string;
+      name: string;
+      label: string;
+      type: "slider";
+      defaultValue: number;
+      min: number;
+      max: number;
+      step?: number;
+      description?: string;
+    };
+
+export type PromptVariableValueDTO = string | number;
+export type PromptVariableValuesDTO = Record<string, Record<string, PromptVariableValueDTO>>;
+export type PromptBlockRoleDTO = "system" | "user" | "assistant" | "user_append" | "assistant_append";
+export type PromptBlockPositionDTO = "pre_history" | "post_history" | "in_history";
+export type PromptBlockCategoryModeDTO = "radio" | "checkbox" | null;
+
+export interface PromptBlockDTO {
+  id: string;
+  name: string;
+  content: string;
+  role: PromptBlockRoleDTO;
+  enabled: boolean;
+  position: PromptBlockPositionDTO;
+  depth: number;
+  /** `"category"` marks a structural category header; other strings are structural insertion markers. */
+  marker: string | null;
+  isLocked: boolean;
+  color: string | null;
+  injectionTrigger: string[];
+  group: string | null;
+  /** Only meaningful when `marker === "category"`. Radio categories allow one enabled child; checkbox categories allow many. */
+  categoryMode?: PromptBlockCategoryModeDTO;
+  variables?: PromptVariableDefDTO[];
+}
+
+export interface PromptBlockCategoryGroupDTO {
+  /** The category header block, or null for uncategorized leading blocks. */
+  categoryBlock: PromptBlockDTO | null;
+  /** Non-category blocks after the header until the next category header. */
+  children: PromptBlockDTO[];
+}
+
+export interface UserPresetDTO {
+  id: string;
+  name: string;
+  provider: string;
+  engine: string;
+  parameters: Record<string, unknown>;
+  prompt_order: PromptBlockDTO[];
+  prompts: Record<string, unknown>;
+  metadata: Record<string, unknown>;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface UserPresetCreateDTO {
+  name: string;
+  provider: string;
+  engine?: string;
+  parameters?: Record<string, unknown>;
+  prompt_order?: PromptBlockDTO[];
+  prompts?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+}
+
+export type UserPresetUpdateDTO = Partial<UserPresetCreateDTO>;
+export type PromptBlockCreateDTO = Partial<PromptBlockDTO>;
+export type PromptBlockUpdateDTO = Partial<Omit<PromptBlockDTO, "id">>;
+
 // ─── World Book DTOs ─────────────────────────────────────────────────────
 
 /**
@@ -2114,6 +2216,18 @@ export type WorkerToHost =
   | { type: "chats_get_active"; requestId: string; userId?: string }
   | { type: "chats_update"; requestId: string; chatId: string; input: ChatUpdateDTO; userId?: string }
   | { type: "chats_delete"; requestId: string; chatId: string; userId?: string }
+  // ─── User Presets (gated: "presets") ────────────────────────────────
+  | { type: "presets_list"; requestId: string; limit?: number; offset?: number; userId?: string }
+  | { type: "presets_get"; requestId: string; presetId: string; userId?: string }
+  | { type: "presets_create"; requestId: string; input: UserPresetCreateDTO; userId?: string }
+  | { type: "presets_update"; requestId: string; presetId: string; input: UserPresetUpdateDTO; userId?: string }
+  | { type: "presets_delete"; requestId: string; presetId: string; userId?: string }
+  | { type: "preset_blocks_list"; requestId: string; presetId: string; userId?: string }
+  | { type: "preset_blocks_get"; requestId: string; presetId: string; blockId: string; userId?: string }
+  | { type: "preset_blocks_create"; requestId: string; presetId: string; input: PromptBlockCreateDTO; index?: number; userId?: string }
+  | { type: "preset_blocks_update"; requestId: string; presetId: string; blockId: string; input: PromptBlockUpdateDTO; userId?: string }
+  | { type: "preset_blocks_delete"; requestId: string; presetId: string; blockId: string; userId?: string }
+  | { type: "preset_categories_list"; requestId: string; presetId: string; userId?: string }
   // ─── World Books (gated: "world_books") ──────────────────────────────
   | { type: "world_books_list"; requestId: string; limit?: number; offset?: number; userId?: string }
   | { type: "world_books_get"; requestId: string; worldBookId: string; userId?: string }

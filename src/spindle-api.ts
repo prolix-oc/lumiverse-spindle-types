@@ -22,6 +22,13 @@ import type {
   CharacterUpdateDTO,
   ChatDTO,
   ChatUpdateDTO,
+  UserPresetDTO,
+  UserPresetCreateDTO,
+  UserPresetUpdateDTO,
+  PromptBlockDTO,
+  PromptBlockCreateDTO,
+  PromptBlockUpdateDTO,
+  PromptBlockCategoryGroupDTO,
   WorldBookDTO,
   WorldBookCreateDTO,
   WorldBookUpdateDTO,
@@ -728,6 +735,34 @@ export interface SpindleAPI {
     delete(chatId: string, userId?: string): Promise<boolean>;
     /** Get top-K chat memory chunks for a chat via vector search. */
     getMemories(chatId: string, options?: { topK?: number; userId?: string }): Promise<ChatMemoryResultDTO>;
+  };
+
+  /**
+   * User Presets CRUD (permission: "presets").
+   * Preset categories are structural prompt blocks where `marker === "category"`;
+   * their children are the following non-category prompt blocks until the next
+   * category marker. Use `categories.list()` for the host-derived grouping, and
+   * use block CRUD to create/update/delete both normal prompt blocks and category
+   * marker blocks.
+   * For user-scoped extensions, userId is inferred from the extension owner.
+   * For operator-scoped extensions, pass userId to scope to a specific user.
+   */
+  presets: {
+    list(options?: { limit?: number; offset?: number; userId?: string }): Promise<{ data: UserPresetDTO[]; total: number }>;
+    get(presetId: string, userId?: string): Promise<UserPresetDTO | null>;
+    create(input: UserPresetCreateDTO, userId?: string): Promise<UserPresetDTO>;
+    update(presetId: string, input: UserPresetUpdateDTO, userId?: string): Promise<UserPresetDTO>;
+    delete(presetId: string, userId?: string): Promise<boolean>;
+    blocks: {
+      list(presetId: string, userId?: string): Promise<PromptBlockDTO[]>;
+      get(presetId: string, blockId: string, userId?: string): Promise<PromptBlockDTO | null>;
+      create(presetId: string, input: PromptBlockCreateDTO, options?: { index?: number; userId?: string }): Promise<PromptBlockDTO>;
+      update(presetId: string, blockId: string, input: PromptBlockUpdateDTO, userId?: string): Promise<PromptBlockDTO>;
+      delete(presetId: string, blockId: string, userId?: string): Promise<boolean>;
+    };
+    categories: {
+      list(presetId: string, userId?: string): Promise<PromptBlockCategoryGroupDTO[]>;
+    };
   };
 
   /**

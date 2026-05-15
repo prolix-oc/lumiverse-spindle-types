@@ -12,6 +12,7 @@
  * - "generation_parameters" — inject parameters into in-flight generations via interceptors
  * - "characters"           — CRUD on character cards
  * - "chats"                — CRUD on chat sessions
+ * - "presets"              — CRUD on user presets and prompt blocks
  * - "personas"             — CRUD on personas
  * - "databanks"            — CRUD on databanks and their documents
  * - "macro_interceptor"    — transform raw templates before macro parsing/dispatch
@@ -30,6 +31,7 @@ export type SpindlePermission =
   | "oauth"
   | "characters"
   | "chats"
+  | "presets"
   | "world_books"
   | "regex_scripts"
   | "databanks"
@@ -54,6 +56,7 @@ export const ALL_PERMISSIONS: readonly SpindlePermission[] = [
   "oauth",
   "characters",
   "chats",
+  "presets",
   "world_books",
   "regex_scripts",
   "databanks",
