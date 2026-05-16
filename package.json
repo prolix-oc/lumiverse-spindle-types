@@ -1,6 +1,6 @@
 {
   "name": "lumiverse-spindle-types",
-  "version": "0.4.74",
+  "version": "0.4.75",
   "types": "./src/index.ts",
   "keywords": [
     "lumiverse",
