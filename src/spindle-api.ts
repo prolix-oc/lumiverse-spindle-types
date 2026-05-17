@@ -1304,7 +1304,7 @@ export interface SpindleAPI {
      * Use `variablesByMode` to specify different values for light/dark mode.
      * Mode-specific values take precedence over flat `variables` for the same key.
      */
-    apply(overrides: ThemeOverrideDTO): Promise<void>;
+    apply(overrides: ThemeOverrideDTO, userId?: string): Promise<void>;
     /**
      * Apply a palette-driven theme using Lumiverse's own presentation rules.
      *
