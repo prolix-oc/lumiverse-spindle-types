@@ -104,6 +104,31 @@ import type {
   SharedRpcRequestContextDTO,
   SharedRpcEndpointPolicyDTO,
 } from "./api";
+import type {
+  ChatChunkDTO,
+  ChatLinkAttachDTO,
+  ChatLinkDTO,
+  ChatMemoryWarmupResultDTO,
+  CortexIngestionStatusDTO,
+  CortexIngestionTelemetryDTO,
+  CortexQueryDTO,
+  CortexResultDTO,
+  CortexUsageStatsDTO,
+  LinkedCortexResultDTO,
+  MemoryConsolidationDTO,
+  MemoryCortexConfigDTO,
+  MemoryEntityDTO,
+  MemoryEntityStatusUpdateDTO,
+  MemoryEntityUpsertDTO,
+  MemoryRelationDTO,
+  MemoryRelationUpsertDTO,
+  MemorySalienceDTO,
+  VaultChunkDTO,
+  VaultCreateDTO,
+  VaultDTO,
+  VaultReindexResultDTO,
+  VaultWithContentsDTO,
+} from "./memories";
 
 export interface FrontendProcessHandle {
   /** Host-assigned process ID unique within the extension runtime. */
@@ -824,6 +849,193 @@ export interface SpindleAPI {
       delete(documentId: string, userId?: string): Promise<boolean>;
       getContent(documentId: string, userId?: string): Promise<{ content: string } | null>;
       reprocess(documentId: string, userId?: string): Promise<{ success: true; status: "processing" }>;
+    };
+  };
+
+  /**
+   * Memory Cortex & Long-Term Chat Memory (permission: "memories").
+   *
+   * Lumiverse's hybrid memory architecture exposed as a single CRUD surface:
+   *
+   *  - **`cortex`** — config get/put, retrieval (cortex query, linked-cortex
+   *    query for vaults + interlinks), warm-cache reads, cache invalidation.
+   *  - **`entities`** / **`relations`** — entity graph CRUD: list, find,
+   *    upsert, status updates, fact appends, emotional valence, plus active
+   *    + unfiltered relation reads and `upsert` for symbolic edges.
+   *  - **`consolidations`** — list arcs by tier, fetch the latest arc, and
+   *    `run()` to trigger a background consolidation pass.
+   *  - **`salience`** — read salience records (score, emotional tags,
+   *    narrative flags) for chunks already ingested.
+   *  - **`vaults`** — frozen snapshots of cortex state. `create()` snapshots
+   *    a chat's entities/relations/chunks, `reindex()` re-copies the chunk
+   *    snapshot after a LanceDB reset, plus list / get / rename / delete.
+   *  - **`links`** — attach vaults to chats or set up bidirectional
+   *    chat-to-chat interlinks; list / remove / toggle.
+   *  - **`chatMemory`** — the long-term chat memory layer used by the
+   *    `{{memories}}` macro: list vectorized chunks, fetch top-K retrieval,
+   *    warm a chat (rebuild + queue vectorization), invalidate cache.
+   *  - **`stats`** — usage counters, live ingestion phase, and ingestion
+   *    timing telemetry.
+   *
+   * For user-scoped extensions, `userId` is inferred from the extension
+   * owner. For operator-scoped extensions, pass `userId` to scope a call
+   * to a specific user.
+   *
+   * All chat-scoped calls verify chat ownership against the resolved user
+   * — extensions cannot read or mutate cortex state for chats they do not
+   * own.
+   */
+  memories: {
+    cortex: {
+      /** Get the user's Memory Cortex configuration. */
+      getConfig(userId?: string): Promise<MemoryCortexConfigDTO>;
+      /** Patch the user's Memory Cortex configuration. Unspecified fields are left untouched. */
+      putConfig(patch: Partial<MemoryCortexConfigDTO>, userId?: string): Promise<MemoryCortexConfigDTO>;
+      /**
+       * Execute a cortex-enhanced memory retrieval. Combines vector search,
+       * entity-context fan-out, recency, reinforcement, and emotional
+       * components into a unified `CortexResultDTO`.
+       *
+       * Results are cached server-side; the next call within ~5 minutes
+       * for the same chat + query shape returns the cached value.
+       */
+      query(query: CortexQueryDTO): Promise<CortexResultDTO>;
+      /**
+       * Read the most recent cortex result from the warm cache without
+       * triggering a re-query. Returns `null` if no cached result exists
+       * or it expired. Synchronous from the caller's perspective (no
+       * vector search runs); useful when an extension just needs the same
+       * memories the active generation saw.
+       */
+      getCached(chatId: string): Promise<CortexResultDTO | null>;
+      /**
+       * Resolve linked-cortex data for a chat — every attached vault plus
+       * every bidirectional interlink target. When `queryText` is supplied,
+       * vault retrieval and interlink queries are enriched with relevance
+       * to the current conversation.
+       */
+      queryLinked(chatId: string, options?: { queryText?: string; userId?: string }): Promise<LinkedCortexResultDTO>;
+      /** Read the cached linked-cortex result for a chat. Mirrors {@link getCached}. */
+      getCachedLinked(chatId: string): Promise<LinkedCortexResultDTO | null>;
+      /** Invalidate the cortex retrieval cache for a chat. */
+      invalidateCache(chatId: string): Promise<void>;
+      /** Invalidate the linked-cortex retrieval cache for a chat. */
+      invalidateLinkedCache(chatId: string): Promise<void>;
+    };
+
+    entities: {
+      /**
+       * List entities for a chat. By default returns only entities with
+       * `status: "active"`, ordered by salience; pass `activeOnly: false`
+       * to include retired / deceased / destroyed entities.
+       */
+      list(chatId: string, options?: { activeOnly?: boolean; limit?: number; userId?: string }): Promise<MemoryEntityDTO[]>;
+      get(entityId: string, userId?: string): Promise<MemoryEntityDTO | null>;
+      findByName(chatId: string, name: string, userId?: string): Promise<MemoryEntityDTO | null>;
+      /**
+       * Upsert an entity. Matches against canonical name and known aliases;
+       * inserts a new row on miss. `chunkId` and `createdAt` attribute the
+       * mention used to fill `lastSeen*` fields — pass them when replaying
+       * an extractor over a specific chunk.
+       */
+      upsert(
+        chatId: string,
+        entity: MemoryEntityUpsertDTO,
+        options?: { chunkId?: string | null; createdAt?: number; userId?: string },
+      ): Promise<MemoryEntityDTO>;
+      updateStatus(entityId: string, patch: MemoryEntityStatusUpdateDTO, userId?: string): Promise<MemoryEntityDTO>;
+      addFacts(entityId: string, facts: string[], userId?: string): Promise<MemoryEntityDTO>;
+      getFacts(entityId: string, userId?: string): Promise<string[]>;
+      updateEmotionalValence(entityId: string, valence: Record<string, number>, userId?: string): Promise<MemoryEntityDTO>;
+    };
+
+    relations: {
+      /** Active relations for a chat (excludes superseded / merged edges). */
+      list(chatId: string, userId?: string): Promise<MemoryRelationDTO[]>;
+      /** Every relation row including superseded / merged edges — for diagnostics. */
+      listAll(chatId: string, userId?: string): Promise<MemoryRelationDTO[]>;
+      forEntity(chatId: string, entityId: string, userId?: string): Promise<MemoryRelationDTO[]>;
+      forEntities(chatId: string, entityIds: string[], options?: { limit?: number; userId?: string }): Promise<MemoryRelationDTO[]>;
+      /**
+       * Upsert a relation. Both endpoints must already exist in the entity
+       * graph (use `entities.upsert` first); the relation is silently
+       * dropped otherwise. `chunkId` attributes the evidence to a chunk.
+       */
+      upsert(
+        chatId: string,
+        relation: MemoryRelationUpsertDTO,
+        options?: { chunkId?: string | null; userId?: string },
+      ): Promise<MemoryRelationDTO | null>;
+    };
+
+    consolidations: {
+      /** List arcs for a chat. Pass `tier` to filter to one tier (1 = scene, 2 = chapter, …). */
+      list(chatId: string, options?: { tier?: number; userId?: string }): Promise<MemoryConsolidationDTO[]>;
+      /** The most recent arc across all tiers, or `null` if none have been produced. */
+      latestArc(chatId: string, userId?: string): Promise<MemoryConsolidationDTO | null>;
+      /**
+       * Trigger an async consolidation pass over the chat's chunks. Returns
+       * immediately; new arcs become visible via `list()` once the
+       * background job completes.
+       */
+      run(chatId: string, userId?: string): Promise<void>;
+    };
+
+    salience: {
+      /** List salience records for a chat's chunks, ordered by `scoredAt`. */
+      list(chatId: string, options?: { limit?: number; offset?: number; userId?: string }): Promise<MemorySalienceDTO[]>;
+    };
+
+    vaults: {
+      list(userId?: string): Promise<VaultDTO[]>;
+      /** Fetch a vault with its entities + relations. Returns `null` if not found or not owned by the resolved user. */
+      get(vaultId: string, userId?: string): Promise<VaultWithContentsDTO | null>;
+      getChunks(vaultId: string, userId?: string): Promise<VaultChunkDTO[]>;
+      /**
+       * Snapshot a chat's cortex state into a new vault. Copies entities,
+       * relations and chunk content; LanceDB embeddings are copied in the
+       * background.
+       */
+      create(input: VaultCreateDTO, userId?: string): Promise<VaultDTO>;
+      rename(vaultId: string, name: string, userId?: string): Promise<boolean>;
+      delete(vaultId: string, userId?: string): Promise<boolean>;
+      /** Re-run the LanceDB chunk copy for a vault (e.g. after an embedding model swap). */
+      reindex(vaultId: string, userId?: string): Promise<VaultReindexResultDTO>;
+    };
+
+    links: {
+      list(chatId: string, userId?: string): Promise<ChatLinkDTO[]>;
+      /**
+       * Attach a vault or set up a chat-to-chat interlink. For interlinks,
+       * pass `bidirectional: true` to also create the reverse link.
+       */
+      attach(input: ChatLinkAttachDTO, userId?: string): Promise<ChatLinkDTO[]>;
+      remove(chatId: string, linkId: string, userId?: string): Promise<boolean>;
+      toggle(chatId: string, linkId: string, enabled: boolean, userId?: string): Promise<boolean>;
+    };
+
+    chatMemory: {
+      /**
+       * List the vectorized chunks for a chat. Useful for inspecting the
+       * raw retrieval index used by the `{{memories}}` macro.
+       */
+      listChunks(chatId: string, userId?: string): Promise<ChatChunkDTO[]>;
+      /** Top-K chat memory chunks for a chat via hybrid vector + BM25 search. */
+      get(chatId: string, options?: { topK?: number; userId?: string }): Promise<ChatMemoryResultDTO>;
+      /**
+       * Warm long-term chat memory: rebuilds chunks if stale and queues any
+       * pending chunk vectorizations. Pass `force: true` to rebuild even
+       * when the chunk hash is fresh.
+       */
+      warm(chatId: string, options?: { force?: boolean; userId?: string }): Promise<ChatMemoryWarmupResultDTO>;
+      /** Drop the cached `{{memories}}` retrieval result for a chat. */
+      invalidate(chatId: string, userId?: string): Promise<void>;
+    };
+
+    stats: {
+      usage(chatId: string, userId?: string): Promise<CortexUsageStatsDTO>;
+      ingestionStatus(chatId: string, userId?: string): Promise<CortexIngestionStatusDTO | null>;
+      ingestionTelemetry(chatId: string, userId?: string): Promise<CortexIngestionTelemetryDTO>;
     };
   };
 

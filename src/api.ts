@@ -1,5 +1,14 @@
 import type { SpindleManifest } from "./manifest";
 import type { CouncilMemberContext } from "./council";
+import type {
+  ChatLinkAttachDTO,
+  CortexQueryDTO,
+  MemoryCortexConfigDTO,
+  MemoryEntityStatusUpdateDTO,
+  MemoryEntityUpsertDTO,
+  MemoryRelationUpsertDTO,
+  VaultCreateDTO,
+} from "./memories";
 
 // ─── DTO types for messages ──────────────────────────────────────────────
 
@@ -2281,6 +2290,50 @@ export type WorkerToHost =
   | { type: "generate_dry_run"; requestId: string; input: DryRunRequestDTO; userId?: string }
   // ─── Chat Memories (gated: "chats") ───────────────────────────────
   | { type: "chats_get_memories"; requestId: string; chatId: string; topK?: number; userId?: string }
+  // ─── Memory Cortex & Long-Term Chat Memory (gated: "memories") ────
+  | { type: "memories_config_get"; requestId: string; userId?: string }
+  | { type: "memories_config_put"; requestId: string; patch: Partial<MemoryCortexConfigDTO>; userId?: string }
+  | { type: "memories_query_cortex"; requestId: string; query: CortexQueryDTO }
+  | { type: "memories_query_linked"; requestId: string; chatId: string; queryText?: string; userId?: string }
+  | { type: "memories_get_cached"; requestId: string; chatId: string }
+  | { type: "memories_get_cached_linked"; requestId: string; chatId: string }
+  | { type: "memories_invalidate_cache"; requestId: string; chatId: string }
+  | { type: "memories_invalidate_linked_cache"; requestId: string; chatId: string }
+  | { type: "memories_entities_list"; requestId: string; chatId: string; activeOnly?: boolean; limit?: number; userId?: string }
+  | { type: "memories_entities_get"; requestId: string; entityId: string; userId?: string }
+  | { type: "memories_entities_find_by_name"; requestId: string; chatId: string; name: string; userId?: string }
+  | { type: "memories_entities_upsert"; requestId: string; chatId: string; entity: MemoryEntityUpsertDTO; chunkId?: string | null; createdAt?: number; userId?: string }
+  | { type: "memories_entities_update_status"; requestId: string; entityId: string; patch: MemoryEntityStatusUpdateDTO; userId?: string }
+  | { type: "memories_entities_add_facts"; requestId: string; entityId: string; facts: string[]; userId?: string }
+  | { type: "memories_entities_get_facts"; requestId: string; entityId: string; userId?: string }
+  | { type: "memories_entities_update_emotional_valence"; requestId: string; entityId: string; valence: Record<string, number>; userId?: string }
+  | { type: "memories_relations_list"; requestId: string; chatId: string; userId?: string }
+  | { type: "memories_relations_list_all"; requestId: string; chatId: string; userId?: string }
+  | { type: "memories_relations_for_entity"; requestId: string; chatId: string; entityId: string; userId?: string }
+  | { type: "memories_relations_for_entities"; requestId: string; chatId: string; entityIds: string[]; limit?: number; userId?: string }
+  | { type: "memories_relations_upsert"; requestId: string; chatId: string; relation: MemoryRelationUpsertDTO; chunkId?: string | null; userId?: string }
+  | { type: "memories_consolidations_list"; requestId: string; chatId: string; tier?: number; userId?: string }
+  | { type: "memories_consolidations_latest_arc"; requestId: string; chatId: string; userId?: string }
+  | { type: "memories_consolidations_run"; requestId: string; chatId: string; userId?: string }
+  | { type: "memories_salience_get"; requestId: string; chatId: string; limit?: number; offset?: number; userId?: string }
+  | { type: "memories_vaults_list"; requestId: string; userId?: string }
+  | { type: "memories_vaults_get"; requestId: string; vaultId: string; userId?: string }
+  | { type: "memories_vaults_get_chunks"; requestId: string; vaultId: string; userId?: string }
+  | { type: "memories_vaults_create"; requestId: string; input: VaultCreateDTO; userId?: string }
+  | { type: "memories_vaults_rename"; requestId: string; vaultId: string; name: string; userId?: string }
+  | { type: "memories_vaults_delete"; requestId: string; vaultId: string; userId?: string }
+  | { type: "memories_vaults_reindex"; requestId: string; vaultId: string; userId?: string }
+  | { type: "memories_links_list"; requestId: string; chatId: string; userId?: string }
+  | { type: "memories_links_attach"; requestId: string; input: ChatLinkAttachDTO; userId?: string }
+  | { type: "memories_links_remove"; requestId: string; chatId: string; linkId: string; userId?: string }
+  | { type: "memories_links_toggle"; requestId: string; chatId: string; linkId: string; enabled: boolean; userId?: string }
+  | { type: "memories_chat_chunks_list"; requestId: string; chatId: string; userId?: string }
+  | { type: "memories_chat_memory_get"; requestId: string; chatId: string; topK?: number; userId?: string }
+  | { type: "memories_chat_memory_warm"; requestId: string; chatId: string; force?: boolean; userId?: string }
+  | { type: "memories_chat_memory_invalidate"; requestId: string; chatId: string; userId?: string }
+  | { type: "memories_stats_usage"; requestId: string; chatId: string; userId?: string }
+  | { type: "memories_stats_ingestion_status"; requestId: string; chatId: string; userId?: string }
+  | { type: "memories_stats_ingestion_telemetry"; requestId: string; chatId: string; userId?: string }
   // ─── Toast (free tier) ───────────────────────────────────────────────
   | { type: "toast_show"; toastType: "success" | "warning" | "error" | "info"; message: string; title?: string; duration?: number; userId?: string }
   // ─── Push Notifications (gated: "push_notification") ────────────────

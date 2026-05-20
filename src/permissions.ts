@@ -15,6 +15,9 @@
  * - "presets"              — CRUD on user presets and prompt blocks
  * - "personas"             — CRUD on personas
  * - "databanks"            — CRUD on databanks and their documents
+ * - "memories"             — CRUD on the Memory Cortex (entities, relations, vaults, chat
+ *                            links, consolidations) and long-term chat memory (vectorized
+ *                            chat-chunk retrieval, warmup, cache).
  * - "macro_interceptor"    — transform raw templates before macro parsing/dispatch
  */
 export type SpindlePermission =
@@ -35,6 +38,7 @@ export type SpindlePermission =
   | "world_books"
   | "regex_scripts"
   | "databanks"
+  | "memories"
   | "personas"
   | "push_notification"
   | "image_gen"
@@ -60,6 +64,7 @@ export const ALL_PERMISSIONS: readonly SpindlePermission[] = [
   "world_books",
   "regex_scripts",
   "databanks",
+  "memories",
   "personas",
   "push_notification",
   "image_gen",
