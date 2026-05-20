@@ -15,6 +15,14 @@ export interface SpindleManifest {
   description?: string;
   /** Requested permissions (gated capabilities) */
   permissions: SpindlePermission[];
+  /**
+   * Declared backend capabilities that opt this extension out of specific
+   * Spindle heuristic-scanner blocks. See `SpindleCapability` for the
+   * available values. Distinct from `permissions`: permissions gate runtime
+   * API surfaces; capabilities suppress install-time scanner false positives
+   * for patterns the extension legitimately needs.
+   */
+  requested_capabilities?: SpindleCapability[];
   /** Backend entry point (default: "dist/backend.js") */
   entry_backend?: string;
   /** Frontend entry point (default: "dist/frontend.js") */
@@ -44,6 +52,7 @@ export interface SpindleStorageSeedFile {
 }
 
 export type SpindlePermission = import("./permissions").SpindlePermission;
+export type SpindleCapability = import("./capabilities").SpindleCapability;
 
 /** Regex for validating extension identifiers */
 export const IDENTIFIER_PATTERN = /^[a-z][a-z0-9_]*$/;

@@ -1,6 +1,7 @@
 export type {
   SpindleManifest,
   SpindlePermission,
+  SpindleCapability,
 } from "./manifest";
 export {
   IDENTIFIER_PATTERN,
@@ -9,6 +10,9 @@ export {
 
 export type { SpindlePermission as SpindlePermissionType } from "./permissions";
 export { ALL_PERMISSIONS, isValidPermission } from "./permissions";
+
+export type { SpindleCapability as SpindleCapabilityType } from "./capabilities";
+export { ALL_CAPABILITIES, isValidCapability } from "./capabilities";
 
 export { SpindleEvent, CoreEventType } from "./events";
 
