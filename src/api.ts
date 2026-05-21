@@ -1266,6 +1266,99 @@ export interface PermissionChangedDetail {
   allGranted: string[];
 }
 
+// ─── Web Search DTOs ────────────────────────────────────────────────────
+
+/** Identifies which provider backs the user's configured web search engine. */
+export type WebSearchProviderDTO = "searxng";
+
+/**
+ * Safe view of a user's web search configuration. The raw API key is never
+ * exposed — only `hasApiKey` indicates whether one is on file.
+ */
+export interface WebSearchSettingsDTO {
+  enabled: boolean;
+  provider: WebSearchProviderDTO;
+  apiUrl: string;
+  requestTimeoutMs: number;
+  defaultResultCount: number;
+  maxResultCount: number;
+  maxPagesToScrape: number;
+  maxCharsPerPage: number;
+  language: string;
+  safeSearch: 0 | 1 | 2;
+  engines: string[];
+  hasApiKey: boolean;
+}
+
+/** A single search result row, normalized across providers. */
+export interface WebSearchResultDTO {
+  title: string;
+  url: string;
+  snippet: string;
+  /** Provider-reported engine identifier when available (e.g. `"google"`, `"bing"`). */
+  engine?: string;
+  /** Provider-reported relevance score when available. */
+  score?: number;
+}
+
+/**
+ * A search result enriched with scraped page content. Only present when the
+ * query was run with `scrape: true` (the default).
+ */
+export interface WebSearchDocumentDTO {
+  title: string;
+  url: string;
+  snippet: string;
+  /** How the page content was extracted (e.g. `"html"`, `"pdf"`). */
+  sourceType?: string;
+  /** Extracted page text, clipped to `WebSearchSettingsDTO.maxCharsPerPage`. */
+  content?: string;
+  /** Length of the source page content before clipping. */
+  contentLength?: number;
+  /** Populated when scraping failed for this result; `content` is then absent. */
+  error?: string;
+}
+
+/** Options forwarded to `spindle.webSearch.query()`. */
+export interface WebSearchRequestDTO {
+  /** Free-text search query. Trimmed by the host; empty values are rejected. */
+  query: string;
+  /**
+   * Desired number of results. Clamped to `WebSearchSettingsDTO.maxResultCount`
+   * on the host; omit to use the user's `defaultResultCount`.
+   */
+  count?: number;
+  /**
+   * When `true` (default), the host scrapes the first
+   * `WebSearchSettingsDTO.maxPagesToScrape` results, fills in
+   * `documents[].content`, and assembles the `context` block. Set to `false`
+   * to skip scraping entirely — only `results` are returned, and
+   * `documents` / `context` are omitted from the response. Useful when the
+   * extension only needs titles, URLs, and snippets.
+   */
+  scrape?: boolean;
+  /** For operator-scoped extensions; ignored on user-scoped extensions. */
+  userId?: string;
+}
+
+/**
+ * Result of a successful `spindle.webSearch.query()` call. `documents` and
+ * `context` are omitted when the request was issued with `scrape: false`.
+ */
+export interface WebSearchResponseDTO {
+  /** The (trimmed) query that was executed. */
+  query: string;
+  /** Raw normalized results from the search provider. */
+  results: WebSearchResultDTO[];
+  /** Per-result scraped page content. Absent when `scrape: false`. */
+  documents?: WebSearchDocumentDTO[];
+  /**
+   * Pre-assembled, prompt-ready context block summarizing the query plus the
+   * scraped documents. Absent when `scrape: false`.
+   */
+  context?: string;
+}
+
 // ─── Theme DTOs ──────────────────────────────────────────────────────────
 
 /**
@@ -2448,7 +2541,17 @@ export type WorkerToHost =
       model?: string;
       modelSource?: TokenModelSourceDTO;
       userId?: string;
-    };
+    }
+  // ─── Web Search (gated: "web_search") ─────────────────────────────────
+  | {
+      type: "web_search_query";
+      requestId: string;
+      query: string;
+      count?: number;
+      scrape?: boolean;
+      userId?: string;
+    }
+  | { type: "web_search_get_settings"; requestId: string; userId?: string };
 
 // ─── Host → Worker messages ──────────────────────────────────────────────
 

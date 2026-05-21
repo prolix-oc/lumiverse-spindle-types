@@ -155,6 +155,12 @@ export type {
   MessageContentProcessorOrigin,
   MessageContentProcessorCtxDTO,
   MessageContentProcessorResultDTO,
+  WebSearchProviderDTO,
+  WebSearchSettingsDTO,
+  WebSearchResultDTO,
+  WebSearchDocumentDTO,
+  WebSearchRequestDTO,
+  WebSearchResponseDTO,
   WorkerToHost,
   HostToWorker,
 } from "./api";

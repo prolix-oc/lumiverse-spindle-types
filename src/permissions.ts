@@ -19,6 +19,9 @@
  *                            links, consolidations) and long-term chat memory (vectorized
  *                            chat-chunk retrieval, warmup, cache).
  * - "macro_interceptor"    — transform raw templates before macro parsing/dispatch
+ * - "web_search"           — execute searches via the user's configured web search
+ *                            provider (e.g. SearXNG) and read the safe view of their
+ *                            web search settings (never the API key).
  */
 export type SpindlePermission =
   | "generation"
@@ -44,7 +47,8 @@ export type SpindlePermission =
   | "image_gen"
   | "images"
   | "generation_parameters"
-  | "macro_interceptor";
+  | "macro_interceptor"
+  | "web_search";
 
 export const ALL_PERMISSIONS: readonly SpindlePermission[] = [
   "generation",
@@ -71,6 +75,7 @@ export const ALL_PERMISSIONS: readonly SpindlePermission[] = [
   "images",
   "generation_parameters",
   "macro_interceptor",
+  "web_search",
 ] as const;
 
 export function isValidPermission(p: string): p is SpindlePermission {

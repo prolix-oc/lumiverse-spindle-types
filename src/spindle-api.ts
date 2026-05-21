@@ -103,6 +103,9 @@ import type {
   MessageContentProcessorResultDTO,
   SharedRpcRequestContextDTO,
   SharedRpcEndpointPolicyDTO,
+  WebSearchRequestDTO,
+  WebSearchResponseDTO,
+  WebSearchSettingsDTO,
 } from "./api";
 import type {
   ChatChunkDTO,
@@ -1368,6 +1371,74 @@ export interface SpindleAPI {
       available: boolean;
       subscriptionCount: number;
     }>;
+  };
+
+  /**
+   * Web search (permission: `"web_search"`).
+   *
+   * Execute searches via the user's configured web search provider
+   * (currently SearXNG; additional providers will be added over time) and
+   * read the safe view of their web search settings. The host enforces all
+   * upstream limits (engine list, max result count, max pages to scrape,
+   * timeouts) — extensions cannot supply their own endpoint or API key.
+   *
+   * For user-scoped extensions, `userId` is inferred from the extension
+   * owner. Operator-scoped extensions should pass the `userId` of the user
+   * whose search engine should run the query.
+   *
+   * @example
+   * ```ts
+   * // Pre-flight: confirm web search is configured before issuing a query.
+   * const settings = await spindle.webSearch.getSettings()
+   * if (!settings.enabled) {
+   *   spindle.toast.warning('Configure a web search provider in Settings → Web Search first.')
+   *   return
+   * }
+   *
+   * // Full enriched query — scrapes the top-N pages and returns a
+   * // ready-to-inject context block.
+   * const enriched = await spindle.webSearch.query({
+   *   query: 'latest LLM benchmark results',
+   *   count: 5,
+   * })
+   * await spindle.chat.appendMessage(chatId, {
+   *   role: 'system',
+   *   content: enriched.context ?? '',
+   * })
+   *
+   * // Lightweight query — titles, URLs, snippets only.
+   * const quick = await spindle.webSearch.query({
+   *   query: 'who won the 2026 world cup',
+   *   scrape: false,
+   * })
+   * for (const row of quick.results) {
+   *   spindle.log.info(`${row.title} — ${row.url}`)
+   * }
+   * ```
+   */
+  webSearch: {
+    /**
+     * Run a search against the user's configured provider.
+     *
+     * Rejects with `"Web search is disabled"` when the user has not
+     * configured a provider, and with `"Web search API URL is not configured"`
+     * when the upstream endpoint is missing. Other upstream errors surface
+     * as `Error("SearXNG returned HTTP NNN")` (or equivalent for future
+     * providers).
+     *
+     * When `input.scrape` is `false`, `documents` and `context` are omitted
+     * from the response. Otherwise the host scrapes up to
+     * `WebSearchSettingsDTO.maxPagesToScrape` results, fills in
+     * `documents[].content`, and assembles a prompt-ready `context` block.
+     */
+    query(input: WebSearchRequestDTO): Promise<WebSearchResponseDTO>;
+    /**
+     * Read the safe view of the user's web search configuration. The raw
+     * API key is never exposed — only `hasApiKey` indicates whether one is
+     * on file. Useful for branching on `enabled` / `provider` /
+     * `maxResultCount` before issuing a query.
+     */
+    getSettings(userId?: string): Promise<WebSearchSettingsDTO>;
   };
 
   /**
