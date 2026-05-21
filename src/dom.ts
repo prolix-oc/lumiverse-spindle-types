@@ -1,4 +1,5 @@
 import type { RequestInitDTO } from "./api";
+import type { SpindleComponentsHelper } from "./components";
 
 /** DOM helper API provided to frontend extension modules. */
 export interface SpindleDOMHelper {
@@ -598,6 +599,14 @@ export interface SpindleFrontendContext {
      */
     showConfirm(options: SpindleConfirmOptions): Promise<SpindleConfirmResult>;
   };
+  /**
+   * Mount instances of Lumiverse's first-party shared UI components (form
+   * atoms, model picker, select, pagination, etc.) inside extension-owned DOM.
+   * The host renders real React components into the supplied container — the
+   * extension never needs to depend on React directly. See
+   * {@link SpindleComponentsHelper} for the full surface.
+   */
+  components: SpindleComponentsHelper;
   uploads: {
     pickFile(options?: {
       accept?: string[];

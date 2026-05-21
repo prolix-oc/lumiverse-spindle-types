@@ -214,6 +214,47 @@ export type {
     SpindleFrontendProcessRegistry,
  } from "./dom";
 
+export type {
+  SpindleMountedComponent,
+  SpindleComponentTarget,
+  SpindleConnectionKind,
+  SpindleConnectionRef,
+  SpindleTextInputOptions,
+  SpindleTextInputHandle,
+  SpindleTextAreaOptions,
+  SpindleTextAreaHandle,
+  SpindleNumericInputOptions,
+  SpindleNumericInputHandle,
+  SpindleNumberStepperOptions,
+  SpindleNumberStepperHandle,
+  SpindleCheckboxOptions,
+  SpindleCheckboxHandle,
+  SpindleSwitchOptions,
+  SpindleSwitchHandle,
+  SpindleSelectOption,
+  SpindleSelectOptionsBase,
+  SpindleSelectOptions,
+  SpindleSelectHandle,
+  SpindleMultiSelectOptions,
+  SpindleMultiSelectHandle,
+  SpindleModelComboboxOptions,
+  SpindleModelComboboxHandle,
+  SpindleFolderDropdownOptions,
+  SpindleFolderDropdownHandle,
+  SpindleBadgeColor,
+  SpindleBadgeOptions,
+  SpindleBadgeHandle,
+  SpindleSpinnerOptions,
+  SpindleSpinnerHandle,
+  SpindleCollapsibleSectionOptions,
+  SpindleCollapsibleSectionHandle,
+  SpindlePaginationOptions,
+  SpindlePaginationHandle,
+  SpindleCloseButtonOptions,
+  SpindleCloseButtonHandle,
+  SpindleComponentsHelper,
+} from "./components";
+
 export type { ExtensionInfo } from "./extension-info";
 
 export type {
