@@ -232,6 +232,7 @@ export type {
   SpindleSwitchOptions,
   SpindleSwitchHandle,
   SpindleSelectOption,
+  SpindleSelectOptionLeading,
   SpindleSelectOptionsBase,
   SpindleSelectOptions,
   SpindleSelectHandle,

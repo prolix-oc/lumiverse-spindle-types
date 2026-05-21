@@ -206,6 +206,71 @@ export interface SpindleSwitchHandle extends SpindleMountedComponent<SpindleSwit
 // Pickers & selects
 // ──────────────────────────────────────────────────────────────────────────
 
+/**
+ * Declarative leading-cell content for a select option (avatar, icon, swatch, initial).
+ *
+ * Rendered by the host in the fixed leading slot of both the dropdown row and
+ * the selected-value trigger. Extensions describe what they want declaratively
+ * — they do not pass React nodes themselves.
+ *
+ * Common patterns:
+ * - Persona/character avatars with initial fallback: pick `{ type: "image", src, fallback }`.
+ *   The host shows the image when it loads successfully; if `src` is empty or
+ *   the image fails to load, the host falls back to the supplied initial.
+ * - Provider icons / brand marks: `{ type: "icon-svg" }` or `{ type: "icon-url" }`.
+ * - Color tags / category swatches: `{ type: "swatch", color }`.
+ * - Plain text bubble (initials, single emoji): `{ type: "initial", text }`.
+ */
+export type SpindleSelectOptionLeading =
+  | {
+      type: "image";
+      /** Image URL. Anything `<img src>` accepts, including data URLs. */
+      src: string;
+      /** Alt text for accessibility. Defaults to empty (decorative). */
+      alt?: string;
+      /** Render the image as a circle. Default: `true`. Useful for avatars. */
+      rounded?: boolean;
+      /**
+       * Fallback rendered when `src` is empty or fails to load. Typically a
+       * one-character initial. If omitted, the slot collapses on failure.
+       */
+      fallback?: {
+        /** Fallback text — usually a single character / initial. */
+        text: string;
+        /** Optional background color for the fallback bubble. */
+        background?: string;
+        /** Optional text color for the fallback bubble. */
+        color?: string;
+      };
+    }
+  | {
+      type: "icon-svg";
+      /** Inline SVG string. The host sanitizes and inlines the SVG. */
+      svg: string;
+      /** Optional foreground color applied via `currentColor`. */
+      color?: string;
+    }
+  | {
+      type: "icon-url";
+      /** URL to an icon image (PNG / SVG / WebP). */
+      url: string;
+      alt?: string;
+    }
+  | {
+      type: "swatch";
+      /** Any CSS color string. Rendered as a small filled circle. */
+      color: string;
+    }
+  | {
+      type: "initial";
+      /** Text shown inside the leading bubble — typically one character. */
+      text: string;
+      /** Background color for the bubble. */
+      background?: string;
+      /** Text color inside the bubble. */
+      color?: string;
+    };
+
 /** A single option in a select-style picker. */
 export interface SpindleSelectOption {
   /** Stable value emitted to `onChange`. */
@@ -214,6 +279,13 @@ export interface SpindleSelectOption {
   label: string;
   /** Secondary text rendered beneath the label. */
   sublabel?: string;
+  /**
+   * Optional leading-cell content rendered before the label in both the
+   * dropdown row and the selected-value trigger. See {@link SpindleSelectOptionLeading}
+   * for the supported variants (avatar image with initial fallback, inline
+   * SVG icon, icon URL, color swatch, plain initial bubble).
+   */
+  leading?: SpindleSelectOptionLeading;
   /** Group key. Options sharing a group are visually clustered with a header. */
   group?: string;
   /** Render as disabled. */
@@ -229,8 +301,29 @@ export interface SpindleSelectOptionsBase {
   searchPlaceholder?: string;
   /** Minimum option count before the search field is shown. Default: `8`. */
   searchThreshold?: number;
-  /** Message rendered when the filtered option list is empty. */
+  /**
+   * Message rendered when the option list itself is empty (i.e. no options
+   * were supplied). For "no matches against the current search" use
+   * {@link noResultsMessage} instead.
+   */
   emptyMessage?: string;
+  /** Message rendered when the search query has no matching options. */
+  noResultsMessage?: string;
+  /**
+   * Force a specific trigger label, ignoring whichever option is currently
+   * selected. Useful for "+ Add", "Filter…" style triggers.
+   */
+  triggerLabel?: string;
+  /**
+   * Custom trigger icon. Replaces the default chevron. Accepts the same
+   * declarative shape as option leading cells — typically `{ type: "icon-svg" }`
+   * for a brand mark or chevron alternative.
+   */
+  triggerIcon?: SpindleSelectOptionLeading;
+  /** Accessible label for the trigger button. Surfaces as `aria-label`. */
+  ariaLabel?: string;
+  /** Additional CSS class merged onto the trigger button. */
+  triggerClassName?: string;
   /**
    * Render the dropdown into a React portal anchored to `document.body` so it
    * escapes containers with `overflow:hidden`. Default: `true`.
@@ -250,6 +343,13 @@ export interface SpindleSelectOptions extends SpindleSelectOptionsBase {
   /** Initial value. */
   value?: string;
   onChange?: (value: string) => void;
+  /**
+   * Show a "None" / clear option pinned to the top of the dropdown. Selecting
+   * it emits `onChange("")`. Single-select only.
+   */
+  clearable?: boolean;
+  /** Label shown for the clear option. Default: `"None"`. */
+  clearLabel?: string;
 }
 
 export interface SpindleSelectHandle extends SpindleMountedComponent<SpindleSelectOptions> {
