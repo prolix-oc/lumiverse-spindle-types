@@ -169,6 +169,67 @@ export interface SpindleNumberStepperHandle extends SpindleMountedComponent<Spin
   getValue(): number | null;
 }
 
+/**
+ * Declarative formatting for the value displayed in a range slider's header.
+ *
+ * Composed as `prefix + formatted-number + suffix`. The number portion respects
+ * `decimals` if provided; otherwise it follows the slider's `step` (integer
+ * sliders show whole numbers; floats show as many decimals as `step` implies).
+ *
+ * For more complex formatting (e.g. localized strings, range-dependent units),
+ * omit the `label` field and render your own header outside the slider while
+ * using {@link SpindleRangeSliderOptions.onDragValue} to track the live value.
+ */
+export interface SpindleRangeSliderFormat {
+  /** Number of decimal places to show. Defaults to whatever `step` implies. */
+  decimals?: number;
+  /** String appended after the value (e.g. `"%"`, `"ms"`, `" tokens"`). */
+  suffix?: string;
+  /** String prepended before the value. */
+  prefix?: string;
+}
+
+export interface SpindleRangeSliderOptions {
+  /** Inclusive lower bound. */
+  min: number;
+  /** Inclusive upper bound. */
+  max: number;
+  /** Initial committed value. Defaults to `min` if omitted. */
+  value?: number;
+  /** Snap increment. Default: `1`. */
+  step?: number;
+  /** Round to integers regardless of `step` formatting. Default: `false`. */
+  integer?: boolean;
+  /**
+   * Fired once when a drag ends with a new value (mouse release, touch lift,
+   * or tap-to-jump). Not fired during the drag itself — that's `onDragValue`.
+   */
+  onCommit?: (value: number) => void;
+  /**
+   * Fired with the live value during a gesture, and with `null` if the gesture
+   * ends without committing (e.g. cancelled touch). Use this to mirror the
+   * value into a sibling label or for previews; the host already updates the
+   * built-in header in real time when {@link label} is provided.
+   */
+  onDragValue?: (value: number | null) => void;
+  /** Optional header label rendered above the track. */
+  label?: string;
+  /** Optional helper text rendered below the header. */
+  hint?: string;
+  /**
+   * Declarative formatting for the displayed value when {@link label} is
+   * provided. Ignored if no `label` is set.
+   */
+  format?: SpindleRangeSliderFormat;
+  disabled?: boolean;
+  className?: string;
+}
+
+export interface SpindleRangeSliderHandle extends SpindleMountedComponent<SpindleRangeSliderOptions> {
+  /** Read the current committed value. */
+  getValue(): number;
+}
+
 // ──────────────────────────────────────────────────────────────────────────
 // Boolean inputs
 // ──────────────────────────────────────────────────────────────────────────
@@ -576,6 +637,7 @@ export interface SpindleComponentsHelper {
   // Numeric inputs
   mountNumericInput(target: SpindleComponentTarget, options?: SpindleNumericInputOptions): SpindleNumericInputHandle;
   mountNumberStepper(target: SpindleComponentTarget, options?: SpindleNumberStepperOptions): SpindleNumberStepperHandle;
+  mountRangeSlider(target: SpindleComponentTarget, options: SpindleRangeSliderOptions): SpindleRangeSliderHandle;
 
   // Boolean inputs
   mountCheckbox(target: SpindleComponentTarget, options?: SpindleCheckboxOptions): SpindleCheckboxHandle;
