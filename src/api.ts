@@ -638,6 +638,13 @@ export interface ChatChangedPayloadDTO {
 
 // ─── User Preset DTOs ───────────────────────────────────────────────────
 
+/** Option entry for `select` and `multiselect` prompt variables. */
+export interface PromptVariableOptionDTO {
+  id: string;
+  label: string;
+  value: string;
+}
+
 export type PromptVariableDefDTO =
   | {
       id: string;
@@ -677,9 +684,41 @@ export type PromptVariableDefDTO =
       max: number;
       step?: number;
       description?: string;
+    }
+  | {
+      id: string;
+      name: string;
+      label: string;
+      type: "select";
+      /** Stored selection: an option id. */
+      defaultValue: string;
+      options: PromptVariableOptionDTO[];
+      description?: string;
+    }
+  | {
+      id: string;
+      name: string;
+      label: string;
+      type: "switch";
+      /** 0 (off) or 1 (on). */
+      defaultValue: 0 | 1;
+      description?: string;
+    }
+  | {
+      id: string;
+      name: string;
+      label: string;
+      type: "multiselect";
+      /** Stored selection: array of option ids. */
+      defaultValue: string[];
+      options: PromptVariableOptionDTO[];
+      /** String inserted between joined option values. Defaults to two newlines. */
+      separator?: string;
+      description?: string;
     };
 
-export type PromptVariableValueDTO = string | number;
+export type PromptVariableTypeDTO = PromptVariableDefDTO["type"];
+export type PromptVariableValueDTO = string | number | string[];
 export type PromptVariableValuesDTO = Record<string, Record<string, PromptVariableValueDTO>>;
 export type PromptBlockRoleDTO = "system" | "user" | "assistant" | "user_append" | "assistant_append";
 export type PromptBlockPositionDTO = "pre_history" | "post_history" | "in_history";
