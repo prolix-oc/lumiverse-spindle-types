@@ -1616,9 +1616,9 @@ export interface SpindleAPI {
     /** Close the drawer if it is currently open. */
     closeDrawer(options?: { userId?: string }): Promise<void>;
     /**
-     * Open the settings modal. Pass a settings tab id (e.g. `"connections"`,
-     * `"display"`) to land on a specific view; omit to open the user's last
-     * settings view.
+     * Open the settings modal and switch to the specified tab in one step.
+     * Pass a settings tab id (e.g. `"connections"`, `"display"`) to land on
+     * that view. Omit to fall back to `"display"`.
      */
     openSettings(viewId?: string, options?: { userId?: string }): Promise<void>;
     /** Close the settings modal if it is currently open. */
