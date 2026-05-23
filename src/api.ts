@@ -248,6 +248,25 @@ export interface GenerationRequestDTO {
   /** Optional tool/function definitions for inline function calling (raw/quiet only). */
   tools?: ToolSchemaDTO[];
   /**
+   * Optional per-request override of the user's reasoning ("extended thinking")
+   * settings. When omitted (or `{ source: "inherit" }`) the backend resolves
+   * the effective settings the same way a normal chat generation does:
+   * the resolved connection's `reasoning_bindings` win, falling back to the
+   * user's global `reasoningSettings`.
+   *
+   * Use this to bypass that resolution for a single request — e.g. to force
+   * `"off"` for a quick, cheap call, or to dial the effort up/down with
+   * `source: "custom"`. The backend translates the high-level intent into
+   * the provider-specific knobs (`thinking`, `thinkingConfig`,
+   * `reasoning_effort`, `reasoning.effort`, etc.) so the extension doesn't
+   * need to know the per-provider quirks.
+   *
+   * Raw values supplied in `parameters` still take precedence at the field
+   * level — this override only fills in what hasn't already been set,
+   * except `source: "off"` which unconditionally strips reasoning fields.
+   */
+  reasoning?: GenerationReasoningOverrideDTO;
+  /**
    * For operator-scoped extensions: the user ID whose connection profiles
    * and generation context should be used. For user-scoped extensions this
    * is inferred from the extension owner and can be omitted.
@@ -349,6 +368,112 @@ export interface RequestInitDTO {
 }
 
 /**
+ * Reasoning effort tier. Provider mapping:
+ * - Anthropic adaptive (Claude 4.6+): `low | medium | high | max` (+ `xhigh` on Opus 4.7) → `output_config.effort`.
+ * - Anthropic legacy: mapped to `thinking.budget_tokens` (low=2048, medium=8192, high=16384, max=32768).
+ * - Google (Gemini / Vertex): `minimal | low | medium | high` → `thinkingConfig.thinkingLevel`.
+ * - DeepSeek: `low | medium | high` → `"high"`, `max | xhigh` → `"max"` (`reasoning_effort`).
+ * - OpenRouter: `none | minimal | low | medium | high | xhigh` → `reasoning.effort`.
+ * - NanoGPT: `none | minimal | low | medium | high` → `reasoning.effort`.
+ * - Moonshot / Z.AI: toggle-only — effort ignored, just enables `thinking`.
+ * - Generic OpenAI-compatible: passed verbatim as `reasoning.effort`.
+ *
+ * `"auto"` defers to the user's preset/global setting or the provider's
+ * model-specific default and is the safest value to use when you don't
+ * have a specific tier in mind.
+ */
+export type ReasoningEffortDTO =
+  | "auto"
+  | "none"
+  | "minimal"
+  | "low"
+  | "medium"
+  | "high"
+  | "max"
+  | "xhigh";
+
+/**
+ * Anthropic-only display mode for thinking blocks. Maps to `thinking.display`
+ * in the Messages API. `"auto"` omits the field so Anthropic applies its
+ * model-specific default (`"omitted"` on Opus 4.7 / Mythos Preview,
+ * `"summarized"` elsewhere). Ignored by every other provider.
+ */
+export type ThinkingDisplayDTO = "auto" | "summarized" | "omitted";
+
+/**
+ * Full reasoning settings snapshot. Mirrors the user-level setting that
+ * Lumiverse stores under `reasoningSettings`. Surfaced on
+ * `ConnectionProfileDTO.reasoning_bindings.settings` when a connection has
+ * a binding attached.
+ *
+ * Only `apiReasoning` / `reasoningEffort` / `thinkingDisplay` influence the
+ * outgoing provider request — the remaining fields drive delimited-reasoning
+ * parsing (`prefix`, `suffix`, `autoParse`) and chat-history pruning
+ * (`keepInHistory`) and are included for inspection / round-tripping.
+ */
+export interface ReasoningSettingsDTO {
+  /** Master switch: whether the provider should produce thinking output. */
+  apiReasoning: boolean;
+  /** Effort tier — see {@link ReasoningEffortDTO}. */
+  reasoningEffort: ReasoningEffortDTO;
+  /** Anthropic-only. */
+  thinkingDisplay: ThinkingDisplayDTO;
+  /** Opening delimiter used by the delimited-reasoning parser (e.g. `"<think>\n"`). */
+  prefix: string;
+  /** Closing delimiter used by the delimited-reasoning parser (e.g. `"\n</think>"`). */
+  suffix: string;
+  /** Whether to auto-parse delimited reasoning out of the assistant content stream. */
+  autoParse: boolean;
+  /**
+   * How many recent reasoning blocks to retain in assembled prompt history.
+   * `0` strips all, `-1` keeps everything, `N` keeps the last N.
+   */
+  keepInHistory: number;
+}
+
+/**
+ * Reasoning settings bound to a specific connection profile. When present,
+ * these override the user's global `reasoningSettings` during normal chat
+ * generation on this connection.
+ */
+export interface ConnectionReasoningBindingsDTO {
+  /** Reasoning settings snapshot captured at bind time. */
+  settings: ReasoningSettingsDTO;
+  /**
+   * Optional "Start Reply With" assistant prefill captured alongside the
+   * reasoning snapshot. When present, overrides the user's global
+   * `promptBias` setting for this connection.
+   */
+  promptBias?: string;
+}
+
+/**
+ * Per-request reasoning override for `spindle.generate.*` calls. Use the
+ * `source` discriminator to pick how the backend resolves the effective
+ * reasoning settings:
+ *
+ *  - `"inherit"` (default if `source` is omitted): apply the connection's
+ *    `reasoning_bindings` if any, else the user's global setting. Same as
+ *    leaving the `reasoning` field off entirely. Useful when you want to
+ *    document intent without changing behaviour.
+ *  - `"off"`: short-circuit. The provider's no-reasoning off-switch is
+ *    applied unconditionally — even if `parameters` already carry an
+ *    explicit `thinking` / `reasoning` block from the caller.
+ *  - `"custom"`: use the explicit `apiReasoning` / `effort` / `thinkingDisplay`
+ *    fields below for this request only. Omitted fields use their defaults
+ *    (`apiReasoning: true`, `effort: "auto"`, `thinkingDisplay: "auto"`).
+ *    Raw values supplied via `parameters` still win at the field level —
+ *    the override only fills in unset fields, exactly like the inherited
+ *    settings would.
+ */
+export interface GenerationReasoningOverrideDTO {
+  source?: "inherit" | "off" | "custom";
+  apiReasoning?: boolean;
+  effort?: ReasoningEffortDTO;
+  thinkingDisplay?: ThinkingDisplayDTO;
+}
+
+/**
  * Safe representation of a user's connection profile exposed to extensions.
  * Never contains the actual API key — only `has_api_key` boolean.
  */
@@ -361,7 +486,20 @@ export interface ConnectionProfileDTO {
   preset_id: string | null;
   is_default: boolean;
   has_api_key: boolean;
+  /**
+   * Raw provider-specific metadata bag stored on the connection. Includes
+   * provider-quirk flags (Anthropic prompt caching, Google thinking budget
+   * config, etc.) and the original `reasoningBindings` blob — `reasoning_bindings`
+   * below is the parsed, typed view of that same blob.
+   */
   metadata: Record<string, unknown>;
+  /**
+   * Typed view of the connection's bound reasoning settings, parsed from
+   * `metadata.reasoningBindings`. `null` when the connection has no binding
+   * (in which case generation falls back to the user's global
+   * `reasoningSettings`).
+   */
+  reasoning_bindings: ConnectionReasoningBindingsDTO | null;
   created_at: number;
   updated_at: number;
 }

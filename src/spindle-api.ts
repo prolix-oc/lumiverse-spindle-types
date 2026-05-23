@@ -301,6 +301,21 @@ export interface SpindleAPI {
    * `fetch()` uses, so it composes with `AbortSignal.timeout()` and
    * `AbortSignal.any([...])`.
    *
+   * ## Reasoning / extended thinking
+   *
+   * By default every generation inherits the resolved user's reasoning
+   * settings — the connection's `reasoning_bindings` if any, else the
+   * user-global `reasoningSettings`. The host translates that into the
+   * correct provider-specific knob (`thinking.budget_tokens`,
+   * `thinkingConfig.thinkingLevel`, `reasoning.effort`, `reasoning_effort`,
+   * etc.) so extensions don't have to.
+   *
+   * Use `input.reasoning` to override that resolution per-request:
+   *  - `{ source: "off" }` — disable thinking for one cheap call.
+   *  - `{ source: "custom", effort: "high" }` — dial effort up just for this call.
+   *
+   * See {@link GenerationReasoningOverrideDTO} for the full shape.
+   *
    * @example
    * ```ts
    * const controller = new AbortController()
@@ -616,6 +631,25 @@ export interface SpindleAPI {
   /**
    * Connection profile access (permission: "generation").
    * Returns safe representations — API keys are never exposed.
+   *
+   * The returned DTO carries a typed `reasoning_bindings` view of the
+   * connection's bound reasoning settings (parsed from `metadata.reasoningBindings`).
+   * Pair this with `GenerationRequestDTO.reasoning` to inspect what the
+   * connection is configured for and optionally override it per-request:
+   *
+   * @example
+   * ```ts
+   * const conn = await spindle.connections.get(connId);
+   * const bound = conn?.reasoning_bindings?.settings;
+   * if (bound?.apiReasoning) {
+   *   await spindle.generate.raw({
+   *     messages,
+   *     connection_id: connId,
+   *     // Force the bound effort one tier higher, just for this request.
+   *     reasoning: { source: "custom", apiReasoning: true, effort: "max" },
+   *   });
+   * }
+   * ```
    */
   connections: {
     /**
