@@ -1637,6 +1637,50 @@ export interface SpindleCommandContextDTO {
   isGroupChat?: boolean;
 }
 
+// ─── UI Automation DTOs ─────────────────────────────────────────────────
+
+/**
+ * Read-only snapshot of a drawer tab discoverable via
+ * {@link SpindleAPI.ui.getDrawerTabs}. Mirrors the metadata used by the
+ * built-in Command Palette to render the "Panels" group.
+ */
+export interface SpindleUIDrawerTabDTO {
+  /** Stable id used by `openDrawerTab(id)`. */
+  id: string;
+  /** Short label shown beneath the sidebar icon (max ~8 characters). */
+  shortName: string;
+  /** Full title shown in menus and the command palette. */
+  tabName: string;
+  /** One-line description shown in the command palette. */
+  tabDescription: string;
+  /** Keywords used for command-palette fuzzy search. */
+  keywords: string[];
+  /** Whether the tab is built into Lumiverse or contributed by another extension. */
+  source: "builtin" | "extension";
+  /** For extension-contributed tabs, the owning extension's identifier. */
+  extensionId?: string;
+}
+
+/**
+ * Read-only snapshot of a settings tab discoverable via
+ * {@link SpindleAPI.ui.getSettingsTabs}. Restricted entries (`role` set) are
+ * filtered out when the call resolves to a user that lacks the required role.
+ */
+export interface SpindleUISettingsTabDTO {
+  /** Stable id used by `openSettings(id)`. */
+  id: string;
+  /** Short label shown in the settings sidebar. */
+  shortName: string;
+  /** Full title shown in the settings header / command palette. */
+  tabName: string;
+  /** One-line description shown in the command palette. */
+  tabDescription: string;
+  /** Keywords used for command-palette fuzzy search. */
+  keywords: string[];
+  /** Set when the tab is only visible to certain roles. */
+  role?: "admin" | "owner";
+}
+
 // ─── Frontend Process Lifecycle DTOs ────────────────────────────────────
 
 /** High-level lifecycle state for a frontend process tracked by the backend host. */
@@ -2590,7 +2634,24 @@ export type WorkerToHost =
       scrape?: boolean;
       userId?: string;
     }
-  | { type: "web_search_get_settings"; requestId: string; userId?: string };
+  | { type: "web_search_get_settings"; requestId: string; userId?: string }
+  // ─── UI Automation (free tier) ────────────────────────────────────────
+  | { type: "ui_get_drawer_tabs"; requestId: string; userId?: string }
+  | { type: "ui_get_settings_tabs"; requestId: string; userId?: string }
+  | {
+      type: "ui_navigate";
+      requestId: string;
+      action:
+        | "open_drawer_tab"
+        | "close_drawer"
+        | "open_settings"
+        | "close_settings"
+        | "open_command_palette"
+        | "close_command_palette";
+      tabId?: string;
+      viewId?: string;
+      userId?: string;
+    };
 
 // ─── Host → Worker messages ──────────────────────────────────────────────
 

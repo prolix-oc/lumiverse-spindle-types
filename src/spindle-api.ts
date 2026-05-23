@@ -72,6 +72,8 @@ import type {
   SpindleModalItemDTO,
   SpindleCommandDTO,
   SpindleCommandContextDTO,
+  SpindleUIDrawerTabDTO,
+  SpindleUISettingsTabDTO,
   FrontendProcessSpawnOptionsDTO,
   FrontendProcessListOptionsDTO,
   FrontendProcessInfoDTO,
@@ -1520,6 +1522,77 @@ export interface SpindleAPI {
      * For operator-scoped extensions, pass userId explicitly.
      */
     getRole(userId?: string): Promise<SpindleUserRoleDTO>;
+  };
+
+  /**
+   * UI automation (free tier — no permission needed).
+   *
+   * Enumerate the built-in drawer / settings tabs and trigger navigation
+   * on the user's frontend. Same primitives the Command Palette uses, but
+   * exposed to extensions so agents and automations can guide the user to
+   * the right surface — for example, an onboarding flow that opens the
+   * Connections drawer, or a "fix it" prompt that jumps to the relevant
+   * settings tab.
+   *
+   * Listings include both built-in tabs (mirrored on the backend) and
+   * extension-contributed drawer tabs the user's frontend has registered.
+   * Navigation calls accept any tab id the frontend recognises — including
+   * extension-added ids — so an extension can deep-link into another
+   * extension's tab if it knows the id.
+   *
+   * @example
+   * ```ts
+   * // Enumerate every drawer tab the user can see and surface our own
+   * // command-palette-style picker.
+   * const tabs = await spindle.ui.getDrawerTabs({ userId })
+   * await spindle.modal.open({
+   *   title: "Jump to…",
+   *   items: tabs.map((t) => ({ type: "key_value", label: t.tabName, value: t.tabDescription })),
+   * })
+   *
+   * // Take the user straight to the Connections drawer.
+   * await spindle.ui.openDrawerTab("connections", { userId })
+   * ```
+   */
+  ui: {
+    /**
+     * Read the discoverable drawer tabs (built-in + extension-contributed)
+     * visible to the resolved user. Extension tabs are only included once
+     * the user's frontend has synced its registry over the WebSocket;
+     * during connection bootstrap the list may be limited to built-ins.
+     *
+     * For user-scoped extensions, `userId` defaults to the installer.
+     * Operator-scoped extensions should pass `userId` to scope the call.
+     */
+    getDrawerTabs(options?: { userId?: string }): Promise<SpindleUIDrawerTabDTO[]>;
+    /**
+     * Read the discoverable settings tabs visible to the resolved user.
+     * Restricted tabs (e.g. `role: "owner"`) are filtered out for users
+     * lacking the required role. When `userId` is omitted on operator-scoped
+     * extensions, role gating is skipped and every tab is returned.
+     */
+    getSettingsTabs(options?: { userId?: string }): Promise<SpindleUISettingsTabDTO[]>;
+    /**
+     * Open the drawer to a specific tab. The id is forwarded verbatim, so
+     * extension-contributed tabs are addressable too. The call resolves
+     * once the host has dispatched the navigation event — the frontend
+     * applies it asynchronously.
+     */
+    openDrawerTab(tabId: string, options?: { userId?: string }): Promise<void>;
+    /** Close the drawer if it is currently open. */
+    closeDrawer(options?: { userId?: string }): Promise<void>;
+    /**
+     * Open the settings modal. Pass a settings tab id (e.g. `"connections"`,
+     * `"display"`) to land on a specific view; omit to open the user's last
+     * settings view.
+     */
+    openSettings(viewId?: string, options?: { userId?: string }): Promise<void>;
+    /** Close the settings modal if it is currently open. */
+    closeSettings(options?: { userId?: string }): Promise<void>;
+    /** Open the command palette overlay. */
+    openCommandPalette(options?: { userId?: string }): Promise<void>;
+    /** Close the command palette overlay if it is currently open. */
+    closeCommandPalette(options?: { userId?: string }): Promise<void>;
   };
 
   /** Show toast notifications in the frontend UI (free tier — no permission needed) */
