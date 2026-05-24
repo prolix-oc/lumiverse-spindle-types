@@ -1,6 +1,14 @@
 import type { RequestInitDTO } from "./api";
 import type { SpindleComponentsHelper } from "./components";
 
+/** A chat-message DOM element paired with its stable message id. */
+export interface SpindleMessageElement {
+  /** Stable message id (matches the message's id in the host's data store). */
+  messageId: string;
+  /** Currently-mounted bubble root element for that message. */
+  element: Element;
+}
+
 /** DOM helper API provided to frontend extension modules. */
 export interface SpindleDOMHelper {
   /** Inject sanitized HTML into the host document at the given target. */
@@ -23,6 +31,50 @@ export interface SpindleDOMHelper {
 
   /** Query all matches inside the extension-owned host DOM. */
   queryAll(selector: string): Element[];
+
+  /**
+   * Resolve the chat message that contains the given DOM element. Walks
+   * up the DOM tree from `target` looking for the host's message-bubble
+   * anchor and returns the stable message id of the containing message,
+   * or `null` when `target` isn't inside any chat message (e.g. it's in
+   * the sidebar, a modal, or a floating widget).
+   *
+   * Prefer this over reading host-private DOM attributes directly — the
+   * underlying attribute name is an implementation detail of the host
+   * and may change; this method is the stable public contract.
+   *
+   * Typical use: an extension injects content into a message bubble and
+   * needs the stable id to persist per-message state, key event
+   * handlers on the message id, or call `ctx.messages.renderWidget()`
+   * with the right id.
+   */
+  getMessageId(target: Element): string | null;
+
+  /**
+   * Find the chat-message bubble element currently mounted in the DOM
+   * for the given stable message id. Returns `null` when the message
+   * isn't currently rendered — the chat message list is virtualized, so
+   * only bubbles near the viewport (plus a small overscan window) have
+   * DOM at any moment.
+   *
+   * Typical use: extension wants to attach content to a specific known
+   * message id. If `null` comes back, the bubble isn't currently
+   * mounted. Injections previously made via `dom.inject()` against a
+   * bubble element are auto-replayed by the host when that bubble next
+   * mounts, so extensions don't need to re-inject on scroll themselves.
+   */
+  findMessageElement(messageId: string): Element | null;
+
+  /**
+   * Enumerate every chat message bubble currently mounted in the DOM,
+   * paired with its stable message id. The returned list reflects only
+   * what the virtualizer has rendered (typically the viewport plus a
+   * small overscan window), so it changes as the user scrolls.
+   *
+   * Typical use: extension sweeps every visible message on setup or in
+   * response to a chat-changed event to apply per-message decoration.
+   */
+  listMessageElements(): SpindleMessageElement[];
 
   /** Remove all DOM created by the extension helper. */
   cleanup(): void;
