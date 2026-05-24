@@ -704,6 +704,38 @@ export interface SpindleFrontendContext {
     ): () => void;
     /** Remove a previously rendered message widget. */
     removeWidget(messageId: string, widgetId: string): void;
+    /**
+     * Get the latest (most recent) message id in the active chat, or
+     * `null` if the chat is empty / no chat is active. Reflects the
+     * full chat history — works even when the latest bubble is
+     * currently scrolled off-screen (the chat list is virtualized, so
+     * the DOM might not contain the bubble even though the message
+     * exists logically).
+     *
+     * Typical use: extensions that decorate or react to the most recent
+     * message (trackers, summarizers, "show last response details"
+     * widgets) call this on setup + on each new-message event to find
+     * the id they should target, then pair with `dom.findMessageElement`
+     * or `dom.inject()` to attach DOM content. Injections registered
+     * via `dom.inject()` auto-replay when the bubble next mounts so the
+     * extension doesn't have to re-attach on scroll itself.
+     */
+    getLatestMessageId(): string | null;
+    /**
+     * Get the message id at the given chronological index in the
+     * active chat (0 = oldest, length-1 = newest). Negative indices
+     * count from the end Python-style: -1 = latest, -2 = second-
+     * latest. Returns `null` if the index is out of range or no chat
+     * is active.
+     */
+    getMessageIdAtIndex(index: number): string | null;
+    /**
+     * Enumerate every message id in the active chat in chronological
+     * order (oldest first, newest last). Reflects the full chat
+     * history, not just messages currently mounted in the DOM. See
+     * `dom.listMessageElements()` for the mounted-only DOM view.
+     */
+    listMessageIds(): string[];
   };
   characters: {
     /** Read a character through the host app's authenticated API. */
