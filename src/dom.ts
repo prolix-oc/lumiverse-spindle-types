@@ -11,8 +11,37 @@ export interface SpindleMessageElement {
 
 /** DOM helper API provided to frontend extension modules. */
 export interface SpindleDOMHelper {
-  /** Inject sanitized HTML into the host document at the given target. */
+  /**
+   * Inject sanitized HTML into the host document at the given target and
+   * return the wrapper element containing the parsed content.
+   *
+   * **Element identity is preserved across chat-list virtualization.**
+   * When the injection lands inside a chat-message bubble, the host
+   * registers the wrapper and *moves* (not recreates) it back into place
+   * when the bubble next mounts. That means form-control state, event
+   * listeners bound to the wrapper subtree, and any refs the extension is
+   * holding all survive scroll-away/scroll-back cycles. Extensions can
+   * cache the returned Element and trust it indefinitely until they
+   * explicitly retire it via `uninject()` or `cleanup()`.
+   *
+   * To deliberately remove an injection, call `uninject(wrapper)` — NOT
+   * `wrapper.remove()`. The latter detaches the wrapper but leaves the
+   * registry record in place, so the host will resurrect the wrapper on
+   * the next bubble remount.
+   *
+   * Injections outside any chat-message bubble (sidebar, modals, toolbar)
+   * are unaffected by virtualization and don't go through replay — they
+   * stay attached wherever the extension put them.
+   */
   inject(target: string | Element, html: string, position?: InsertPosition): Element;
+
+  /**
+   * Retire an injection previously returned by `inject()`. Removes the
+   * wrapper from the DOM and drops its replay registration so the host
+   * won't restore it on future bubble remounts. No-op if the element
+   * isn't a recognised Spindle injection wrapper.
+   */
+  uninject(element: Element): void;
 
   /** Create a style element in the host document. Returns a removal function. */
   addStyle(css: string): () => void;
@@ -60,8 +89,10 @@ export interface SpindleDOMHelper {
    * Typical use: extension wants to attach content to a specific known
    * message id. If `null` comes back, the bubble isn't currently
    * mounted. Injections previously made via `dom.inject()` against a
-   * bubble element are auto-replayed by the host when that bubble next
-   * mounts, so extensions don't need to re-inject on scroll themselves.
+   * bubble element are auto-replayed by the host (with the original
+   * Element identity preserved — see `inject()` for the full contract)
+   * when that bubble next mounts, so extensions don't need to re-inject
+   * on scroll themselves.
    */
   findMessageElement(messageId: string): Element | null;
 
