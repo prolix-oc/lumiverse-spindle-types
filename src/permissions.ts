@@ -22,6 +22,8 @@
  * - "web_search"           — execute searches via the user's configured web search
  *                            provider (e.g. SearXNG) and read the safe view of their
  *                            web search settings (never the API key).
+ * - "unsafe_eval"          — opt a sandboxed widget frame into CSP 'unsafe-eval'
+ *                            (eval / new Function) for runtime-compiling frameworks.
  */
 export type SpindlePermission =
   | "generation"
@@ -48,7 +50,8 @@ export type SpindlePermission =
   | "images"
   | "generation_parameters"
   | "macro_interceptor"
-  | "web_search";
+  | "web_search"
+  | "unsafe_eval";
 
 export const ALL_PERMISSIONS: readonly SpindlePermission[] = [
   "generation",
@@ -76,6 +79,7 @@ export const ALL_PERMISSIONS: readonly SpindlePermission[] = [
   "generation_parameters",
   "macro_interceptor",
   "web_search",
+  "unsafe_eval",
 ] as const;
 
 export function isValidPermission(p: string): p is SpindlePermission {

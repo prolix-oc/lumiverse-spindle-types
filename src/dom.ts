@@ -259,6 +259,14 @@ export interface SpindleSandboxFrameOptions {
   minHeight?: number;
   /** Maximum host iframe height in CSS pixels. Default: `4000`. */
   maxHeight?: number;
+  /**
+   * Opt this frame into CSP 'unsafe-eval' so the iframe can use eval / new
+   * Function (e.g. frameworks that compile templates at runtime). Requires the
+   * extension to hold the privileged `unsafe_eval` permission, otherwise the
+   * host ignores this and the frame's CSP stays default (unsafe-inline only).
+   * Default: false.
+   */
+  allowEval?: boolean;
 }
 
 export interface SpindleSandboxFrameHandle {
