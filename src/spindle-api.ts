@@ -578,6 +578,11 @@ export interface SpindleAPI {
      * that have never had the flag set. Requires the `chat_mutation` permission.
      */
     isMessageHidden(chatId: string, messageId: string): Promise<boolean>;
+    /**
+     * Set a chat's CSS containment mode. `'extension-relaxed'` lets card-authored
+     * `position: fixed` paint at viewport scope (requires `app_manipulation`).
+     */
+    setStyleMode(chatId: string, mode: "bounded" | "extension-relaxed", userId?: string): Promise<void>;
   };
 
   /** Extension-level telemetry */
