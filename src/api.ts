@@ -2406,6 +2406,13 @@ export type WorkerToHost =
       messageId: string;
     }
   | {
+      type: "chat_set_style_mode";
+      requestId: string;
+      chatId: string;
+      mode: "bounded" | "extension-relaxed";
+      userId?: string;
+    }
+  | {
       type: "events_track";
       requestId: string;
       eventName: string;
