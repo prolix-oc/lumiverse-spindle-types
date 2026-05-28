@@ -1356,8 +1356,19 @@ export interface MemoryStatsDTO {
   chunksAvailable: number;
   chunksPending: number;
   injectionMethod: "macro" | "fallback" | "disabled";
+  /**
+   * How the chunks were retrieved: a real vector/hybrid search ("vector") or
+   * the recency fallback ("recency", e.g. when the query embedding failed).
+   * Absent until the chat-memory cache has been populated.
+   */
+  retrievalMode?: "vector" | "recency" | "empty" | "disabled";
   retrievedChunks: Array<{
-    score: number;
+    /**
+     * Vector distance (lower = more similar). `null` for keyword-only or
+     * recency-fallback hits, which have no vector distance — do not treat a
+     * missing score as a perfect (zero-distance) match.
+     */
+    score: number | null;
     tokenEstimate: number;
     messageRange: [number, number];
     preview: string;
@@ -1395,7 +1406,12 @@ export interface DryRunResultDTO {
 
 export interface ChatMemoryChunkDTO {
   content: string;
-  score: number;
+  /**
+   * Vector distance (lower = more similar). `null` for keyword-only or
+   * recency-fallback hits, which have no vector distance — do not treat a
+   * missing score as a perfect (zero-distance) match.
+   */
+  score: number | null;
   metadata: Record<string, unknown>;
 }
 
@@ -1408,6 +1424,8 @@ export interface ChatMemoryResultDTO {
   settingsSource: "global" | "per_chat";
   chunksAvailable: number;
   chunksPending: number;
+  /** How chunks were retrieved (real vector search vs. recency fallback). */
+  retrievalMode?: "vector" | "recency" | "empty" | "disabled";
 }
 
 /**
