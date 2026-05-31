@@ -85,6 +85,7 @@ import type {
   BackendProcessLifecycleEventDTO,
   BackendProcessStopOptionsDTO,
   ChatChangedPayloadDTO,
+  ChatForkedPayloadDTO,
   ChatMessageDTO,
   GenerationStartedPayloadDTO,
   StreamTokenPayloadDTO,
@@ -220,6 +221,8 @@ export interface SpindleAPI {
   on(event: "GENERATION_STOPPED", handler: (payload: GenerationStoppedPayloadDTO, userId?: string) => void): () => void;
   /** Subscribe to `CHAT_CHANGED` events. `changedFields` lists the dot-paths that differed when emitted by the standard `updateChat` path; absent on emits from other sources. */
   on(event: "CHAT_CHANGED", handler: (payload: ChatChangedPayloadDTO, userId?: string) => void): () => void;
+  /** Subscribe to `CHAT_FORKED` events. Emitted when a chat is forked (branched) from a message into a new chat. The payload carries the source/forked chat ids, the full forked chat row, and the fork point. */
+  on(event: "CHAT_FORKED", handler: (payload: ChatForkedPayloadDTO, userId?: string) => void): () => void;
   /**
    * Subscribe to swipe lifecycle events. The payload's `action` discriminator
    * tells you whether a swipe was added, updated, deleted, or navigated, and

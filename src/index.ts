@@ -49,6 +49,7 @@ export type {
     ChatUpdateDTO,
     ChatSwitchedPayloadDTO,
     ChatChangedPayloadDTO,
+    ChatForkedPayloadDTO,
     PromptVariableOptionDTO,
     PromptVariableDefDTO,
     PromptVariableTypeDTO,

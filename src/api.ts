@@ -787,6 +787,26 @@ export interface ChatChangedPayloadDTO {
   changedFields?: string[];
 }
 
+/**
+ * Payload for `CHAT_FORKED` events. Emitted when a chat is forked (branched)
+ * from a specific message — the messages up to and including the fork point are
+ * copied into a brand-new chat that shares the source chat's character.
+ */
+export interface ChatForkedPayloadDTO {
+  /** Id of the source chat that was forked. */
+  sourceChatId: string;
+  /** Id of the newly created forked chat. Equal to `chat.id`. */
+  forkedChatId: string;
+  /** The new forked chat row, including its `metadata` (carries `branched_from` and `branch_at_message`). */
+  chat: { id: string; [key: string]: unknown };
+  /** The `branch_id` assigned to every message copied into the forked chat. */
+  branchId: string;
+  /** Id of the message in the source chat the fork was taken at. Messages up to and including this one were copied into the forked chat. */
+  forkedAtMessageId: string;
+  /** Zero-based index of the fork-point message within the source chat. */
+  forkedAtMessageIndex: number;
+}
+
 // ─── User Preset DTOs ───────────────────────────────────────────────────
 
 /** Option entry for `select` and `multiselect` prompt variables. */
