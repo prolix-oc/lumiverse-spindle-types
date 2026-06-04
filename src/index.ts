@@ -161,6 +161,7 @@ export type {
   MacroInterceptorEnvDTO,
   MacroInterceptorCtxDTO,
   MacroInterceptorResultDTO,
+  MacroInterceptorRichResultDTO,
   MessageContentProcessorOrigin,
   MessageContentProcessorCtxDTO,
   MessageContentProcessorResultDTO,
@@ -221,6 +222,14 @@ export type {
     SpindleUIEventsHelper,
     SpindleFrontendProcessContext,
     SpindleFrontendProcessRegistry,
+    SpindleDisplayResolver,
+    SpindleDisplayResolverRegistry,
+    SpindleDisplayContext,
+    SpindleDisplayBodyArgs,
+    SpindleDisplayTemplatesArgs,
+    SpindleDisplayScriptsArgs,
+    SpindleDisplayResolveResult,
+    SpindleDisplayTemplatesResult,
  } from "./dom";
 
 export type {

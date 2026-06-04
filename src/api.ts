@@ -160,11 +160,24 @@ export interface MacroInterceptorCtxDTO {
 }
 
 /**
+ * Lets an interceptor that resolves the template report its real cache 
+ * dependencies so the host's display-regex cache can store the result 
+ * and invalidate it precisely.
+ */
+export interface MacroInterceptorRichResultDTO {
+  text: string;
+  touchedVars?: readonly string[];
+  volatile?: boolean;
+}
+
+/**
  * Return value of a macro interceptor handler.
  *  - `string` replaces the template for subsequent interceptors + parsing.
+ *    (forces a non-cacheable resolution when it changes the template).
+ *  - {@link MacroInterceptorRichResultDTO}
  *  - `void` / `undefined` passes the template through unchanged.
  */
-export type MacroInterceptorResultDTO = string | void;
+export type MacroInterceptorResultDTO = string | MacroInterceptorRichResultDTO | void;
 
 // ─── Message Content Processor (permission: "chat_mutation") ───────────
 

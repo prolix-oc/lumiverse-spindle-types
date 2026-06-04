@@ -630,6 +630,71 @@ export interface SpindleFrontendProcessRegistry {
   ): () => void;
 }
 
+export interface SpindleDisplayContext {
+  chatId?: string;
+  characterId?: string;
+  personaId?: string;
+  isUser: boolean;
+  depth: number;
+  messageId?: string;
+  messageIndex?: number;
+  role?: string;
+  dynamicMacros?: Record<string, string>;
+}
+
+export interface SpindleDisplayResolveResult {
+  content: string;
+  touchedVars?: string[];
+  cacheable?: boolean;
+}
+
+export interface SpindleDisplayTemplatesResult {
+  resolved: Record<string, string>;
+  touchedVars?: Record<string, string[]>;
+  cacheable?: Record<string, boolean>;
+}
+
+export interface SpindleDisplayBodyArgs {
+  content: string;
+  context: SpindleDisplayContext;
+}
+
+export interface SpindleDisplayTemplatesArgs {
+  templates: Record<string, string>;
+  context: SpindleDisplayContext;
+}
+
+export interface SpindleDisplayScriptsArgs {
+  content: string;
+  scripts: unknown[];
+  context: SpindleDisplayContext;
+  resolvedFindPatterns?: Record<string, string>;
+  resolvedReplacements?: Record<string, string>;
+}
+
+/**
+ * A frontend display resolver lets an extension take over display-time content
+ * resolution in the browser instead of round-tripping to the host backend. The
+ * host consults the registered resolver while rendering messages and falls back
+ * to its own backend resolution whenever the resolver is absent, reports it is
+ * not ready for the chat, throws, or returns `null`.
+ */
+export interface SpindleDisplayResolver {
+  ready(chatId: string): boolean;
+  resolveBody(args: SpindleDisplayBodyArgs): Promise<SpindleDisplayResolveResult | null>;
+  resolveTemplates(args: SpindleDisplayTemplatesArgs): Promise<SpindleDisplayTemplatesResult | null>;
+  applyScripts(args: SpindleDisplayScriptsArgs): Promise<SpindleDisplayResolveResult | null>;
+}
+
+export interface SpindleDisplayResolverRegistry {
+  /** Register this extension's frontend display resolver. */
+  registerResolver(resolver: SpindleDisplayResolver): () => void;
+  /** Ask the host to invalidate cached display resolutions whose dependencies (a `<scope>:<name>` set) changed. */
+  invalidate(touchedVars: string[]): void;
+  /** Publish the set of character IDs whose display this extension owns. The host uses it to decide synchronously, at render time, whether a chat is owned by this resolver. */
+  setOwnedCharacters(characterIds: string[]): void;
+}
+
 /** Context object provided to frontend extension modules */
 export interface SpindleFrontendContext {
   dom: SpindleDOMHelper;
@@ -784,6 +849,8 @@ export interface SpindleFrontendContext {
     /** Update a message through the host app's authenticated API. */
     updateMessage(chatId: string, messageId: string, input: { content?: string }): Promise<unknown>;
   };
+  /** Take over display-time content resolution in the browser. */
+  display?: SpindleDisplayResolverRegistry;
   manifest: import("./manifest").SpindleManifest;
 }
 
