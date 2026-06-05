@@ -209,6 +209,19 @@ export type SpindleBackendProcessModule = {
   run?: (process: SpindleBackendProcessContext) => void | (() => void) | Promise<void | (() => void)>;
 };
 
+/**
+ * Lets an extension tell the host that it will apply `target:prompt` regex
+ * itself for a set of chats, so the host skips its own per-message prompt-regex
+ * pass for those chats.
+ */
+export interface SpindlePromptRegex {
+  /**
+   * Declare the chats this extension applies `target:prompt` regex for. Replaces
+   * the previously-declared set. Empty array clears ownership (host resumes its pass).
+   */
+  setOwnedChats(chatIds: string[]): void;
+}
+
 /** The global `spindle` object available in backend extension workers */
 export interface SpindleAPI {
   /** Subscribe to generation-started events (requires `generation` permission). The optional `userId` identifies which user triggered the event. */
@@ -288,6 +301,12 @@ export interface SpindleAPI {
     ) => Promise<LlmMessageDTO[] | InterceptorResultDTO>,
     priority?: number
   ): void;
+
+  /**
+   * Declare the chats whose `target:prompt` regex this extension applies itself; the 
+   * host skips its own pass for them.
+   */
+  promptRegex: SpindlePromptRegex;
 
   /** Register an LLM tool */
   registerTool(tool: ToolRegistrationDTO): void;
