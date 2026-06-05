@@ -36,6 +36,14 @@ export interface LlmMessageDTO {
    * only on `role: 'assistant'` messages.
    */
   reasoning_content?: string;
+  /**
+   * True when this message is a chat-history turn (as opposed to a depth-injected 
+   * world-info/preset/author's-note block that was spliced into the chat-history 
+   * range). Set by the host only on the messages passed to the interceptor pipeline, 
+   * so an extension applying prompt-target regex inline can reproduce the host's depth 
+   * frame exactly.
+   */
+  __isChatHistory?: boolean;
 }
 
 export type SpindleUserRoleDTO = "operator" | "admin" | "user";

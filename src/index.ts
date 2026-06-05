@@ -334,6 +334,7 @@ export type {
 
 export type {
   SpindleAPI,
+  SpindlePromptRegex,
   FrontendProcessHandle,
   BackendProcessHandle,
   SpindleBackendProcessContext,
