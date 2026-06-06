@@ -40,10 +40,20 @@ export interface LlmMessageDTO {
    * True when this message is a chat-history turn (as opposed to a depth-injected 
    * world-info/preset/author's-note block that was spliced into the chat-history 
    * range). Set by the host only on the messages passed to the interceptor pipeline, 
-   * so an extension applying prompt-target regex inline can reproduce the host's depth 
+   * so an extension applying prompt-target regex inline can reproduce the host's depth
    * frame exactly.
    */
   __isChatHistory?: boolean;
+  /**
+   * Id of the originating chat message, set only on chat-history turns. Lets 
+   * interceptors map back to the source message without matching on 
+   * (macro/regex-mutated) content. Stripped before the LLM payload. 
+   */
+  sourceMessageId?: string;
+  /**
+   * Source message's `index_in_chat`, paired with `sourceMessageId`. 
+   */
+  sourceIndexInChat?: number;
 }
 
 export type SpindleUserRoleDTO = "operator" | "admin" | "user";
