@@ -691,8 +691,6 @@ export interface SpindleDisplayResolverRegistry {
   registerResolver(resolver: SpindleDisplayResolver): () => void;
   /** Ask the host to invalidate cached display resolutions whose dependencies (a `<scope>:<name>` set) changed. */
   invalidate(touchedVars: string[]): void;
-  /** Publish the set of character IDs whose display this extension owns. The host uses it to decide synchronously, at render time, whether a chat is owned by this resolver. */
-  setOwnedCharacters(characterIds: string[]): void;
 }
 
 /** Context object provided to frontend extension modules */
