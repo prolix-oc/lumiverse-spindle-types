@@ -231,7 +231,8 @@ export type {
     SpindleDisplayScriptsArgs,
     SpindleDisplayResolveResult,
     SpindleDisplayTemplatesResult,
- } from "./dom";
+    SpindleTabLocation,
+  } from "./dom";
 
 export type {
   SpindleMountedComponent,

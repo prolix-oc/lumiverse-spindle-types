@@ -212,6 +212,13 @@ export interface SpindleDockPanelHandle {
   onVisibilityChange(handler: (visible: boolean) => void): () => void;
 }
 
+// ── Tab Mobility ──
+
+/** Where a built-in drawer tab currently lives. */
+export type SpindleTabLocation =
+  | { kind: "main-drawer" }
+  | { kind: "container"; containerId: string };
+
 // ── App Mount ──
 
 export interface SpindleAppMountOptions {
@@ -752,6 +759,12 @@ export interface SpindleFrontendContext {
      * ```
      */
     showConfirm(options: SpindleConfirmOptions): Promise<SpindleConfirmResult>;
+    /** Request a tab move to a specific drawer location. */
+    requestTabLocation(tabId: string, location: SpindleTabLocation): void;
+    /** Get the display title of a built-in drawer tab by its id. */
+    getBuiltInTabTitle(tabId: string): string | undefined;
+    /** Get the root HTMLElement of a built-in drawer tab by its id, or undefined if not mounted. */
+    getBuiltInTabRoot(tabId: string): HTMLElement | undefined;
   };
   /**
    * Mount instances of Lumiverse's first-party shared UI components (form
@@ -761,6 +774,13 @@ export interface SpindleFrontendContext {
    * {@link SpindleComponentsHelper} for the full surface.
    */
   components: SpindleComponentsHelper;
+  /** Register or unregister passive DOM containers that can receive tab roots. */
+  containers: {
+    /** Register a container element with a stable id. Tabs routed to this id via `requestTabLocation` will be reparented into `element`. Idempotent on id collision. */
+    registerContainer(entry: { id: string; side: 'left' | 'right' | 'top' | 'bottom'; element: HTMLElement }): void;
+    /** Remove a previously registered container. Tabs still pointing to this id will fall back to the main drawer. */
+    unregisterContainer(id: string): void;
+  };
   uploads: {
     pickFile(options?: {
       accept?: string[];
