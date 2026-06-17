@@ -98,6 +98,8 @@ export type {
   PersonaCreateDTO,
   PersonaUpdateDTO,
   ActivatedWorldInfoEntryDTO,
+  WorldBookSourceDTO,
+  WorldInfoActivatedEventDTO,
   DryRunRequestDTO,
   DryRunResultDTO,
   AssemblyBreakdownEntryDTO,

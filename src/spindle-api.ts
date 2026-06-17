@@ -877,6 +877,27 @@ export interface SpindleAPI {
     };
     /** Get activated world info entries (keyword + vector) for a chat. */
     getActivated(chatId: string, userId?: string): Promise<ActivatedWorldInfoEntryDTO[]>;
+    /**
+     * Get the IDs of the user's globally-active world books (the
+     * "globalWorldBooks" setting). Global books apply to every chat.
+     */
+    getGlobal(userId?: string): Promise<string[]>;
+    /**
+     * Replace the set of globally-active world books. IDs that don't
+     * resolve to an existing world book are dropped. Returns the applied
+     * ID list.
+     */
+    setGlobal(worldBookIds: string[], userId?: string): Promise<string[]>;
+    /**
+     * Activate a single world book globally (atomic add). Throws if the
+     * book does not exist. Returns the updated global ID list.
+     */
+    activateGlobal(worldBookId: string, userId?: string): Promise<string[]>;
+    /**
+     * Deactivate a single globally-active world book (atomic remove).
+     * No-op if the book wasn't active. Returns the updated global ID list.
+     */
+    deactivateGlobal(worldBookId: string, userId?: string): Promise<string[]>;
   };
 
   /**

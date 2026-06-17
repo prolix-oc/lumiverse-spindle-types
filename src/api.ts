@@ -1175,6 +1175,8 @@ export interface WorldInfoInterceptorEntryDTO {
   readonly delay_until_recursion: boolean;
   readonly scan_depth: number | null;
   readonly order_value: number;
+  /** Attachment scope that contributed the entry's book to this chat. */
+  readonly book_source?: WorldBookSourceDTO;
 }
 
 /**
@@ -1354,6 +1356,13 @@ export interface PersonaUpdateDTO {
 // ─── Activated World Info DTOs ─────────────────────────────────────────
 
 /**
+ * Which attachment scope contributed a world book to prompt assembly.
+ * When a book is attached at multiple scopes the narrowest one wins:
+ * character → persona → chat → global.
+ */
+export type WorldBookSourceDTO = "character" | "persona" | "chat" | "global";
+
+/**
  * Lightweight summary of an activated world info entry.
  * Safe subset — no raw entry content or internal fields exposed.
  */
@@ -1363,6 +1372,17 @@ export interface ActivatedWorldInfoEntryDTO {
   keys: string[];
   source: "keyword" | "vector";
   score?: number;
+  /** ID of the world book the entry belongs to. */
+  bookId?: string;
+  /** Attachment scope that contributed the entry's book. */
+  bookSource?: WorldBookSourceDTO;
+}
+
+/** Payload of the `WORLD_INFO_ACTIVATED` event. */
+export interface WorldInfoActivatedEventDTO {
+  chatId: string;
+  entries: ActivatedWorldInfoEntryDTO[];
+  stats?: Record<string, unknown>;
 }
 
 // ─── Dry Run DTOs ──────────────────────────────────────────────────────
@@ -2669,6 +2689,11 @@ export type WorkerToHost =
   | { type: "council_get_available_lumia_items"; requestId: string; userId?: string }
   // ─── Activated World Info (gated: "world_books") ───────────────────
   | { type: "world_books_get_activated"; requestId: string; chatId: string; userId?: string }
+  // ─── Global World Books (gated: "world_books") ───────────────────────
+  | { type: "world_books_get_global"; requestId: string; userId?: string }
+  | { type: "world_books_set_global"; requestId: string; worldBookIds: string[]; userId?: string }
+  | { type: "world_books_activate_global"; requestId: string; worldBookId: string; userId?: string }
+  | { type: "world_books_deactivate_global"; requestId: string; worldBookId: string; userId?: string }
   // ─── Regex Scripts (gated: "regex_scripts") ────────────────────────
   | { type: "regex_scripts_list"; requestId: string; scope?: RegexScopeDTO; scopeId?: string; target?: RegexTargetDTO; limit?: number; offset?: number; userId?: string }
   | { type: "regex_scripts_get"; requestId: string; scriptId: string; userId?: string }
