@@ -224,6 +224,12 @@ export interface SpindlePromptRegex {
 
 /** The global `spindle` object available in backend extension workers */
 export interface SpindleAPI {
+  /**
+   * Subscribe to permission grant/revoke changes for this extension only.
+   * This is delivered directly by the worker host and does not subscribe to
+   * the global backend event bus.
+   */
+  on(event: "PERMISSION_CHANGED", handler: (payload: PermissionChangedDetail) => void): () => void;
   /** Subscribe to generation-started events (requires `generation` permission). The optional `userId` identifies which user triggered the event. */
   on(event: "GENERATION_STARTED", handler: (payload: GenerationStartedPayloadDTO, userId?: string) => void): () => void;
   /** Subscribe to streamed token events (requires `generation` permission). The optional `userId` identifies which user triggered the event. */

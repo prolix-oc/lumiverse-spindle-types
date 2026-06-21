@@ -2944,6 +2944,8 @@ export type HostToWorker =
     }
   | {
       type: "permission_changed";
+      /** Extension identifier for the worker receiving this scoped change */
+      extensionId?: string;
       permission: string;
       granted: boolean;
       allGranted: string[];
