@@ -810,6 +810,17 @@ export interface SpindleFrontendContext {
    * ```
    */
   getActiveChat(): { chatId: string | null; characterId: string | null };
+  /**
+   * Signal that the frontend is ready to receive any startup messages that
+   * were queued while the bundle was loading.
+   */
+  ready(): void;
+  /**
+   * Opt out of legacy auto-ready behavior. Call during setup() before it
+   * returns if initialization continues asynchronously and startup messages
+   * should remain queued until a later `ready()` call.
+   */
+  deferReady(): void;
   sendToBackend(payload: unknown): void;
   onBackendMessage(handler: (payload: unknown) => void): () => void;
   /** Structured lifecycle hooks for backend-spawned frontend processes. */
