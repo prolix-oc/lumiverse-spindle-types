@@ -151,6 +151,57 @@ export interface SpindleDrawerTabHandle {
   onActivate(handler: () => void): () => void;
 }
 
+// ── Character Editor Tab ──
+
+export interface SpindleCharacterEditorTabOptions {
+  /** Unique tab identifier within the current extension. */
+  id: string;
+  /** Label shown in the character editor tab bar. */
+  title: string;
+}
+
+export interface SpindleCharacterEditorTabHandle {
+  root: HTMLElement;
+  tabId: string;
+  setTitle(title: string): void;
+  activate(): void;
+  destroy(): void;
+  /** Register a callback fired when the active character-editor tab switches to this tab. */
+  onActivate(handler: () => void): () => void;
+}
+
+export interface SpindleCharacterEditorState {
+  /** Whether the character editor modal is currently open. */
+  open: boolean;
+  /** Character currently being edited, or `null` when the modal is closed. */
+  characterId: string | null;
+  /** Active built-in or extension tab id inside the editor modal. */
+  activeTabId: string | null;
+  /** Current draft extensions blob visible to the editor. */
+  extensions: Record<string, any>;
+}
+
+export interface SpindleCharacterEditorSaveOptions {
+  /** Persist immediately instead of using the host's debounced save path. */
+  immediate?: boolean;
+}
+
+export interface SpindleCharacterEditorHelper {
+  /** Read the current editor snapshot. */
+  getState(): SpindleCharacterEditorState;
+  /** Subscribe to editor open/close, tab, character, and extensions changes. */
+  onChange(handler: (state: SpindleCharacterEditorState) => void): () => void;
+  /** Replace the draft extensions object shown in the editor. */
+  setExtensions(extensions: Record<string, any>, options?: SpindleCharacterEditorSaveOptions): void;
+  /** Atomically derive the next draft extensions object from the current one. */
+  updateExtensions(
+    mutator: (extensions: Record<string, any>) => Record<string, any>,
+    options?: SpindleCharacterEditorSaveOptions,
+  ): void;
+  /** Immediately persist any pending draft extension changes. */
+  flush(): Promise<void>;
+}
+
 // ── Float Widget ──
 
 export interface SpindleFloatWidgetOptions {
@@ -711,6 +762,8 @@ export interface SpindleFrontendContext {
     events: SpindleUIEventsHelper;
     mount(point: SpindleMountPoint): Element;
     registerDrawerTab(options: SpindleDrawerTabOptions): SpindleDrawerTabHandle;
+    registerCharacterEditorTab(options: SpindleCharacterEditorTabOptions): SpindleCharacterEditorTabHandle;
+    characterEditor: SpindleCharacterEditorHelper;
     createFloatWidget(options?: SpindleFloatWidgetOptions): SpindleFloatWidgetHandle;
     requestDockPanel(options: SpindleDockPanelOptions): SpindleDockPanelHandle;
     mountApp(options?: SpindleAppMountOptions): SpindleAppMountHandle;
