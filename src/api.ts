@@ -1353,6 +1353,23 @@ export interface PersonaUpdateDTO {
   metadata?: Record<string, unknown>;
 }
 
+export interface GlobalAddonDTO {
+  id: string;
+  label: string;
+  content: string;
+  sort_order: number;
+  metadata: Record<string, unknown>;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface GlobalAddonUpdateDTO {
+  label?: string;
+  content?: string;
+  sort_order?: number;
+  metadata?: Record<string, unknown>;
+}
+
 // ─── Activated World Info DTOs ─────────────────────────────────────────
 
 /**
@@ -2683,6 +2700,10 @@ export type WorkerToHost =
   | { type: "personas_delete"; requestId: string; personaId: string; userId?: string }
   | { type: "personas_switch"; requestId: string; personaId: string | null; userId?: string }
   | { type: "personas_get_world_book"; requestId: string; personaId: string; userId?: string }
+  // ─── Global Add-ons (gated: "personas") ──────────────────────────
+  | { type: "global_addons_list"; requestId: string; limit?: number; offset?: number; userId?: string }
+  | { type: "global_addons_get"; requestId: string; addonId: string; userId?: string }
+  | { type: "global_addons_update"; requestId: string; addonId: string; input: GlobalAddonUpdateDTO; userId?: string }
   // ─── Council (free tier, read-only) ──────────────────────────────
   | { type: "council_get_settings"; requestId: string; userId?: string }
   | { type: "council_get_members"; requestId: string; userId?: string }

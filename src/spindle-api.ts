@@ -47,6 +47,8 @@ import type {
   DatabankDocumentCreateDTO,
   DatabankDocumentUpdateDTO,
   PersonaDTO,
+  GlobalAddonDTO,
+  GlobalAddonUpdateDTO,
   LumiaItemDTO,
   PersonaCreateDTO,
   PersonaUpdateDTO,
@@ -1161,6 +1163,12 @@ export interface SpindleAPI {
     switchActive(personaId: string | null, userId?: string): Promise<void>;
     /** Get the world book attached to a persona. Returns null if none attached. */
     getWorldBook(personaId: string, userId?: string): Promise<WorldBookDTO | null>;
+  };
+
+  global_addons: {
+    list(options?: { limit?: number; offset?: number; userId?: string }): Promise<{ data: GlobalAddonDTO[]; total: number }>;
+    get(addonId: string, userId?: string): Promise<GlobalAddonDTO | null>;
+    update(addonId: string, input: GlobalAddonUpdateDTO, userId?: string): Promise<GlobalAddonDTO>;
   };
 
   permissions: {
