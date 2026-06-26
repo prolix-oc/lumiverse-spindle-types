@@ -94,6 +94,8 @@ export type {
   DatabankDocumentCreateDTO,
   DatabankDocumentUpdateDTO,
   PersonaDTO,
+  GlobalAddonDTO,
+  GlobalAddonUpdateDTO,
   LumiaItemDTO,
   PersonaCreateDTO,
   PersonaUpdateDTO,
