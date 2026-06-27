@@ -160,6 +160,7 @@ export type {
   TokenModelSourceDTO,
   TokenCountOptionsDTO,
   TokenCountResultDTO,
+  SpindleUploadDTO,
   SharedRpcRequestContextDTO,
   SharedRpcEndpointPolicyDTO,
   MacroInterceptorPhase,
