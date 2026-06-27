@@ -2347,6 +2347,13 @@ export interface TokenCountResultDTO {
   approximate: boolean;
 }
 
+/** A completed resumable upload read back by `spindle.uploads.get`. */
+export interface SpindleUploadDTO {
+  fileName: string;
+  size: number;
+  data: Uint8Array;
+}
+
 /** Context delivered to an on-request shared RPC endpoint handler. */
 export interface SharedRpcRequestContextDTO {
   /** Fully-qualified endpoint name (for example `weather_ext.status.current`). */

@@ -100,6 +100,7 @@ import type {
   StreamChunkDTO,
   TokenCountOptionsDTO,
   TokenCountResultDTO,
+  SpindleUploadDTO,
   MacroInterceptorCtxDTO,
   MacroInterceptorResultDTO,
   WorldInfoInterceptorCtxDTO,
@@ -717,6 +718,17 @@ export interface SpindleAPI {
     ): Promise<TokenCountResultDTO>;
     /** Count tokens for a live stored chat by ID. `options.model` overrides `options.modelSource`. */
     countChat(chatId: string, options?: TokenCountOptionsDTO): Promise<TokenCountResultDTO>;
+  };
+
+  /**
+   * Resumable uploads (free tier). Consume a file the user streamed to the host
+   * tus endpoint (`/api/v1/spindle-uploads`), scoped to this extension + user.
+   */
+  uploads: {
+    /** Read a completed upload's bytes. Null if missing, expired, or not owned by this extension + user. */
+    get(uploadId: string, userId?: string): Promise<SpindleUploadDTO | null>;
+    /** Delete a staged upload once consumed. Returns false if it was already gone. */
+    delete(uploadId: string, userId?: string): Promise<boolean>;
   };
 
   /**
