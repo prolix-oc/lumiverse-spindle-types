@@ -65,6 +65,13 @@ import type {
   ImageListOptionsDTO,
   ImageUploadDTO,
   ImageUploadFromDataUrlOptionsDTO,
+  MediaConvertAudioRequestDTO,
+  MediaConvertVideoRequestDTO,
+  MediaTranscodeVideoRequestDTO,
+  MediaRemoveAudioFromVideoRequestDTO,
+  MediaAddAudioToVideoRequestDTO,
+  MediaCreateVideoFromImageAndAudioRequestDTO,
+  MediaTransformResultDTO,
   ThemeOverrideDTO,
   ThemeInfoDTO,
   ThemePaletteConfigDTO,
@@ -766,8 +773,8 @@ export interface SpindleAPI {
   };
 
   /**
-   * Image CRUD (permission: "images").
-   * Manage images stored in Lumiverse's image system on behalf of the user.
+   * Image/video asset CRUD (permission: "images").
+   * Manage assets stored in Lumiverse's image system on behalf of the user.
    * For user-scoped extensions, userId is inferred from the extension owner.
    * For operator-scoped extensions, pass userId to scope to a specific user.
    */
@@ -783,6 +790,20 @@ export interface SpindleAPI {
     uploadFromDataUrl(dataUrl: string, originalFilename?: string, userId?: string): Promise<ImageDTO>;
     uploadFromDataUrl(dataUrl: string, options?: ImageUploadFromDataUrlOptionsDTO): Promise<ImageDTO>;
     delete(imageId: string, userId?: string): Promise<boolean>;
+  };
+
+  /**
+   * Backend media conversion and composition (permission: "media").
+   * Uses Lumiverse's host-side media pipeline for audio/video transforms.
+   * Sources may be inline bytes, staged uploads, or existing Lumiverse assets.
+   */
+  media: {
+    convertAudio(input: MediaConvertAudioRequestDTO): Promise<MediaTransformResultDTO>;
+    convertVideo(input: MediaConvertVideoRequestDTO): Promise<MediaTransformResultDTO>;
+    transcodeVideo(input: MediaTranscodeVideoRequestDTO): Promise<MediaTransformResultDTO>;
+    removeAudioFromVideo(input: MediaRemoveAudioFromVideoRequestDTO): Promise<MediaTransformResultDTO>;
+    addAudioToVideo(input: MediaAddAudioToVideoRequestDTO): Promise<MediaTransformResultDTO>;
+    createVideoFromImageAndAudio(input: MediaCreateVideoFromImageAndAudioRequestDTO): Promise<MediaTransformResultDTO>;
   };
 
   /**

@@ -18,6 +18,8 @@
  * - "memories"             — CRUD on the Memory Cortex (entities, relations, vaults, chat
  *                            links, consolidations) and long-term chat memory (vectorized
  *                            chat-chunk retrieval, warmup, cache).
+ * - "media"                — invoke the backend media pipeline for audio/video conversion,
+ *                            transcoding, muxing, and simple image+audio composition.
  * - "macro_interceptor"    — transform raw templates before macro parsing/dispatch
  * - "web_search"           — execute searches via the user's configured web search
  *                            provider (e.g. SearXNG) and read the safe view of their
@@ -44,6 +46,7 @@ export type SpindlePermission =
   | "regex_scripts"
   | "databanks"
   | "memories"
+  | "media"
   | "personas"
   | "push_notification"
   | "image_gen"
@@ -72,6 +75,7 @@ export const ALL_PERMISSIONS: readonly SpindlePermission[] = [
   "regex_scripts",
   "databanks",
   "memories",
+  "media",
   "personas",
   "push_notification",
   "image_gen",

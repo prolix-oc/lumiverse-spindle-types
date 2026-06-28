@@ -615,6 +615,7 @@ export interface ImageGenResultDTO {
 // ─── Image DTOs ─────────────────────────────────────────────────────────
 
 export type ImageSpecificityDTO = "full" | "sm" | "lg";
+export type ImageVideoCodecDTO = "h264" | "hevc";
 
 export interface ImageListOptionsDTO {
   limit?: number;
@@ -644,7 +645,7 @@ export interface ImageGetOptionsDTO {
   userId?: string;
 }
 
-/** Safe representation of an image exposed to extensions. */
+/** Safe representation of an image/video asset exposed to extensions. */
 export interface ImageDTO {
   id: string;
   original_filename: string;
@@ -663,7 +664,7 @@ export interface ImageDTO {
 
 /** Upload payload for `spindle.images.upload()` */
 export interface ImageUploadDTO {
-  /** Raw image bytes. */
+  /** Raw image or video bytes. */
   data: Uint8Array;
   /** Optional filename used to preserve the extension/MIME when storing the image. */
   filename?: string;
@@ -673,6 +674,12 @@ export interface ImageUploadDTO {
   owner_character_id?: string;
   /** Optional chat ownership tag for the persisted image. */
   owner_chat_id?: string;
+  /** For video uploads, strip any audio tracks from the stored output when possible. */
+  strip_audio?: boolean;
+  /** For video uploads, transcode the primary stored asset to this codec. */
+  transcode_video_codec?: ImageVideoCodecDTO;
+  /** Optional extra video variants to generate alongside the primary stored asset. */
+  sidecar_video_codecs?: ImageVideoCodecDTO[];
 }
 
 export interface ImageUploadFromDataUrlOptionsDTO {
@@ -681,6 +688,159 @@ export interface ImageUploadFromDataUrlOptionsDTO {
   owner_character_id?: string;
   /** Optional chat ownership tag for the persisted image. */
   owner_chat_id?: string;
+  /** For operator-scoped extensions. */
+  userId?: string;
+}
+
+// ─── Media DTOs ─────────────────────────────────────────────────────────
+
+export type MediaSourceDTO =
+  | {
+      kind: "inline";
+      data: Uint8Array;
+      filename?: string;
+      mime_type?: string;
+    }
+  | {
+      kind: "upload";
+      upload_id: string;
+      filename?: string;
+      mime_type?: string;
+    }
+  | {
+      /**
+       * Image or video asset already stored in Lumiverse's images table.
+       * This can point at either a still image or a video upload.
+       */
+      kind: "image";
+      image_id: string;
+    }
+  | {
+      /** Audio asset already stored in Lumiverse's audio_files table. */
+      kind: "audio";
+      audio_id: string;
+    };
+
+export type MediaAudioFormatDTO =
+  | "mp3"
+  | "wav"
+  | "ogg"
+  | "aac"
+  | "flac"
+  | "m4a"
+  | "webm";
+
+export type MediaVideoFormatDTO =
+  | "mp4"
+  | "webm"
+  | "mov"
+  | "mkv";
+
+export type MediaVideoCodecDTO =
+  | "h264"
+  | "hevc"
+  | "vp9"
+  | "av1"
+  | "copy";
+
+export type MediaAudioCodecDTO =
+  | "aac"
+  | "mp3"
+  | "opus"
+  | "vorbis"
+  | "flac"
+  | "pcm_s16le"
+  | "copy";
+
+export type MediaFitModeDTO = "contain" | "cover" | "stretch";
+
+export interface MediaTransformResultDTO {
+  data: Uint8Array;
+  filename: string;
+  mime_type: string;
+  byte_size: number;
+  duration_ms?: number | null;
+  width?: number | null;
+  height?: number | null;
+}
+
+export interface MediaConvertAudioRequestDTO {
+  source: MediaSourceDTO;
+  output_format: MediaAudioFormatDTO;
+  audio_codec?: MediaAudioCodecDTO;
+  bitrate_kbps?: number;
+  sample_rate?: number;
+  channels?: number;
+  filename?: string;
+  /** For operator-scoped extensions. */
+  userId?: string;
+}
+
+export interface MediaConvertVideoRequestDTO {
+  source: MediaSourceDTO;
+  output_format: MediaVideoFormatDTO;
+  filename?: string;
+  /** For operator-scoped extensions. */
+  userId?: string;
+}
+
+export interface MediaTranscodeVideoRequestDTO {
+  source: MediaSourceDTO;
+  output_format?: MediaVideoFormatDTO;
+  video_codec?: MediaVideoCodecDTO;
+  audio_codec?: MediaAudioCodecDTO | "none";
+  video_bitrate_kbps?: number;
+  audio_bitrate_kbps?: number;
+  crf?: number;
+  preset?: string;
+  width?: number;
+  height?: number;
+  fps?: number;
+  pixel_format?: string;
+  faststart?: boolean;
+  filename?: string;
+  /** For operator-scoped extensions. */
+  userId?: string;
+}
+
+export interface MediaRemoveAudioFromVideoRequestDTO {
+  source: MediaSourceDTO;
+  output_format?: MediaVideoFormatDTO;
+  video_codec?: MediaVideoCodecDTO;
+  filename?: string;
+  /** For operator-scoped extensions. */
+  userId?: string;
+}
+
+export interface MediaAddAudioToVideoRequestDTO {
+  video: MediaSourceDTO;
+  audio: MediaSourceDTO;
+  output_format?: MediaVideoFormatDTO;
+  video_codec?: MediaVideoCodecDTO;
+  audio_codec?: MediaAudioCodecDTO;
+  /** Defaults to true: replace any existing audio track on the source video. */
+  replace_existing_audio?: boolean;
+  /** When true, clamp the output duration to the shorter input stream. */
+  shortest?: boolean;
+  /** Optional positive offset, in milliseconds, before the new audio starts. */
+  audio_start_ms?: number;
+  filename?: string;
+  /** For operator-scoped extensions. */
+  userId?: string;
+}
+
+export interface MediaCreateVideoFromImageAndAudioRequestDTO {
+  image: MediaSourceDTO;
+  audio: MediaSourceDTO;
+  output_format?: MediaVideoFormatDTO;
+  video_codec?: Exclude<MediaVideoCodecDTO, "copy">;
+  audio_codec?: MediaAudioCodecDTO;
+  width?: number;
+  height?: number;
+  fps?: number;
+  fit_mode?: MediaFitModeDTO;
+  background_color?: string;
+  filename?: string;
   /** For operator-scoped extensions. */
   userId?: string;
 }
@@ -2852,6 +3012,17 @@ export type WorkerToHost =
       userId?: string;
     }
   | { type: "images_delete"; requestId: string; imageId: string; userId?: string }
+  // ─── Media (gated: "media") ─────────────────────────────────────────
+  | { type: "media_audio_convert"; requestId: string; input: MediaConvertAudioRequestDTO }
+  | { type: "media_video_convert"; requestId: string; input: MediaConvertVideoRequestDTO }
+  | { type: "media_video_transcode"; requestId: string; input: MediaTranscodeVideoRequestDTO }
+  | { type: "media_video_remove_audio"; requestId: string; input: MediaRemoveAudioFromVideoRequestDTO }
+  | { type: "media_video_add_audio"; requestId: string; input: MediaAddAudioToVideoRequestDTO }
+  | {
+      type: "media_video_from_image_audio";
+      requestId: string;
+      input: MediaCreateVideoFromImageAndAudioRequestDTO;
+    }
   // ─── Theme (gated: "app_manipulation") ──────────────────────────────────
   | { type: "theme_apply"; requestId: string; overrides: ThemeOverrideDTO; userId?: string }
   | { type: "theme_apply_palette"; requestId: string; palette: ThemePaletteConfigDTO | null; userId?: string }
