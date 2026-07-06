@@ -790,6 +790,11 @@ export interface SpindleAPI {
     uploadFromDataUrl(dataUrl: string, originalFilename?: string, userId?: string): Promise<ImageDTO>;
     uploadFromDataUrl(dataUrl: string, options?: ImageUploadFromDataUrlOptionsDTO): Promise<ImageDTO>;
     delete(imageId: string, userId?: string): Promise<boolean>;
+    /**
+     * Bulk delete: chunked DB deletes with file unlinks deferred to a background
+     * task, no per-image IMAGE_DELETED events. Returns the number of rows deleted.
+     */
+    deleteMany(imageIds: string[], options?: { userId?: string }): Promise<number>;
   };
 
   /**
