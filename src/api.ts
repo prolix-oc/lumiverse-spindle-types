@@ -1086,6 +1086,8 @@ export interface PromptBlockDTO {
   isLocked: boolean;
   color: string | null;
   injectionTrigger: string[];
+  /** Optional character-tag filter. The block is included when the focused character matches. */
+  characterTagTrigger?: string[];
   group: string | null;
   /** Only meaningful when `marker === "category"`. Radio categories allow one enabled child; checkbox categories allow many. */
   categoryMode?: PromptBlockCategoryModeDTO;
@@ -1648,6 +1650,32 @@ export interface DryRunResultDTO {
   tokenCount?: DryRunTokenCountDTO;
   worldInfoStats?: ActivationStatsDTO;
   memoryStats?: MemoryStatsDTO;
+}
+
+// ─── Assembly-only DTOs ────────────────────────────────────────────────
+
+/**
+ * Assemble an extension-supplied Loom block graph against a real chat context
+ * without invoking the pre-generation context/interceptor pipeline or an LLM.
+ */
+export interface AssembleRequestDTO {
+  /** Native Loom prompt blocks to assemble. These replace the saved preset's block graph. */
+  blocks: PromptBlockDTO[];
+  /** Chat supplying history, character, world-info, and macro context. */
+  chatId: string;
+  connectionId?: string;
+  personaId?: string;
+  /** Defaults to `"normal"`. */
+  generationType?: string;
+  /** Per-block prompt-variable values, keyed by block id then variable name. */
+  promptVariables?: PromptVariableValuesDTO;
+  /** Cancel an in-flight assembly. Consumed in the extension worker and not cloned over RPC. */
+  signal?: AbortSignal;
+}
+
+export interface AssembleResultDTO {
+  messages: LlmMessageDTO[];
+  breakdown: AssemblyBreakdownEntryDTO[];
 }
 
 // ─── Chat Memory DTOs ──────────────────────────────────────────────────
@@ -2545,6 +2573,12 @@ export type WorkerToHost =
       messages: LlmMessageDTO[];
       parameters?: Record<string, unknown>;
       breakdown?: InterceptorBreakdownEntryDTO[];
+    }
+  | {
+      type: "assemble_prompt";
+      requestId: string;
+      input: Omit<AssembleRequestDTO, "signal">;
+      userId?: string;
     }
   | { type: "register_tool"; tool: ToolRegistrationDTO }
   | { type: "unregister_tool"; name: string }

@@ -55,6 +55,8 @@ import type {
   ActivatedWorldInfoEntryDTO,
   DryRunRequestDTO,
   DryRunResultDTO,
+  AssembleRequestDTO,
+  AssembleResultDTO,
   ChatMemoryResultDTO,
   ImageGenRequestDTO,
   ImageGenResultDTO,
@@ -317,6 +319,13 @@ export interface SpindleAPI {
     ) => Promise<LlmMessageDTO[] | InterceptorResultDTO>,
     priority?: number
   ): void;
+
+  /**
+   * Assemble an arbitrary Loom block graph against a chat without calling an
+   * LLM or re-entering the pre-generation context/interceptor pipeline.
+   * Requires the `generation` permission.
+   */
+  assemble(input: AssembleRequestDTO, userId?: string): Promise<AssembleResultDTO>;
 
   /**
    * Declare the chats whose `target:prompt` regex this extension applies itself; the 

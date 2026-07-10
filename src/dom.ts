@@ -1,4 +1,4 @@
-import type { RequestInitDTO } from "./api";
+import type { PromptBlockDTO, RequestInitDTO } from "./api";
 import type { SpindleComponentsHelper } from "./components";
 
 /** A chat-message DOM element paired with its stable message id. */
@@ -199,6 +199,65 @@ export interface SpindleCharacterEditorHelper {
     options?: SpindleCharacterEditorSaveOptions,
   ): void;
   /** Immediately persist any pending draft extension changes. */
+  flush(): Promise<void>;
+}
+
+// ── Preset Editor Tab ──
+
+export interface SpindlePresetEditorTabOptions {
+  /** Unique tab identifier within the current extension. */
+  id: string;
+  /** Label shown in the Loom preset editor tab bar. */
+  title: string;
+}
+
+export interface SpindlePresetEditorTabHandle {
+  root: HTMLElement;
+  tabId: string;
+  setTitle(title: string): void;
+  activate(): void;
+  destroy(): void;
+  /** Register a callback fired when the active preset-editor tab switches to this tab. */
+  onActivate(handler: () => void): () => void;
+}
+
+/** Mutable, editor-native snapshot of the current Loom preset draft. */
+export interface SpindlePresetEditorDraft {
+  id: string;
+  name: string;
+  blocks: PromptBlockDTO[];
+  parameters: Record<string, unknown>;
+  prompts: Record<string, unknown>;
+  metadata: Record<string, unknown>;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface SpindlePresetEditorState {
+  /** Whether a Loom preset editor instance is currently mounted. */
+  open: boolean;
+  /** Preset currently being edited, or `null` when none is selected. */
+  presetId: string | null;
+  /** Active built-in or extension tab id inside the preset editor. */
+  activeTabId: string | null;
+  /** Current draft. Callers receive a structured clone. */
+  preset: SpindlePresetEditorDraft | null;
+}
+
+export interface SpindlePresetEditorSaveOptions {
+  /** Persist immediately instead of using the host's debounced save path. */
+  immediate?: boolean;
+}
+
+export interface SpindlePresetEditorHelper {
+  getState(): SpindlePresetEditorState;
+  onChange(handler: (state: SpindlePresetEditorState) => void): () => void;
+  /** Atomically derive the next editor draft from the latest pending draft. */
+  updatePreset(
+    mutator: (preset: SpindlePresetEditorDraft) => SpindlePresetEditorDraft,
+    options?: SpindlePresetEditorSaveOptions,
+  ): void;
+  /** Immediately persist and await any pending draft changes. */
   flush(): Promise<void>;
 }
 
@@ -764,6 +823,8 @@ export interface SpindleFrontendContext {
     registerDrawerTab(options: SpindleDrawerTabOptions): SpindleDrawerTabHandle;
     registerCharacterEditorTab(options: SpindleCharacterEditorTabOptions): SpindleCharacterEditorTabHandle;
     characterEditor: SpindleCharacterEditorHelper;
+    registerPresetEditorTab(options: SpindlePresetEditorTabOptions): SpindlePresetEditorTabHandle;
+    presetEditor: SpindlePresetEditorHelper;
     createFloatWidget(options?: SpindleFloatWidgetOptions): SpindleFloatWidgetHandle;
     requestDockPanel(options: SpindleDockPanelOptions): SpindleDockPanelHandle;
     mountApp(options?: SpindleAppMountOptions): SpindleAppMountHandle;
