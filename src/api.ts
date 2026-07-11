@@ -1481,6 +1481,70 @@ export interface LumiaItemDTO {
   updated_at: number;
 }
 
+/** A Loom item category included in a Lumia DLC pack. */
+export type LoomItemCategoryDTO = "narrative_style" | "loom_utility" | "retrofit";
+
+/** A narrative style, utility, or retrofit included in a Lumia DLC pack. */
+export interface LoomItemDTO {
+  id: string;
+  pack_id: string;
+  name: string;
+  content: string;
+  category: LoomItemCategoryDTO;
+  author_name: string;
+  version: string;
+  sort_order: number;
+  created_at: number;
+  updated_at: number;
+}
+
+/** A tool included in a Lumia DLC pack. */
+export interface LoomToolDTO {
+  id: string;
+  pack_id: string;
+  tool_name: string;
+  display_name: string;
+  description: string;
+  prompt: string;
+  input_schema: Record<string, unknown>;
+  result_variable: string;
+  store_in_deliberation: boolean;
+  author_name: string;
+  version: string;
+  sort_order: number;
+  created_at: number;
+  updated_at: number;
+}
+
+/**
+ * Extension-safe metadata for a pack in the user's Lumia DLC catalog.
+ * Ownership and the arbitrary pack `extras` blob are intentionally omitted.
+ */
+export interface LumiaDlcPackDTO {
+  id: string;
+  name: string;
+  author: string;
+  cover_url: string | null;
+  version: string;
+  is_custom: boolean;
+  source_url: string | null;
+  created_at: number;
+  updated_at: number;
+}
+
+/**
+ * All Lumia DLC content currently available to one user. Item `pack_id`
+ * values refer to an entry in `packs`.
+ */
+export interface LumiaDlcCatalogDTO {
+  packs: LumiaDlcPackDTO[];
+  lumiaItems: LumiaItemDTO[];
+  narrativeStyles: LoomItemDTO[];
+  utilities: LoomItemDTO[];
+  retrofits: LoomItemDTO[];
+  tools: LoomToolDTO[];
+}
+
 export interface PersonaDTO {
   id: string;
   name: string;
@@ -2909,6 +2973,8 @@ export type WorkerToHost =
   | { type: "council_get_settings"; requestId: string; userId?: string }
   | { type: "council_get_members"; requestId: string; userId?: string }
   | { type: "council_get_available_lumia_items"; requestId: string; userId?: string }
+  // ─── Lumia DLC (free tier, read-only) ──────────────────────────────
+  | { type: "dlc_get_catalog"; requestId: string; userId?: string }
   // ─── Activated World Info (gated: "world_books") ───────────────────
   | { type: "world_books_get_activated"; requestId: string; chatId: string; userId?: string }
   // ─── Global World Books (gated: "world_books") ───────────────────────

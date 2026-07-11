@@ -50,6 +50,7 @@ import type {
   GlobalAddonDTO,
   GlobalAddonUpdateDTO,
   LumiaItemDTO,
+  LumiaDlcCatalogDTO,
   PersonaCreateDTO,
   PersonaUpdateDTO,
   ActivatedWorldInfoEntryDTO,
@@ -1194,6 +1195,15 @@ export interface SpindleAPI {
     getMembers(options?: { userId?: string }): Promise<CouncilMemberContext[]>;
     /** Retrieve all Lumia items generally available to the user (e.g. from packs) */
     getAvailableLumiaItems(options?: { userId?: string }): Promise<LumiaItemDTO[]>;
+  };
+
+  /**
+   * Read-only Lumia DLC catalog (no permission declaration required).
+   * Includes pack metadata, Lumias, narrative styles, Loom utilities,
+   * retrofits, and Loom tools available to the effective user.
+   */
+  dlc: {
+    getCatalog(options?: { userId?: string }): Promise<LumiaDlcCatalogDTO>;
   };
 
   personas: {
