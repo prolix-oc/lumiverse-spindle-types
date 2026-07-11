@@ -1287,11 +1287,25 @@ export interface SpindleAPI {
   /** Make a CORS-proxied HTTP request */
   cors(url: string, options?: RequestInitDTO): Promise<unknown>;
 
-  /** Register a context handler for enriching generation context */
+  /**
+   * Register a context handler for enriching generation context, awaited
+   * before prompt assembly. The context carries `chatId`, `generationType`,
+   * `dryRun` (tokenize/preview assemblies) and `userId`, returning it with
+   * `cancelGeneration: true` stops the generation, and `opts.timeoutMs`
+   * overrides the default 10s wall-clock budget (clamped to 1s-120s).
+   */
   registerContextHandler(
     handler: (context: unknown) => Promise<unknown>,
-    priority?: number
+    priority?: number,
+    opts?: { timeoutMs?: number }
   ): void;
+
+  /**
+   * Host contract versions for feature detection, keyed by contract name.
+   * `preAssemblyGenerationContext >= 1`: generation contexts carry
+   * `dryRun`/`userId` and `cancelGeneration` is honored.
+   */
+  contracts?: Readonly<Record<string, number>>;
 
   /**
    * Register a macro interceptor (permission: `macro_interceptor`).

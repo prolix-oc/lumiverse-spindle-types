@@ -2824,7 +2824,7 @@ export type WorkerToHost =
       keys: string[];
     }
   | { type: "cors_request"; requestId: string; url: string; options: RequestInitDTO }
-  | { type: "register_context_handler"; priority?: number }
+  | { type: "register_context_handler"; priority?: number; timeoutMs?: number }
   | {
       type: "context_handler_result";
       requestId: string;
