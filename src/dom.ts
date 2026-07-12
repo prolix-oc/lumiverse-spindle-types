@@ -290,8 +290,8 @@ export interface SpindlePresetEditorExtensionState {
   activeTabId: string | null;
   blocks: PromptBlockDTO[];
   promptVariableValues: PromptVariableValuesDTO;
-  /** Only metadata owned by the calling extension's manifest identifier. */
-  metadata: Record<string, unknown> | undefined;
+  /** The raw metadata value currently owned by the calling extension. */
+  metadata: unknown;
 }
 
 export interface SpindlePresetEditorScopedHelper {
@@ -299,7 +299,7 @@ export interface SpindlePresetEditorScopedHelper {
   onChange(handler: (state: SpindlePresetEditorExtensionState) => void): () => void;
   setMetadata(value: Record<string, unknown>, options?: SpindlePresetEditorSaveOptions): void;
   updateMetadata(
-    mutator: (current: Record<string, unknown> | undefined) => Record<string, unknown>,
+    mutator: (current: unknown) => Record<string, unknown>,
     options?: SpindlePresetEditorSaveOptions,
   ): void;
   activateBuiltinTab(tab: SpindlePresetEditorBuiltinTab): void;

@@ -14,7 +14,10 @@ export function verifyPresetEditorContract(ctx: SpindleFrontendContext): void {
   state.blocks.forEach((block) => block.id);
 
   editor.setMetadata({ mode: "parallel" }, { immediate: true });
-  editor.updateMetadata((current) => ({ ...current, revision: 1 }));
+  editor.updateMetadata((current) => ({
+    ...(current && typeof current === "object" && !Array.isArray(current) ? current : {}),
+    revision: 1,
+  }));
   editor.activateBuiltinTab("blocks");
   void editor.flush();
 }
