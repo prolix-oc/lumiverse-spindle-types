@@ -230,8 +230,8 @@ export interface SpindlePresetEditorToolbarItemOptions {
 }
 
 export interface SpindlePresetEditorToolbarItemHandle {
-  root: HTMLElement;
-  itemId: string;
+  readonly root: HTMLElement;
+  readonly itemId: string;
   setVisible(visible: boolean): void;
   destroy(): void;
 }
@@ -285,13 +285,15 @@ export interface SpindlePresetEditorHelper {
 export type SpindlePresetEditorBuiltinTab = "blocks";
 
 export interface SpindlePresetEditorExtensionState {
-  open: boolean;
-  presetId: string | null;
-  activeTabId: string | null;
+  readonly open: boolean;
+  readonly presetId: string | null;
+  readonly activeTabId: string | null;
+  /** Detached array cloned from the host draft. */
   blocks: PromptBlockDTO[];
+  /** Detached prompt-variable values cloned from the host draft. */
   promptVariableValues: PromptVariableValuesDTO;
   /** The raw metadata value currently owned by the calling extension. */
-  metadata: unknown;
+  readonly metadata: unknown;
 }
 
 export interface SpindlePresetEditorScopedHelper {

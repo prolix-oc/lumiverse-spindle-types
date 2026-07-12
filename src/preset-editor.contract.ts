@@ -7,6 +7,8 @@ export function verifyPresetEditorContract(ctx: SpindleFrontendContext): void {
     ariaLabel: "Agent mode controls",
   });
   toolbar.setVisible(true);
+  // @ts-expect-error Extension-owned handles do not expose mutable host identity.
+  toolbar.itemId = "replacement";
   toolbar.destroy();
 
   const editor = ctx.ui.presetEditor.extension;
@@ -14,6 +16,10 @@ export function verifyPresetEditorContract(ctx: SpindleFrontendContext): void {
   ctx.ui.presetEditor.extension = editor;
   const state = editor.getState();
   state.blocks.forEach((block) => block.id);
+  // @ts-expect-error Snapshot identity is host-owned.
+  state.open = true;
+  // @ts-expect-error Scoped metadata is a read-only host snapshot.
+  state.metadata = { mode: "replacement" };
 
   editor.setMetadata({ mode: "parallel" }, { immediate: true });
   editor.updateMetadata((current) => ({
