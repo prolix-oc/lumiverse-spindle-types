@@ -279,7 +279,7 @@ export interface SpindlePresetEditorHelper {
    * sandbox same-origin extension code; it prevents accidental whole-draft
    * writes through the supported helper.
    */
-  extension: SpindlePresetEditorScopedHelper;
+  readonly extension: SpindlePresetEditorScopedHelper;
 }
 
 export type SpindlePresetEditorBuiltinTab = "blocks";

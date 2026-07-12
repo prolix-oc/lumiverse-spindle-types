@@ -10,6 +10,8 @@ export function verifyPresetEditorContract(ctx: SpindleFrontendContext): void {
   toolbar.destroy();
 
   const editor = ctx.ui.presetEditor.extension;
+  // @ts-expect-error Scoped helpers are acquired from a read-only getter.
+  ctx.ui.presetEditor.extension = editor;
   const state = editor.getState();
   state.blocks.forEach((block) => block.id);
 
