@@ -22,6 +22,33 @@
  * Components inherit the active Lumiverse theme via CSS variables, so they
  * visually match the rest of the host UI without any additional wiring.
  */
+import type { PromptBlockDTO, PromptVariableValuesDTO } from "./api";
+
+// ──────────────────────────────────────────────────────────────────────────
+// Loom block editor
+// ──────────────────────────────────────────────────────────────────────────
+
+/** Editable public value rendered by the native Loom block editor. */
+export interface SpindleLoomBlockEditorValue {
+  blocks: PromptBlockDTO[];
+  promptVariableValues: PromptVariableValuesDTO;
+}
+
+/** Controlled options for the native Loom block editor. */
+export interface SpindleLoomBlockEditorOptions {
+  value: SpindleLoomBlockEditorValue;
+  onChange?: (value: SpindleLoomBlockEditorValue) => void;
+  readOnly?: boolean;
+  compact?: boolean;
+}
+
+/** Handle returned by `mountLoomBlockEditor`. */
+export interface SpindleLoomBlockEditorHandle
+  extends SpindleMountedComponent<SpindleLoomBlockEditorOptions> {
+  getValue(): SpindleLoomBlockEditorValue;
+  refreshMacros(): Promise<void>;
+}
+
 
 // ──────────────────────────────────────────────────────────────────────────
 // Shared base shapes
@@ -655,4 +682,9 @@ export interface SpindleComponentsHelper {
   mountCollapsibleSection(target: SpindleComponentTarget, options: SpindleCollapsibleSectionOptions): SpindleCollapsibleSectionHandle;
   mountPagination(target: SpindleComponentTarget, options: SpindlePaginationOptions): SpindlePaginationHandle;
   mountCloseButton(target: SpindleComponentTarget, options?: SpindleCloseButtonOptions): SpindleCloseButtonHandle;
+  // Loom editor
+  mountLoomBlockEditor(
+    target: SpindleComponentTarget,
+    options: SpindleLoomBlockEditorOptions,
+  ): SpindleLoomBlockEditorHandle;
 }

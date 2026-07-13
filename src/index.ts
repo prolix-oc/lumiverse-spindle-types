@@ -319,6 +319,9 @@ export type {
   SpindlePaginationHandle,
   SpindleCloseButtonOptions,
   SpindleCloseButtonHandle,
+  SpindleLoomBlockEditorValue,
+  SpindleLoomBlockEditorOptions,
+  SpindleLoomBlockEditorHandle,
   SpindleComponentsHelper,
 } from "./components";
 
