@@ -1101,6 +1101,14 @@ export interface PromptBlockCategoryGroupDTO {
   children: PromptBlockDTO[];
 }
 
+export interface HostResponseErrorDTO {
+  code: string;
+  message: string;
+  presetId?: string;
+  expectedCacheRevision?: number;
+  actualCacheRevision?: number;
+}
+
 export interface UserPresetDTO {
   id: string;
   name: string;
@@ -1110,6 +1118,7 @@ export interface UserPresetDTO {
   prompt_order: PromptBlockDTO[];
   prompts: Record<string, unknown>;
   metadata: Record<string, unknown>;
+  cache_revision: number;
   created_at: number;
   updated_at: number;
 }
@@ -1124,7 +1133,9 @@ export interface UserPresetCreateDTO {
   metadata?: Record<string, unknown>;
 }
 
-export type UserPresetUpdateDTO = Partial<UserPresetCreateDTO>;
+export type UserPresetUpdateDTO = Partial<UserPresetCreateDTO> & {
+  expected_cache_revision: number;
+};
 export type PromptBlockCreateDTO = Partial<PromptBlockDTO>;
 export type PromptBlockUpdateDTO = Partial<Omit<PromptBlockDTO, "id">>;
 
@@ -3234,7 +3245,7 @@ export type HostToWorker =
       type: "response";
       requestId: string;
       result?: unknown;
-      error?: string;
+      error?: string | HostResponseErrorDTO;
     }
   | {
       type: "permission_denied";

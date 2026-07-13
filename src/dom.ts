@@ -1,4 +1,4 @@
-import type { PromptBlockDTO, RequestInitDTO } from "./api";
+import type { PromptBlockDTO, PromptVariableValuesDTO, RequestInitDTO } from "./api";
 import type { SpindleComponentsHelper } from "./components";
 
 /** A chat-message DOM element paired with its stable message id. */
@@ -221,6 +221,21 @@ export interface SpindlePresetEditorTabHandle {
   onActivate(handler: () => void): () => void;
 }
 
+/** Extension-owned root placed above Loom's list and editor branches. */
+export interface SpindlePresetEditorToolbarItemOptions {
+  /** Unique toolbar item identifier within the current extension. */
+  id: string;
+  /** Required accessible label for the extension-owned toolbar root. */
+  ariaLabel: string;
+}
+
+export interface SpindlePresetEditorToolbarItemHandle {
+  readonly root: HTMLElement;
+  readonly itemId: string;
+  setVisible(visible: boolean): void;
+  destroy(): void;
+}
+
 /** Mutable, editor-native snapshot of the current Loom preset draft. */
 export interface SpindlePresetEditorDraft {
   id: string;
@@ -258,6 +273,38 @@ export interface SpindlePresetEditorHelper {
     options?: SpindlePresetEditorSaveOptions,
   ): void;
   /** Immediately persist and await any pending draft changes. */
+  flush(): Promise<void>;
+  /**
+   * Cooperative, extension-identifier-scoped metadata access. This does not
+   * sandbox same-origin extension code; it prevents accidental whole-draft
+   * writes through the supported helper.
+   */
+  readonly extension: SpindlePresetEditorScopedHelper;
+}
+
+export type SpindlePresetEditorBuiltinTabId = "blocks";
+
+export interface SpindlePresetEditorExtensionState {
+  readonly open: boolean;
+  readonly presetId: string | null;
+  readonly activeTabId: string | null;
+  /** Detached array cloned from the host draft. */
+  readonly blocks: readonly PromptBlockDTO[];
+  /** Detached prompt-variable values cloned from the host draft. */
+  readonly promptVariableValues: Readonly<PromptVariableValuesDTO>;
+  /** The raw metadata value currently owned by the calling extension. */
+  readonly metadata: unknown;
+}
+
+export interface SpindlePresetEditorScopedHelper {
+  getState(): SpindlePresetEditorExtensionState;
+  onChange(handler: (state: SpindlePresetEditorExtensionState) => void): () => void;
+  setMetadata(value: Record<string, unknown>, options?: SpindlePresetEditorSaveOptions): void;
+  updateMetadata(
+    mutator: (current: unknown) => Record<string, unknown>,
+    options?: SpindlePresetEditorSaveOptions,
+  ): void;
+  activateBuiltinTab(tab: SpindlePresetEditorBuiltinTabId): void;
   flush(): Promise<void>;
 }
 
@@ -824,6 +871,7 @@ export interface SpindleFrontendContext {
     registerCharacterEditorTab(options: SpindleCharacterEditorTabOptions): SpindleCharacterEditorTabHandle;
     characterEditor: SpindleCharacterEditorHelper;
     registerPresetEditorTab(options: SpindlePresetEditorTabOptions): SpindlePresetEditorTabHandle;
+    registerPresetEditorToolbarItem(options: SpindlePresetEditorToolbarItemOptions): SpindlePresetEditorToolbarItemHandle;
     presetEditor: SpindlePresetEditorHelper;
     createFloatWidget(options?: SpindleFloatWidgetOptions): SpindleFloatWidgetHandle;
     requestDockPanel(options: SpindleDockPanelOptions): SpindleDockPanelHandle;
