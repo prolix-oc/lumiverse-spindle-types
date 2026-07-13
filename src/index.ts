@@ -62,6 +62,7 @@ export type {
     PromptBlockCreateDTO,
     PromptBlockUpdateDTO,
     PromptBlockCategoryGroupDTO,
+    HostResponseErrorDTO,
     UserPresetDTO,
     UserPresetCreateDTO,
     UserPresetUpdateDTO,
