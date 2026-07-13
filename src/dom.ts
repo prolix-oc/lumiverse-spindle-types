@@ -282,16 +282,16 @@ export interface SpindlePresetEditorHelper {
   readonly extension: SpindlePresetEditorScopedHelper;
 }
 
-export type SpindlePresetEditorBuiltinTab = "blocks";
+export type SpindlePresetEditorBuiltinTabId = "blocks";
 
 export interface SpindlePresetEditorExtensionState {
   readonly open: boolean;
   readonly presetId: string | null;
   readonly activeTabId: string | null;
   /** Detached array cloned from the host draft. */
-  blocks: PromptBlockDTO[];
+  readonly blocks: readonly PromptBlockDTO[];
   /** Detached prompt-variable values cloned from the host draft. */
-  promptVariableValues: PromptVariableValuesDTO;
+  readonly promptVariableValues: Readonly<PromptVariableValuesDTO>;
   /** The raw metadata value currently owned by the calling extension. */
   readonly metadata: unknown;
 }
@@ -304,7 +304,7 @@ export interface SpindlePresetEditorScopedHelper {
     mutator: (current: unknown) => Record<string, unknown>,
     options?: SpindlePresetEditorSaveOptions,
   ): void;
-  activateBuiltinTab(tab: SpindlePresetEditorBuiltinTab): void;
+  activateBuiltinTab(tab: SpindlePresetEditorBuiltinTabId): void;
   flush(): Promise<void>;
 }
 

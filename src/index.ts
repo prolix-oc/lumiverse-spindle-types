@@ -230,7 +230,7 @@ export type {
   SpindlePresetEditorState,
   SpindlePresetEditorSaveOptions,
   SpindlePresetEditorHelper,
-  SpindlePresetEditorBuiltinTab,
+  SpindlePresetEditorBuiltinTabId,
   SpindlePresetEditorExtensionState,
   SpindlePresetEditorScopedHelper,
   SpindleFloatWidgetOptions,
