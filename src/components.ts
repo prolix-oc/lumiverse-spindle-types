@@ -66,10 +66,7 @@ export interface SpindleMountedComponent<TOptions> {
   readonly componentId: string;
   /** The container element the component was mounted into. Same node passed as `target`. */
   readonly element: HTMLElement;
-  /**
-   * Merge a partial set of options into the live component. Pass any subset of
-   * the original mount options — undefined fields are ignored.
-   */
+  /** Merge supplied option fields into the live component. Omitted fields remain unchanged. */
   update(patch: Partial<TOptions>): void;
   /** Unmount the React tree and release host resources. The target element is left in place. */
   destroy(): void;

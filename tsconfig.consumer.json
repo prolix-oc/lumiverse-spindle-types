@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "./.consumer-dist",
+    "declaration": false
+  },
+  "include": ["test/loom-block-editor-consumer.ts"]
+}
