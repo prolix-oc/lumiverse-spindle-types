@@ -22,6 +22,33 @@
  * Components inherit the active Lumiverse theme via CSS variables, so they
  * visually match the rest of the host UI without any additional wiring.
  */
+import type { PromptBlockDTO, PromptVariableValuesDTO } from "./api";
+
+// ──────────────────────────────────────────────────────────────────────────
+// Loom block editor
+// ──────────────────────────────────────────────────────────────────────────
+
+/** Editable public value rendered by the native Loom block editor. */
+export interface SpindleLoomBlockEditorValue {
+  blocks: PromptBlockDTO[];
+  promptVariableValues: PromptVariableValuesDTO;
+}
+
+/** Controlled options for the native Loom block editor. */
+export interface SpindleLoomBlockEditorOptions {
+  value: SpindleLoomBlockEditorValue;
+  onChange?: (value: SpindleLoomBlockEditorValue) => void;
+  readOnly?: boolean;
+  compact?: boolean;
+}
+
+/** Handle returned by `mountLoomBlockEditor`. */
+export interface SpindleLoomBlockEditorHandle
+  extends SpindleMountedComponent<SpindleLoomBlockEditorOptions> {
+  getValue(): SpindleLoomBlockEditorValue;
+  refreshMacros(): Promise<void>;
+}
+
 
 // ──────────────────────────────────────────────────────────────────────────
 // Shared base shapes
@@ -39,10 +66,7 @@ export interface SpindleMountedComponent<TOptions> {
   readonly componentId: string;
   /** The container element the component was mounted into. Same node passed as `target`. */
   readonly element: HTMLElement;
-  /**
-   * Merge a partial set of options into the live component. Pass any subset of
-   * the original mount options — undefined fields are ignored.
-   */
+  /** Merge supplied option fields into the live component. Omitted fields remain unchanged. */
   update(patch: Partial<TOptions>): void;
   /** Unmount the React tree and release host resources. The target element is left in place. */
   destroy(): void;
@@ -655,4 +679,9 @@ export interface SpindleComponentsHelper {
   mountCollapsibleSection(target: SpindleComponentTarget, options: SpindleCollapsibleSectionOptions): SpindleCollapsibleSectionHandle;
   mountPagination(target: SpindleComponentTarget, options: SpindlePaginationOptions): SpindlePaginationHandle;
   mountCloseButton(target: SpindleComponentTarget, options?: SpindleCloseButtonOptions): SpindleCloseButtonHandle;
+  // Loom editor
+  mountLoomBlockEditor(
+    target: SpindleComponentTarget,
+    options: SpindleLoomBlockEditorOptions,
+  ): SpindleLoomBlockEditorHandle;
 }
