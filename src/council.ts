@@ -52,6 +52,8 @@ export interface CouncilToolsSettings {
   timeoutMs: number;
   /** Number of recent chat messages to include in sidecar context. */
   sidecarContextWindow: number;
+  /** Omit the newest user-authored message from sidecar council-tool context. */
+  excludeLatestUserMessage: boolean;
   includeUserPersona: boolean;
   includeCharacterInfo: boolean;
   includeWorldInfo: boolean;
@@ -214,6 +216,7 @@ export const COUNCIL_TOOLS_DEFAULTS: CouncilToolsSettings = {
   mode: "sidecar",
   timeoutMs: 30000,
   sidecarContextWindow: 25,
+  excludeLatestUserMessage: false,
   includeUserPersona: true,
   includeCharacterInfo: true,
   includeWorldInfo: true,
