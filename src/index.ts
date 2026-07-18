@@ -8,6 +8,16 @@ export {
   validateIdentifier,
 } from "./manifest";
 
+export type {
+  SpindleHostDescriptorV1,
+  SpindleHostLocale,
+  SpindleHostLocaleAPI,
+} from "./host";
+export {
+  SPINDLE_HOST_CAPABILITIES,
+  SPINDLE_COMPATIBILITY_ERROR_CODE,
+} from "./host";
+
 export type { SpindlePermission as SpindlePermissionType } from "./permissions";
 export { ALL_PERMISSIONS, isValidPermission } from "./permissions";
 
@@ -18,8 +28,19 @@ export { SpindleEvent, CoreEventType } from "./events";
 
 export type {
   LlmMessageDTO,
+  LlmThinkingBlockDTO,
   SpindleUserRoleDTO,
+  InterceptorGenerationType,
+  InterceptorMatchScalar,
+  InterceptorMatchDTO,
+  InterceptorRegistrationMatchOptions,
+  InterceptorRegistrationOptions,
+  InterceptorContextDTO,
+  InterceptorDisposer,
+  InterceptorHandler,
+  DeferredGuidanceDTO,
   InterceptorBreakdownEntryDTO,
+  FinalResponseDTO,
   InterceptorResultDTO,
   MacroDefinitionDTO,
   MacroInvocationContextDTO,
@@ -28,6 +49,11 @@ export type {
   ToolRegistrationDTO,
   ToolSchemaDTO,
   ToolCallDTO,
+  ToolDefinitionDTO,
+  GenerationUsageDTO,
+  GenerationResponseDTO,
+  GenerationDispatchSourceDTO,
+  ConnectionDispatchDescriptorDTO,
   GenerationRequestDTO,
   GenerationReasoningOverrideDTO,
   ReasoningEffortDTO,
@@ -112,6 +138,14 @@ export type {
   DryRunResultDTO,
   AssembleRequestDTO,
   AssembleResultDTO,
+  BoundPrefillAttachmentDTO,
+  BoundAssembleRequestDTO,
+  BoundAssemblySuccessDTO,
+  BoundAssemblyFailureDTO,
+  BoundAssemblyOutcomeDTO,
+  QuietTrackedRequestDTO,
+  QuietDispatchReceiptDTO,
+  QuietTrackedResultDTO,
   AssemblyBreakdownEntryDTO,
   ActivationStatsDTO,
   MemoryStatsDTO,
@@ -216,6 +250,7 @@ export type {
     PermissionRequestOptions,
   SpindleFrontendContext,
   SpindleFrontendModule,
+  SpindleFrontendTeardown,
   SpindleDrawerTabOptions,
   SpindleDrawerTabHandle,
   SpindleCharacterEditorTabOptions,
@@ -381,6 +416,8 @@ export type {
 
 export type {
   SpindleAPI,
+  SpindleGenerateAPI,
+  SpindleConnectionsAPI,
   SpindlePromptRegex,
   FrontendProcessHandle,
   BackendProcessHandle,

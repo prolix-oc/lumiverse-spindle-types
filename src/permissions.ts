@@ -26,6 +26,8 @@
  *                            web search settings (never the API key).
  * - "unsafe_eval"          — opt a sandboxed widget frame into CSP 'unsafe-eval'
  *                            (eval / new Function) for runtime-compiling frameworks.
+ * - "final_response"        — replace the authoritative assistant response from
+ *                            an interceptor (privileged; never auto-granted)
  */
 export type SpindlePermission =
   | "generation"
@@ -54,7 +56,8 @@ export type SpindlePermission =
   | "generation_parameters"
   | "macro_interceptor"
   | "web_search"
-  | "unsafe_eval";
+  | "unsafe_eval"
+  | "final_response";
 
 export const ALL_PERMISSIONS: readonly SpindlePermission[] = [
   "generation",
@@ -84,6 +87,7 @@ export const ALL_PERMISSIONS: readonly SpindlePermission[] = [
   "macro_interceptor",
   "web_search",
   "unsafe_eval",
+  "final_response",
 ] as const;
 
 export function isValidPermission(p: string): p is SpindlePermission {

@@ -1,11 +1,15 @@
 import type { SpindleManifest } from "./manifest";
+import type { SpindleHostDescriptorV1 } from "./host";
 import type {
   CouncilMemberContext,
   CouncilSettings,
 } from "./council";
 import type {
   LlmMessageDTO,
-  InterceptorResultDTO,
+  InterceptorDisposer,
+  InterceptorHandler,
+  InterceptorRegistrationMatchOptions,
+  InterceptorRegistrationOptions,
   MacroDefinitionDTO,
   MacroResolveOptionsDTO,
   MacroResolveResultDTO,
@@ -14,6 +18,7 @@ import type {
   ChatAppendMessageOptionsDTO,
   RequestInitDTO,
   ConnectionProfileDTO,
+  ConnectionDispatchDescriptorDTO,
   PermissionDeniedDetail,
   PermissionChangedDetail,
   CharacterDTO,
@@ -58,6 +63,10 @@ import type {
   DryRunResultDTO,
   AssembleRequestDTO,
   AssembleResultDTO,
+  BoundAssembleRequestDTO,
+  BoundAssemblyOutcomeDTO,
+  QuietTrackedRequestDTO,
+  QuietTrackedResultDTO,
   ChatMemoryResultDTO,
   ImageGenRequestDTO,
   ImageGenResultDTO,
@@ -235,8 +244,20 @@ export interface SpindlePromptRegex {
   setOwnedChats(chatIds: string[]): void;
 }
 
+export type SpindleGenerateAPI = SpindleAPI["generate"];
+
+export interface SpindleConnectionsAPI {
+  /**
+   * Resolve an owned concrete slot's current safe dispatch descriptor inside
+   * an active interceptor callback. Requires the `generation` permission.
+   */
+  resolveDispatch(connectionId: string): Promise<ConnectionDispatchDescriptorDTO | null>;
+}
+
 /** The global `spindle` object available in backend extension workers */
 export interface SpindleAPI {
+  /** Immutable host compatibility descriptor for this extension runtime. */
+  readonly host: SpindleHostDescriptorV1;
   /**
    * Subscribe to permission grant/revoke changes for this extension only.
    * This is delivered directly by the worker host and does not subscribe to
@@ -314,12 +335,14 @@ export interface SpindleAPI {
    * Without it, returned parameters are silently stripped.
    */
   registerInterceptor(
-    handler: (
-      messages: LlmMessageDTO[],
-      context: unknown
-    ) => Promise<LlmMessageDTO[] | InterceptorResultDTO>,
-    priority?: number
-  ): void;
+    handler: InterceptorHandler,
+    priority?: number,
+    options?: InterceptorRegistrationMatchOptions,
+  ): InterceptorDisposer;
+  registerInterceptor(
+    handler: InterceptorHandler,
+    options?: InterceptorRegistrationOptions,
+  ): InterceptorDisposer;
 
   /**
    * Assemble an arbitrary Loom block graph against a chat without calling an
@@ -378,6 +401,18 @@ export interface SpindleAPI {
    * ```
    */
   generate: {
+    /**
+     * Assemble against the active callback's frozen parent retrieval snapshot
+     * without provider work or fresh retrieval effects. Requires the
+     * `generation` permission and an active interceptor callback.
+     */
+    assemble(input: BoundAssembleRequestDTO): Promise<BoundAssemblyOutcomeDTO>;
+    /**
+     * Dispatch a receipt-bearing quiet call through the active callback's
+     * revision-bound Main or explicit-slot source. Requires the `generation`
+     * permission and an active interceptor callback.
+     */
+    quietTracked(input: QuietTrackedRequestDTO): Promise<QuietTrackedResultDTO>;
     raw(input: GenerationRequestDTO): Promise<unknown>;
     quiet(input: GenerationRequestDTO): Promise<unknown>;
     batch(input: GenerationRequestDTO): Promise<unknown>;
@@ -716,6 +751,11 @@ export interface SpindleAPI {
      * Returns null if the connection doesn't exist or isn't accessible.
      */
     get(connectionId: string, userId?: string): Promise<ConnectionProfileDTO | null>;
+    /**
+     * Resolve an owned concrete slot's safe current dispatch descriptor inside
+     * an active interceptor callback. Requires the `generation` permission.
+     */
+    resolveDispatch(connectionId: string): Promise<ConnectionDispatchDescriptorDTO | null>;
   };
 
   /** Server-side token counting helpers (free tier). */
