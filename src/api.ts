@@ -1,4 +1,5 @@
 import type { SpindleManifest } from "./manifest";
+import type { SpindleHostDescriptorV1 } from "./host";
 import type { CouncilMemberContext } from "./council";
 import type {
   ChatLinkAttachDTO,
@@ -16,13 +17,21 @@ export type LlmMessagePartDTO =
   | { type: "text"; text: string; cache_control?: Record<string, unknown> }
   | { type: "image"; data: string; mime_type: string; cache_control?: Record<string, unknown> }
   | { type: "audio"; data: string; mime_type: string; cache_control?: Record<string, unknown> }
-  | { type: "tool_use"; id: string; name: string; input: Record<string, unknown>; cache_control?: Record<string, unknown> }
+  | { type: "tool_use"; id: string; name: string; input: Record<string, unknown>; cache_control?: Record<string, unknown>; thought_signature?: string }
   | { type: "tool_result"; tool_use_id: string; content: string; is_error?: boolean; cache_control?: Record<string, unknown> };
+
+export interface LlmThinkingBlockDTO {
+  type: "thinking" | "redacted_thinking";
+  thinking?: string;
+  signature?: string;
+  data?: string;
+}
 
 export interface LlmMessageDTO {
   role: "system" | "user" | "assistant";
   content: string | LlmMessagePartDTO[];
   name?: string;
+  cache_control?: Record<string, unknown>;
   /**
    * Thinking-mode reasoning content from the previous assistant turn, echoed
    * back on the next request. Required by DeepSeek's thinking-mode models
@@ -36,6 +45,8 @@ export interface LlmMessageDTO {
    * only on `role: 'assistant'` messages.
    */
   reasoning_content?: string;
+  thinking_blocks?: LlmThinkingBlockDTO[];
+  reasoning_details?: Record<string, unknown>[];
   /**
    * True when this message is a chat-history turn (as opposed to a depth-injected 
    * world-info/preset/author's-note block that was spliced into the chat-history 
@@ -57,6 +68,80 @@ export interface LlmMessageDTO {
 }
 
 export type SpindleUserRoleDTO = "operator" | "admin" | "user";
+export type InterceptorGenerationType =
+  | "normal"
+  | "continue"
+  | "regenerate"
+  | "swipe"
+  | "impersonate"
+  | "quiet";
+
+export type InterceptorMatchScalar = string | number | boolean | null;
+
+export interface InterceptorMatchDTO {
+  /**
+   * Serializable filter domain. Terminal callbacks currently run only for
+   * live `normal` and `continue`; every other value is a fail-closed filter.
+   */
+  generationTypes?: InterceptorGenerationType[];
+  /** Terminal callbacks are never invoked for dry runs. */
+  isDryRun?: boolean;
+  presetField?: {
+    path: string[];
+    exists?: boolean;
+    oneOf?: InterceptorMatchScalar[];
+    notIn?: InterceptorMatchScalar[];
+  };
+}
+
+export interface InterceptorRegistrationMatchOptions {
+  match?: InterceptorMatchDTO;
+}
+
+export interface InterceptorRegistrationOptions {
+  priority?: number;
+  match?: InterceptorMatchDTO;
+}
+
+/**
+ * Host-owned, immutable context for one bound interceptor callback.
+ * `signal` is local to the worker invocation and is never serialized.
+ */
+export interface InterceptorContextDTO {
+  readonly userId: string;
+  readonly chatId: string;
+  readonly generationId: string;
+  readonly generationType: InterceptorGenerationType;
+  readonly isDryRun: boolean;
+  readonly presetId: string | null;
+  /** Deep clone of only this extension's own preset metadata namespace. */
+  readonly presetMetadata: unknown;
+  readonly personaId: string | null;
+  readonly characterId: string | null;
+  readonly personaAddonStates: Readonly<Record<string, boolean>>;
+  readonly excludeMessageId?: string;
+  readonly rejectedSwipe?: string;
+  readonly regenFeedback?: string;
+  readonly regenFeedbackPosition?: "system" | "user";
+  readonly mainDispatch: {
+    readonly source: "main";
+    readonly descriptor: Readonly<ConnectionDispatchDescriptorDTO> | null;
+    readonly connectionDispatchRevision: string | null;
+    readonly dispatchKind: "concrete" | "roulette" | null;
+  };
+  readonly prefillCarrier: BoundPrefillAttachmentDTO;
+  readonly interceptorDeadlineAt: number;
+  readonly boundWorkDeadlineAt: number;
+  /** Worker-local cancellation signal; never serialized over the worker protocol. */
+  readonly signal: AbortSignal;
+}
+
+export interface DeferredGuidanceDTO {
+  id: string;
+  content: string;
+  role: "system";
+}
+
 
 /**
  * Optional metadata returned by an interceptor so Lumiverse can surface
@@ -73,6 +158,13 @@ export interface InterceptorBreakdownEntryDTO {
   name?: string;
 }
 
+/** Privileged response override returned by an interceptor. */
+export interface FinalResponseDTO {
+  content: string;
+  reasoning?: string;
+  fallbackMessageIndex: number;
+}
+
 /**
  * Return type for interceptor handlers.
  * Interceptors may return either a plain `LlmMessageDTO[]` (backwards-compatible)
@@ -84,7 +176,18 @@ export interface InterceptorResultDTO {
   parameters?: Record<string, unknown>;
   /** Optional prompt-breakdown entries for injected messages. */
   breakdown?: InterceptorBreakdownEntryDTO[];
+  /** Host-owned system guidance retained for each authoritative Main attempt. */
+  deferredGuidance?: DeferredGuidanceDTO[];
+  /** Optional privileged response replacement. Requires the `final_response` permission. */
+  finalResponse?: FinalResponseDTO;
 }
+
+export type InterceptorDisposer = () => void;
+
+export type InterceptorHandler = (
+  messages: LlmMessageDTO[],
+  context: InterceptorContextDTO,
+) => Promise<LlmMessageDTO[] | InterceptorResultDTO>;
 
 export interface MacroDefinitionDTO {
   name: string;
@@ -261,6 +364,15 @@ export interface ToolSchemaDTO {
   parameters: Record<string, unknown>; // JSON Schema
 }
 
+export interface ToolDefinitionDTO {
+  name: string;
+  description: string;
+  parameters: Record<string, unknown>;
+  strict?: boolean;
+  inputExamples?: Array<Record<string, unknown>>;
+  cache_control?: Record<string, unknown>;
+}
+
 /** A single function call made by the LLM. */
 export interface ToolCallDTO {
   /** Tool name (as given in the schema). */
@@ -269,7 +381,34 @@ export interface ToolCallDTO {
   args: Record<string, unknown>;
   /** Provider call ID (e.g. Anthropic `id`, OpenAI `id`). Synthetic UUID for providers that don't supply one (e.g. Google). */
   call_id: string;
+  /** Opaque provider signature preserved for tool-call continuations. */
+  thought_signature?: string;
 }
+
+export interface GenerationUsageDTO {
+  prompt_tokens?: number;
+  completion_tokens?: number;
+  total_tokens?: number;
+  provider_raw?: Record<string, unknown>;
+}
+
+export interface GenerationResponseDTO {
+  content: string;
+  reasoning?: string;
+  finish_reason: string;
+  tool_calls?: ToolCallDTO[];
+  thinking_blocks?: LlmThinkingBlockDTO[];
+  reasoning_details?: Record<string, unknown>[];
+  usage?: GenerationUsageDTO;
+}
+
+export type GenerationDispatchSourceDTO =
+  | { source: "main"; expectedConnectionDispatchRevision: string }
+  | {
+      source: "slot";
+      connectionId: string;
+      expectedConnectionDispatchRevision: string;
+    };
 
 export interface GenerationRequestDTO {
   type: "raw" | "quiet" | "batch";
@@ -533,6 +672,16 @@ export interface ConnectionProfileDTO {
   reasoning_bindings: ConnectionReasoningBindingsDTO | null;
   created_at: number;
   updated_at: number;
+}
+
+export interface ConnectionDispatchDescriptorDTO {
+  connectionId: string;
+  connectionName: string;
+  provider: string;
+  model: string;
+  endpointOrigin: string;
+  dispatchKind: "concrete" | "roulette";
+  connectionDispatchRevision: string | null;
 }
 
 // ─── Image Generation DTOs ──────────────────────────────────────────────
@@ -1753,6 +1902,126 @@ export interface AssembleResultDTO {
   breakdown: AssemblyBreakdownEntryDTO[];
 }
 
+export interface BoundPrefillAttachmentDTO {
+  /**
+   * Opaque parent-prefill attestation. It may be presented only by the live
+   * worker invocation; it is not itself a reusable attachment capability,
+   * message index, or carrier content.
+   */
+  readonly id: string;
+  readonly state: "absent" | "available" | "invalid";
+}
+
+export interface BoundAssembleRequestDTO {
+  blocks: PromptBlockDTO[];
+  promptVariableValues?: PromptVariableValuesDTO;
+  dispatch: GenerationDispatchSourceDTO;
+  deadlineAt: number;
+  hookFailureMode?: "degrade" | "reject";
+  macroFailureMode?: "degrade" | "reject";
+  signal?: AbortSignal;
+}
+
+export interface BoundAssemblySuccessDTO {
+  messages: LlmMessageDTO[];
+  breakdown: AssemblyBreakdownEntryDTO[];
+  resolved: {
+    source: "main" | "slot";
+    connectionId: string | null;
+    connectionDispatchRevision: string;
+    dispatchKind: "concrete";
+  };
+}
+
+export type BoundAssemblyFailureDTO =
+  | {
+      kind: "hook";
+      code: "ASSEMBLY_HOOK_FAILED";
+      phase: "context" | "world_info" | "macro";
+      reason: "error" | "timeout";
+      message: string;
+    }
+  | {
+      kind: "macro";
+      code: "ASSEMBLY_MACRO_FAILED";
+      reason: "definition" | "parse" | "recursion" | "budget" | "evaluation";
+      message: string;
+    }
+  | {
+      kind: "retrieval_snapshot";
+      code: "ASSEMBLY_RETRIEVAL_SNAPSHOT_UNAVAILABLE";
+      reason: "missing" | "expired" | "unavailable" | "oversize";
+      message: string;
+    }
+  | {
+      kind: "abort";
+      code: "ASSEMBLY_ABORTED";
+      name: "AbortError";
+      message: string;
+    }
+  | {
+      kind: "precondition" | "security" | "internal";
+      code: string;
+      message: string;
+    };
+
+export type BoundAssemblyOutcomeDTO =
+  | { ok: true; result: BoundAssemblySuccessDTO }
+  | { ok: false; error: BoundAssemblyFailureDTO };
+
+export interface QuietTrackedRequestDTO {
+  messages: LlmMessageDTO[];
+  dispatch: GenerationDispatchSourceDTO;
+  /**
+   * When supplied, WorkerHost—not extension code—attaches the authenticated
+   * parent assistant carrier as the final continuation carrier for this dispatch.
+   */
+  continuation?: {
+    parentPrefill: BoundPrefillAttachmentDTO;
+    mode: "append-parent-carrier-last";
+  };
+  parameters?: Record<string, unknown>;
+  reasoning?: Record<string, unknown>;
+  tools?: ToolDefinitionDTO[];
+  deadlineAt: number;
+  signal?: AbortSignal;
+}
+
+export interface QuietDispatchReceiptDTO {
+  providerInvoked: boolean;
+  terminalResponse: boolean;
+  source: "main" | "slot";
+  connectionId: string | null;
+  connectionDispatchRevision: string;
+  usage?: GenerationUsageDTO;
+}
+
+export type QuietTrackedResultDTO =
+  | { ok: true; response: GenerationResponseDTO; receipt: QuietDispatchReceiptDTO }
+  | {
+      ok: false;
+      phase: "preflight";
+      providerInvoked: false;
+      receipt: null;
+      error: {
+        kind: "precondition" | "security";
+        code: string;
+        name: string;
+        message: string;
+      };
+    }
+  | {
+      ok: false;
+      phase: "resolved";
+      receipt: QuietDispatchReceiptDTO;
+      error: {
+        kind: "precondition" | "provider" | "abort" | "security" | "internal";
+        code: string;
+        name: string;
+        message: string;
+      };
+    };
+
 // ─── Chat Memory DTOs ──────────────────────────────────────────────────
 
 export interface ChatMemoryChunkDTO {
@@ -2641,19 +2910,55 @@ export type WorkerToHost =
   | { type: "register_macro"; definition: MacroDefinitionDTO }
   | { type: "unregister_macro"; name: string }
   | { type: "update_macro_value"; name: string; value: string }
-  | { type: "register_interceptor"; priority?: number }
+  | {
+      type: "register_interceptor";
+      registrationId: string;
+      priority?: number;
+      match?: InterceptorMatchDTO;
+    }
+  | { type: "unregister_interceptor"; registrationId: string }
   | {
       type: "intercept_result";
       requestId: string;
+      registrationId: string;
       messages: LlmMessageDTO[];
       parameters?: Record<string, unknown>;
       breakdown?: InterceptorBreakdownEntryDTO[];
+      deferredGuidance?: DeferredGuidanceDTO[];
+      finalResponse?: FinalResponseDTO;
     }
   | {
       type: "assemble_prompt";
       requestId: string;
       input: Omit<AssembleRequestDTO, "signal">;
       userId?: string;
+    }
+  /**
+   * Assemble through the active bound interceptor generation context. The
+   * worker-local signal is omitted from the structured-clone payload.
+   */
+  | {
+      type: "generate_assemble";
+      requestId: string;
+      input: Omit<BoundAssembleRequestDTO, "signal">;
+    }
+  /**
+   * Dispatch tracked quiet generation through the active bound context.
+   * The worker-local signal is omitted from the structured-clone payload.
+   */
+  | {
+      type: "generate_quiet_tracked";
+      requestId: string;
+      input: Omit<QuietTrackedRequestDTO, "signal">;
+    }
+  /**
+   * Inspect an owned concrete slot through the active bound interceptor
+   * context. The host derives user scope from the authenticated callback.
+   */
+  | {
+      type: "connections_resolve_dispatch";
+      requestId: string;
+      connectionId: string;
     }
   | { type: "register_tool"; tool: ToolRegistrationDTO }
   | { type: "unregister_tool"; name: string }
@@ -3205,7 +3510,7 @@ export type WorkerToHost =
 // ─── Host → Worker messages ──────────────────────────────────────────────
 
 export type HostToWorker =
-  | { type: "init"; manifest: SpindleManifest; storagePath: string }
+  | { type: "init"; manifest: SpindleManifest; storagePath: string; host: SpindleHostDescriptorV1 }
   | { type: "event"; event: string; payload: unknown; userId?: string }
   | {
       type: "rpc_pool_request";
@@ -3218,8 +3523,15 @@ export type HostToWorker =
   | {
       type: "intercept_request";
       requestId: string;
+      registrationId: string;
       messages: LlmMessageDTO[];
-      context: unknown;
+      context: Omit<InterceptorContextDTO, "signal">;
+    }
+  | {
+      type: "intercept_abort";
+      requestId: string;
+      registrationId: string;
+      reason?: string;
     }
   | {
       type: "context_handler_request";

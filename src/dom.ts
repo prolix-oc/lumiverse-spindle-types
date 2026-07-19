@@ -1,5 +1,6 @@
 import type { PromptBlockDTO, PromptVariableValuesDTO, RequestInitDTO } from "./api";
 import type { SpindleComponentsHelper } from "./components";
+import type { SpindleHostDescriptorV1, SpindleHostLocaleAPI } from "./host";
 
 /** A chat-message DOM element paired with its stable message id. */
 export interface SpindleMessageElement {
@@ -859,6 +860,10 @@ export interface SpindleDisplayResolverRegistry {
 
 /** Context object provided to frontend extension modules */
 export interface SpindleFrontendContext {
+  /** Immutable host compatibility descriptor for this extension runtime. */
+  readonly host: SpindleHostDescriptorV1;
+  /** Synchronous host locale access with removable live-change subscriptions. */
+  readonly locale: SpindleHostLocaleAPI;
   dom: SpindleDOMHelper;
   events: {
     on(event: string, handler: (payload: unknown) => void): () => void;
@@ -923,6 +928,8 @@ export interface SpindleFrontendContext {
     showConfirm(options: SpindleConfirmOptions): Promise<SpindleConfirmResult>;
     /** Request a tab move to a specific drawer location. */
     requestTabLocation(tabId: string, location: SpindleTabLocation): void;
+    /** Read the current drawer location for a built-in or extension tab. */
+    getTabLocation(tabId: string): SpindleTabLocation;
     /** Get the display title of a built-in drawer tab by its id. */
     getBuiltInTabTitle(tabId: string): string | undefined;
     /** Get the root HTMLElement of a built-in drawer tab by its id, or undefined if not mounted. */
@@ -1045,8 +1052,13 @@ export interface SpindleFrontendContext {
   manifest: import("./manifest").SpindleManifest;
 }
 
+/** Cleanup returned by a frontend extension setup hook. */
+export type SpindleFrontendTeardown = () => void | Promise<void>;
+
 /** What a frontend extension module must export */
 export interface SpindleFrontendModule {
-  setup(ctx: SpindleFrontendContext): void | (() => void);
-  teardown?(): void;
+  setup(
+    ctx: SpindleFrontendContext,
+  ): void | SpindleFrontendTeardown | Promise<void | SpindleFrontendTeardown>;
+  teardown?(): void | Promise<void>;
 }
