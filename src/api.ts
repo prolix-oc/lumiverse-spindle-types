@@ -727,6 +727,11 @@ export interface ImageGenProviderDTO {
     modelListStyle: "static" | "dynamic" | "google";
     staticModels?: Array<{ id: string; label: string }>;
     defaultUrl: string;
+    /** Present only when the provider supports Lumiverse's WebSocket preview/status stream. */
+    websocketPreviewStreaming?: {
+      previews: true;
+      status: true;
+    };
   };
 }
 
@@ -760,6 +765,47 @@ export interface ImageGenResultDTO {
   /** Public URL for the image — works without authentication. Suitable for push notification `image` field. */
   imageUrl?: string;
 }
+
+/** Input for {@link SpindleAPI.imageGen.generateStream}. */
+export interface ImageGenStreamRequestDTO extends ImageGenRequestDTO {
+  /** Abort the upstream generation and close its WebSocket stream. */
+  signal?: AbortSignal;
+}
+
+/** A progress/status update received from the provider WebSocket. */
+export interface ImageGenStreamStatusDTO {
+  type: "status";
+  /** Current step when the provider reports numerical progress. */
+  step?: number;
+  /** Total steps when the provider reports numerical progress. */
+  totalSteps?: number;
+  /** Current workflow node, when supplied by the provider. */
+  nodeId?: string;
+}
+
+/** A preview image received from the provider WebSocket. */
+export interface ImageGenStreamPreviewDTO {
+  type: "preview";
+  /** Preview image as a base64 data URL. */
+  imageDataUrl: string;
+  /** Status reported with this preview, when available. */
+  step?: number;
+  totalSteps?: number;
+  nodeId?: string;
+}
+
+/** Terminal success event for an image generation stream. */
+export interface ImageGenStreamDoneDTO {
+  type: "done";
+  /** Final image and its persisted asset identifiers. */
+  result: ImageGenResultDTO;
+}
+
+/** Events yielded by {@link SpindleAPI.imageGen.generateStream}. */
+export type ImageGenStreamEventDTO =
+  | ImageGenStreamStatusDTO
+  | ImageGenStreamPreviewDTO
+  | ImageGenStreamDoneDTO;
 
 // ─── Image DTOs ─────────────────────────────────────────────────────────
 
@@ -3384,6 +3430,12 @@ export type WorkerToHost =
   | { type: "macros_resolve"; requestId: string; template: string; chatId?: string; characterId?: string; userId?: string; commit?: boolean }
   // ─── Image Generation (gated: "image_gen") ──────────────────────────
   | { type: "image_gen_generate"; requestId: string; input: ImageGenRequestDTO }
+  /**
+   * Start a WebSocket-backed image stream. Only providers that advertise
+   * `websocketPreviewStreaming` accept this request.
+   */
+  | { type: "image_gen_generate_stream"; requestId: string; input: Omit<ImageGenStreamRequestDTO, "signal"> }
+  | { type: "image_gen_cancel_stream"; requestId: string }
   | { type: "image_gen_providers"; requestId: string; userId?: string }
   | { type: "image_gen_connections_list"; requestId: string; userId?: string }
   | { type: "image_gen_connections_get"; requestId: string; connectionId: string; userId?: string }
@@ -3622,4 +3674,6 @@ export type HostToWorker =
    * `request_generation_stream`. Mutually exclusive with the `done`
    * chunk in `generation_stream_chunk`. Aborts surface here too.
    */
-  | { type: "generation_stream_error"; requestId: string; error: string };
+  | { type: "generation_stream_error"; requestId: string; error: string }
+  | { type: "image_gen_stream_chunk"; requestId: string; event: ImageGenStreamEventDTO }
+  | { type: "image_gen_stream_error"; requestId: string; error: string };

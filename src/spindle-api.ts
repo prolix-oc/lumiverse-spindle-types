@@ -70,6 +70,8 @@ import type {
   ChatMemoryResultDTO,
   ImageGenRequestDTO,
   ImageGenResultDTO,
+  ImageGenStreamRequestDTO,
+  ImageGenStreamEventDTO,
   ImageGenConnectionDTO,
   ImageGenProviderDTO,
   ImageGetOptionsDTO,
@@ -800,6 +802,16 @@ export interface SpindleAPI {
      * Returns the image as a base64 data URL.
      */
     generate(input: ImageGenRequestDTO): Promise<ImageGenResultDTO>;
+    /**
+     * Generate through a provider that supports WebSocket preview images and
+     * status updates (currently SwarmUI and ComfyUI). The terminal `done`
+     * event carries the same result as {@link generate}. Breaking from the
+     * iterator or aborting `input.signal` cancels the upstream generation.
+     *
+     * Throws if the selected provider does not advertise
+     * `websocketPreviewStreaming` in {@link getProviders}.
+     */
+    generateStream(input: ImageGenStreamRequestDTO): AsyncGenerator<ImageGenStreamEventDTO, void, void>;
     /**
      * List available image generation providers with their capability schemas.
      * The schemas describe supported parameters, models, and features.
