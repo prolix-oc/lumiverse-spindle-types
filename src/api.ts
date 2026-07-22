@@ -2006,7 +2006,7 @@ export interface BoundPrefillAttachmentDTO {
 }
 
 export interface BoundAssembleRequestDTO {
-  blocks: PromptBlockDTO[];
+  blocks: PromptBlockSnapshotDTO[];
   promptVariableValues?: PromptVariableValuesDTO;
   dispatch: GenerationDispatchSourceDTO;
   deadlineAt: number;
