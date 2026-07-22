@@ -1268,7 +1268,20 @@ export type PromptBlockRoleDTO = "system" | "user" | "assistant" | "user_append"
 export type PromptBlockPositionDTO = "pre_history" | "post_history" | "in_history";
 export type PromptBlockCategoryModeDTO = "radio" | "checkbox" | null;
 
-export interface PromptBlockDTO {
+/** A native Loom placement profile selected for a prompt block. */
+export interface PromptBlockPlacementDTO {
+  role: PromptBlockRoleDTO;
+  position: PromptBlockPositionDTO;
+  depth: number;
+}
+
+/** A select variable's mapping from option ids to native Loom placement profiles. */
+export interface PromptBlockPlacementBindingDTO {
+  variableId: string;
+  options: Record<string, PromptBlockPlacementDTO>;
+}
+
+interface PromptBlockCoreDTO {
   id: string;
   name: string;
   content: string;
@@ -1289,11 +1302,45 @@ export interface PromptBlockDTO {
   variables?: PromptVariableDefDTO[];
 }
 
+/**
+ * Editable/public prompt-block value.
+ *
+ * Host placement and sealed/provenance fields are snapshot-only and therefore
+ * cannot be supplied through mutable block or editor inputs.
+ */
+export interface PromptBlockDTO extends PromptBlockCoreDTO {
+  placementBinding?: never;
+  sealed?: never;
+  sealedKey?: never;
+  sealedSource?: never;
+  sealedOriginPresetId?: never;
+  sealedOriginVersion?: never;
+  sealedSha256?: never;
+}
+
+/**
+ * Host-returned snapshot of a prompt block.
+ *
+ * The placement binding and sealed/provenance fields are native host snapshot
+ * semantics. They are intentionally absent from the editable/public
+ * `PromptBlockDTO` and must not be supplied through mutable block or editor
+ * inputs.
+ */
+export interface PromptBlockSnapshotDTO extends PromptBlockCoreDTO {
+  placementBinding?: PromptBlockPlacementBindingDTO;
+  sealed?: boolean;
+  sealedKey?: string;
+  sealedSource?: "lumihub" | string;
+  sealedOriginPresetId?: string;
+  sealedOriginVersion?: string | null;
+  sealedSha256?: string;
+}
+
 export interface PromptBlockCategoryGroupDTO {
   /** The category header block, or null for uncategorized leading blocks. */
-  categoryBlock: PromptBlockDTO | null;
+  categoryBlock: PromptBlockSnapshotDTO | null;
   /** Non-category blocks after the header until the next category header. */
-  children: PromptBlockDTO[];
+  children: PromptBlockSnapshotDTO[];
 }
 
 export interface HostResponseErrorDTO {
@@ -1310,7 +1357,7 @@ export interface UserPresetDTO {
   provider: string;
   engine: string;
   parameters: Record<string, unknown>;
-  prompt_order: PromptBlockDTO[];
+  prompt_order: PromptBlockSnapshotDTO[];
   prompts: Record<string, unknown>;
   metadata: Record<string, unknown>;
   cache_revision: number;
