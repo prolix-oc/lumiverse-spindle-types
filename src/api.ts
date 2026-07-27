@@ -1601,6 +1601,7 @@ export interface WorldInfoInterceptorResultDTO {
   readonly enabled?: readonly string[];
   readonly forced?: readonly string[];
   readonly mutated?: readonly WorldInfoInterceptorMutationDTO[];
+  readonly captured?: readonly string[];
 }
 
 // ─── Databank DTOs ───────────────────────────────────────────────────────
