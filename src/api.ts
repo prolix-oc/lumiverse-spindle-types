@@ -121,6 +121,8 @@ export interface InterceptorContextDTO {
   readonly characterId: string | null;
   readonly personaAddonStates: Readonly<Record<string, boolean>>;
   readonly excludeMessageId?: string;
+  readonly activatedWorldInfo?: readonly ActivatedWorldInfoEntryDTO[];
+  readonly capturedWorldInfo?: readonly ActivatedWorldInfoEntryDTO[];
   readonly rejectedSwipe?: string;
   readonly regenFeedback?: string;
   readonly regenFeedbackPosition?: "system" | "user";
