@@ -65,6 +65,7 @@ export interface LlmMessageDTO {
    * Source message's `index_in_chat`, paired with `sourceMessageId`. 
    */
   sourceIndexInChat?: number;
+  sourceMessageMetadata?: Readonly<Record<string, unknown>>;
 }
 
 export type SpindleUserRoleDTO = "operator" | "admin" | "user";
