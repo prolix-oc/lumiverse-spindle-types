@@ -136,8 +136,17 @@ export interface InterceptorContextDTO {
   readonly signal: AbortSignal;
 }
 
+/**
+ * Deferred system guidance retained by the host terminal lease.
+ *
+ * A result may contain at most 128 entries. IDs must be unique canonical UUIDs
+ * (versions 1-5). Content must be non-empty, at most 1 MiB per entry when
+ * UTF-8 encoded, and at most 2 MiB across the result.
+ */
 export interface DeferredGuidanceDTO {
+  /** Unique canonical UUID (versions 1-5) within this interceptor result. */
   id: string;
+  /** Non-empty system guidance bounded by the limits above. */
   content: string;
   role: "system";
 }
