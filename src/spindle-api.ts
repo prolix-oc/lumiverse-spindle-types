@@ -1,5 +1,6 @@
 import type { SpindleManifest } from "./manifest";
 import type { SpindleHostDescriptorV1 } from "./host";
+import type { SpindleTextEditorOptions, SpindleTextEditorResult } from "./dom";
 import type {
   CouncilMemberContext,
   CouncilSettings,
@@ -1683,18 +1684,7 @@ export interface SpindleAPI {
      * }
      * ```
      */
-    open(options?: {
-      title?: string;
-      value?: string;
-      placeholder?: string;
-      /** Optional caller-owned 1–128 character ASCII token used with `textEditor.close()`. */
-      editorRequestId?: string;
-      /** For operator-scoped extensions only. */
-      userId?: string;
-    }): Promise<{
-      text: string;
-      cancelled: boolean;
-    }>;
+    open(options?: SpindleTextEditorOptions): Promise<SpindleTextEditorResult>;
     /**
      * Cancel an editor opened with the matching `editorRequestId`.
      *
