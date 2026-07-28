@@ -38,6 +38,8 @@ export interface SpindleLoomBlockEditorValue {
 export interface SpindleLoomBlockEditorOptions {
   value: SpindleLoomBlockEditorValue;
   onChange?: (value: SpindleLoomBlockEditorValue) => void;
+  /** Reports validated in-progress field edits before the native editor commits them. */
+  onDraftChange?: (value: SpindleLoomBlockEditorValue) => void;
   readOnly?: boolean;
   compact?: boolean;
 }
