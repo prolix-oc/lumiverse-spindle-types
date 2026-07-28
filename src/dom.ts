@@ -547,6 +547,8 @@ export interface SpindleTextEditorOptions {
   value?: string;
   /** Placeholder text. Default: "" */
   placeholder?: string;
+  /** Optional caller-owned 1–128 character ASCII token used with `textEditor.close()`. */
+  editorRequestId?: string;
   /** Enable macro syntax highlighting and insertion panel. Default: true */
   macros?: boolean;
 }

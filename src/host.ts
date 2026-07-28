@@ -5,6 +5,7 @@ export const SPINDLE_HOST_CAPABILITIES = Object.freeze({
   "generation-assembly-v1": 1,
   "interceptor-context-v1": 1,
   "interceptor-final-response-v1": 1,
+  "text-editor-close-v1": 1,
 }) as Readonly<Record<string, number>>;
 /** Structured error code returned when host compatibility validation fails. */
 export const SPINDLE_COMPATIBILITY_ERROR_CODE = "SPINDLE_COMPATIBILITY_ERROR" as const;

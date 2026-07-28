@@ -3455,7 +3455,8 @@ export type WorkerToHost =
   | { type: "user_is_visible"; requestId: string; userId?: string }
   | { type: "user_get_role"; requestId: string; userId?: string }
   // ─── Text Editor (free tier) ───────────────────────────────────────
-  | { type: "text_editor_open"; requestId: string; title?: string; value?: string; placeholder?: string; userId?: string }
+  | { type: "text_editor_open"; requestId: string; editorRequestId: string; title?: string; value?: string; placeholder?: string; userId?: string }
+  | { type: "text_editor_close"; requestId: string; editorRequestId: string; userId?: string }
   // ─── Modal (free tier) ────────────────────────────────────────────
   | { type: "modal_open"; requestId: string; modalRequestId?: string; title: string; items: SpindleModalItemDTO[]; width?: number; maxHeight?: number; persistent?: boolean; userId?: string }
   | { type: "modal_close"; requestId: string; openRequestId: string; userId?: string }

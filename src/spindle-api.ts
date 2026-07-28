@@ -1687,12 +1687,20 @@ export interface SpindleAPI {
       title?: string;
       value?: string;
       placeholder?: string;
+      /** Optional caller-owned 1–128 character ASCII token used with `textEditor.close()`. */
+      editorRequestId?: string;
       /** For operator-scoped extensions only. */
       userId?: string;
     }): Promise<{
       text: string;
       cancelled: boolean;
     }>;
+    /**
+     * Cancel an editor opened with the matching `editorRequestId`.
+     *
+     * Unknown or already-settled identities are accepted as no-ops.
+     */
+    close(editorRequestId: string, userId?: string): Promise<void>;
   };
 
   /**

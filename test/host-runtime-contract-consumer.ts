@@ -107,6 +107,24 @@ spindle.host.capabilities["interceptor-final-response-v1"] = 2;
 // @ts-expect-error descriptor scalar fields are readonly
 spindle.host.lumiverseVersion = "2.0.0";
 void backendHost;
+const editorRequestId = "550e8400-e29b-41d4-a716-446655440001";
+const editorResult = spindle.textEditor.open({ editorRequestId, value: "Review me" });
+const editorClose = spindle.textEditor.close(editorRequestId);
+const editorOpenMessage: WorkerToHost = {
+  type: "text_editor_open",
+  requestId: "transport-open",
+  editorRequestId,
+  value: "Review me",
+};
+const editorCloseMessage: WorkerToHost = {
+  type: "text_editor_close",
+  requestId: "transport-close",
+  editorRequestId,
+};
+void editorResult;
+void editorClose;
+void editorOpenMessage;
+void editorCloseMessage;
 
 declare const ctx: SpindleFrontendContext;
 const frontendHost: SpindleHostDescriptorV1 = ctx.host;
