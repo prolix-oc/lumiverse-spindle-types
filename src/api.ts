@@ -252,11 +252,25 @@ export type MacroInterceptorPhase =
  * them has no effect on the real environment. Persist state via
  * `spindle.variables.*` helpers instead.
  */
+export type MacroInterceptorCharacterEnvDTO =
+  Readonly<Record<string, unknown>> & {
+    /** Selected greeting stored in the current chat, including edits. */
+    readonly firstMessage: string;
+    /** Card-defined alternatives, excluding the default greeting. */
+    readonly alternateGreetings: readonly string[];
+  };
+
+export type MacroInterceptorChatEnvDTO =
+  Readonly<Record<string, unknown>> & {
+    /** Selected index in [default greeting, ...alternate greetings]. */
+    readonly greetingIndex: number;
+  };
+
 export interface MacroInterceptorEnvDTO {
   readonly commit: boolean;
   readonly names: Record<string, string>;
-  readonly character: Record<string, unknown>;
-  readonly chat: Record<string, unknown>;
+  readonly character: MacroInterceptorCharacterEnvDTO;
+  readonly chat: MacroInterceptorChatEnvDTO;
   readonly system: Record<string, unknown>;
   readonly variables: {
     readonly local: Record<string, string>;
@@ -337,6 +351,8 @@ export interface MessageContentProcessorCtxDTO {
   /** Undefined for `"create"` origins (the row doesn't exist yet). */
   messageId?: string;
   content: string;
+  /** True when the message was authored by the user. */
+  isUser: boolean;
   extra?: Record<string, unknown>;
   origin: MessageContentProcessorOrigin;
   /** Set for `"swipe_update"` only — the zero-based index of the swipe being rewritten. */
@@ -1442,6 +1458,8 @@ export interface WorldBookEntryDTO {
   group_weight: number;
   probability: number;
   scan_depth: number | null;
+  /** Exclude the synthetic character greeting from lexical activation scans. */
+  exclude_greeting: boolean;
   case_sensitive: boolean;
   match_whole_words: boolean;
   automation_id: string | null;
@@ -1478,6 +1496,8 @@ export interface WorldBookEntryCreateDTO {
   group_weight?: number;
   probability?: number;
   scan_depth?: number;
+  /** Exclude the synthetic character greeting from lexical activation scans. */
+  exclude_greeting?: boolean;
   case_sensitive?: boolean;
   match_whole_words?: boolean;
   automation_id?: string;
@@ -1600,6 +1620,8 @@ export interface WorldInfoInterceptorEntryDTO {
   readonly prevent_recursion: boolean;
   readonly exclude_recursion: boolean;
   readonly delay_until_recursion: boolean;
+  /** Exclude the synthetic character greeting from lexical activation scans. */
+  readonly exclude_greeting: boolean;
   readonly scan_depth: number | null;
   readonly order_value: number;
   /** Attachment scope that contributed the entry's book to this chat. */
@@ -1622,6 +1644,22 @@ export interface WorldInfoInterceptorMessageDTO {
   readonly index_in_chat: number;
 }
 
+/** Effective host settings for world-info activation. */
+export interface WorldInfoActivationSettingsDTO {
+  /** Default entry scan depth, or null to scan all available messages. */
+  readonly globalScanDepth: number | null;
+  readonly maxRecursionPasses: number;
+}
+
+/**
+ * Restrictive, prompt-local changes to world info activation. Overrides from
+ * multiple interceptors compose monotonically: `true` always wins.
+ */
+export interface WorldInfoActivationOverridesDTO {
+  /** Set the effective recursion-pass limit to zero for this prompt. */
+  readonly disableRecursion?: true;
+}
+
 /**
  * Context passed to a `registerWorldInfoInterceptor` handler. Fires inside
  * `assemblePrompt` immediately before `activateWorldInfo` runs, so any
@@ -1636,15 +1674,23 @@ export interface WorldInfoInterceptorCtxDTO {
   readonly messages: readonly WorldInfoInterceptorMessageDTO[];
   readonly chatTurn: number;
   readonly chatMetadata: Readonly<Record<string, unknown>>;
+  readonly activationSettings: WorldInfoActivationSettingsDTO;
 }
 
 /**
- * Per-entry content override emitted by a `registerWorldInfoInterceptor`
- * handler. `content` replaces the entry's `content` for this prompt only.
+ * Per-entry content overrides emitted by a `registerWorldInfoInterceptor`
+ * handler. Both values are prompt-local and never persist to the world book.
  */
 export interface WorldInfoInterceptorMutationDTO {
   readonly id: string;
+  /** Replaces the entry content used for final prompt insertion. */
   readonly content?: string;
+  /**
+   * Alternate content used only for empty filtering, content deduplication,
+   * token accounting, and activation caps. Final insertion still uses
+   * `content` (or the stored entry content when `content` is omitted).
+   */
+  readonly selectionContent?: string;
 }
 
 /**
@@ -1658,6 +1704,7 @@ export interface WorldInfoInterceptorResultDTO {
   readonly forced?: readonly string[];
   readonly mutated?: readonly WorldInfoInterceptorMutationDTO[];
   readonly captured?: readonly string[];
+  readonly activationOverrides?: WorldInfoActivationOverridesDTO;
 }
 
 // ─── Databank DTOs ───────────────────────────────────────────────────────
