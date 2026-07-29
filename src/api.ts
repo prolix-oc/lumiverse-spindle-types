@@ -1622,6 +1622,20 @@ export interface WorldInfoInterceptorMessageDTO {
   readonly index_in_chat: number;
 }
 
+/** Effective host settings for recursive world-info activation. */
+export interface WorldInfoActivationSettingsDTO {
+  readonly maxRecursionPasses: number;
+}
+
+/**
+ * Restrictive, prompt-local changes to world info activation. Overrides from
+ * multiple interceptors compose monotonically: `true` always wins.
+ */
+export interface WorldInfoActivationOverridesDTO {
+  /** Set the effective recursion-pass limit to zero for this prompt. */
+  readonly disableRecursion?: true;
+}
+
 /**
  * Context passed to a `registerWorldInfoInterceptor` handler. Fires inside
  * `assemblePrompt` immediately before `activateWorldInfo` runs, so any
@@ -1636,6 +1650,7 @@ export interface WorldInfoInterceptorCtxDTO {
   readonly messages: readonly WorldInfoInterceptorMessageDTO[];
   readonly chatTurn: number;
   readonly chatMetadata: Readonly<Record<string, unknown>>;
+  readonly activationSettings: WorldInfoActivationSettingsDTO;
 }
 
 /**
@@ -1658,6 +1673,7 @@ export interface WorldInfoInterceptorResultDTO {
   readonly forced?: readonly string[];
   readonly mutated?: readonly WorldInfoInterceptorMutationDTO[];
   readonly captured?: readonly string[];
+  readonly activationOverrides?: WorldInfoActivationOverridesDTO;
 }
 
 // ─── Databank DTOs ───────────────────────────────────────────────────────

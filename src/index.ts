@@ -113,6 +113,8 @@ export type {
   RegexScriptActiveOptionsDTO,
   WorldInfoInterceptorEntryDTO,
   WorldInfoInterceptorMessageDTO,
+  WorldInfoActivationSettingsDTO,
+  WorldInfoActivationOverridesDTO,
   WorldInfoInterceptorCtxDTO,
   WorldInfoInterceptorMutationDTO,
   WorldInfoInterceptorResultDTO,
