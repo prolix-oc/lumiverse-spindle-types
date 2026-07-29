@@ -130,7 +130,22 @@ declare const spindle: SpindleAPI;
 spindle.registerWorldInfoInterceptor(async (worldInfoContext) => {
   const globalScanDepth: number | null =
     worldInfoContext.activationSettings.globalScanDepth;
+  const role: string | null | undefined = worldInfoContext.entries[0]?.role;
+  const priorPlacement = worldInfoContext.entries[0]?.placement;
   void globalScanDepth;
+  void role;
+  void priorPlacement;
+  return {
+    mutated: [{
+      id: "entry-id",
+      placement: {
+        type: "chat_depth",
+        role: "system",
+        depth: 2,
+        direction: "from_start",
+      },
+    }],
+  };
 });
 spindle.registerMessageContentProcessor(async (messageContext) => {
   const isUser: boolean = messageContext.isUser;

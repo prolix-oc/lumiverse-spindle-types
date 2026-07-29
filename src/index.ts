@@ -115,6 +115,8 @@ export type {
   WorldInfoInterceptorMessageDTO,
   WorldInfoActivationSettingsDTO,
   WorldInfoActivationOverridesDTO,
+  WorldInfoInterceptorRoleDTO,
+  WorldInfoInterceptorPlacementDTO,
   WorldInfoInterceptorCtxDTO,
   WorldInfoInterceptorMutationDTO,
   WorldInfoInterceptorResultDTO,
