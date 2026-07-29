@@ -1660,12 +1660,19 @@ export interface WorldInfoInterceptorCtxDTO {
 }
 
 /**
- * Per-entry content override emitted by a `registerWorldInfoInterceptor`
- * handler. `content` replaces the entry's `content` for this prompt only.
+ * Per-entry content overrides emitted by a `registerWorldInfoInterceptor`
+ * handler. Both values are prompt-local and never persist to the world book.
  */
 export interface WorldInfoInterceptorMutationDTO {
   readonly id: string;
+  /** Replaces the entry content used for final prompt insertion. */
   readonly content?: string;
+  /**
+   * Alternate content used only for empty filtering, content deduplication,
+   * token accounting, and activation caps. Final insertion still uses
+   * `content` (or the stored entry content when `content` is omitted).
+   */
+  readonly selectionContent?: string;
 }
 
 /**
