@@ -1442,6 +1442,8 @@ export interface WorldBookEntryDTO {
   group_weight: number;
   probability: number;
   scan_depth: number | null;
+  /** Exclude the synthetic character greeting from lexical activation scans. */
+  exclude_greeting: boolean;
   case_sensitive: boolean;
   match_whole_words: boolean;
   automation_id: string | null;
@@ -1478,6 +1480,8 @@ export interface WorldBookEntryCreateDTO {
   group_weight?: number;
   probability?: number;
   scan_depth?: number;
+  /** Exclude the synthetic character greeting from lexical activation scans. */
+  exclude_greeting?: boolean;
   case_sensitive?: boolean;
   match_whole_words?: boolean;
   automation_id?: string;
@@ -1600,6 +1604,8 @@ export interface WorldInfoInterceptorEntryDTO {
   readonly prevent_recursion: boolean;
   readonly exclude_recursion: boolean;
   readonly delay_until_recursion: boolean;
+  /** Exclude the synthetic character greeting from lexical activation scans. */
+  readonly exclude_greeting: boolean;
   readonly scan_depth: number | null;
   readonly order_value: number;
   /** Attachment scope that contributed the entry's book to this chat. */
