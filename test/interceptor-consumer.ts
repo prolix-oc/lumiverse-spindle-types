@@ -136,6 +136,15 @@ spindle.registerMessageContentProcessor(async (messageContext) => {
   const isUser: boolean = messageContext.isUser;
   void isUser;
 });
+spindle.registerMacroInterceptor(async (macroContext) => {
+  const firstMessage: string = macroContext.env.character.firstMessage;
+  const alternateGreetings: readonly string[] =
+    macroContext.env.character.alternateGreetings;
+  const greetingIndex: number = macroContext.env.chat.greetingIndex;
+  void firstMessage;
+  void alternateGreetings;
+  void greetingIndex;
+});
 const priorityDisposer: InterceptorDisposer = spindle.registerInterceptor(callback, 900, matchOptions);
 const optionsDisposer: InterceptorDisposer = spindle.registerInterceptor(callback, options);
 const handlerOnlyDisposer: InterceptorDisposer = spindle.registerInterceptor(legacyArrayCallback);

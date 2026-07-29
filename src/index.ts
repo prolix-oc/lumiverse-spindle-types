@@ -231,6 +231,8 @@ export type {
   SharedRpcRequestContextDTO,
   SharedRpcEndpointPolicyDTO,
   MacroInterceptorPhase,
+  MacroInterceptorCharacterEnvDTO,
+  MacroInterceptorChatEnvDTO,
   MacroInterceptorEnvDTO,
   MacroInterceptorCtxDTO,
   MacroInterceptorResultDTO,

@@ -252,11 +252,25 @@ export type MacroInterceptorPhase =
  * them has no effect on the real environment. Persist state via
  * `spindle.variables.*` helpers instead.
  */
+export type MacroInterceptorCharacterEnvDTO =
+  Readonly<Record<string, unknown>> & {
+    /** Selected greeting stored in the current chat, including edits. */
+    readonly firstMessage: string;
+    /** Card-defined alternatives, excluding the default greeting. */
+    readonly alternateGreetings: readonly string[];
+  };
+
+export type MacroInterceptorChatEnvDTO =
+  Readonly<Record<string, unknown>> & {
+    /** Selected index in [default greeting, ...alternate greetings]. */
+    readonly greetingIndex: number;
+  };
+
 export interface MacroInterceptorEnvDTO {
   readonly commit: boolean;
   readonly names: Record<string, string>;
-  readonly character: Record<string, unknown>;
-  readonly chat: Record<string, unknown>;
+  readonly character: MacroInterceptorCharacterEnvDTO;
+  readonly chat: MacroInterceptorChatEnvDTO;
   readonly system: Record<string, unknown>;
   readonly variables: {
     readonly local: Record<string, string>;
