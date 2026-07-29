@@ -1,5 +1,6 @@
 import type { SpindleManifest } from "./manifest";
 import type { SpindleHostDescriptorV1 } from "./host";
+import type { SpindleTextEditorOptions, SpindleTextEditorResult } from "./dom";
 import type {
   CouncilMemberContext,
   CouncilSettings,
@@ -30,7 +31,7 @@ import type {
   UserPresetDTO,
   UserPresetCreateDTO,
   UserPresetUpdateDTO,
-  PromptBlockDTO,
+  PromptBlockSnapshotDTO,
   PromptBlockCreateDTO,
   PromptBlockUpdateDTO,
   PromptBlockCategoryGroupDTO,
@@ -953,10 +954,10 @@ export interface SpindleAPI {
     update(presetId: string, input: UserPresetUpdateDTO, userId?: string): Promise<UserPresetDTO>;
     delete(presetId: string, userId?: string): Promise<boolean>;
     blocks: {
-      list(presetId: string, userId?: string): Promise<PromptBlockDTO[]>;
-      get(presetId: string, blockId: string, userId?: string): Promise<PromptBlockDTO | null>;
-      create(presetId: string, input: PromptBlockCreateDTO, options?: { index?: number; userId?: string }): Promise<PromptBlockDTO>;
-      update(presetId: string, blockId: string, input: PromptBlockUpdateDTO, userId?: string): Promise<PromptBlockDTO>;
+      list(presetId: string, userId?: string): Promise<PromptBlockSnapshotDTO[]>;
+      get(presetId: string, blockId: string, userId?: string): Promise<PromptBlockSnapshotDTO | null>;
+      create(presetId: string, input: PromptBlockCreateDTO, options?: { index?: number; userId?: string }): Promise<PromptBlockSnapshotDTO>;
+      update(presetId: string, blockId: string, input: PromptBlockUpdateDTO, userId?: string): Promise<PromptBlockSnapshotDTO>;
       delete(presetId: string, blockId: string, userId?: string): Promise<boolean>;
     };
     categories: {
@@ -1687,16 +1688,13 @@ export interface SpindleAPI {
      * }
      * ```
      */
-    open(options?: {
-      title?: string;
-      value?: string;
-      placeholder?: string;
-      /** For operator-scoped extensions only. */
-      userId?: string;
-    }): Promise<{
-      text: string;
-      cancelled: boolean;
-    }>;
+    open(options?: SpindleTextEditorOptions): Promise<SpindleTextEditorResult>;
+    /**
+     * Cancel an editor opened with the matching `editorRequestId`.
+     *
+     * Unknown or already-settled identities are accepted as no-ops.
+     */
+    close(editorRequestId: string, userId?: string): Promise<void>;
   };
 
   /**

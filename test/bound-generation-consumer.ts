@@ -1,5 +1,6 @@
 import type {
   BoundAssembleRequestDTO,
+  PromptBlockSnapshotDTO,
   BoundAssemblyFailureDTO,
   BoundAssemblyOutcomeDTO,
   BoundAssemblySuccessDTO,
@@ -50,7 +51,37 @@ const messages: LlmMessageDTO[] = [
   },
 ];
 
-const promptBlocks = [] as BoundAssembleRequestDTO["blocks"];
+const boundPromptSnapshot: PromptBlockSnapshotDTO = {
+  id: "bound-block",
+  name: "Bound dialogue",
+  content: "{{dialogue}}",
+  role: "system",
+  enabled: true,
+  position: "pre_history",
+  depth: 0,
+  marker: null,
+  isLocked: false,
+  color: null,
+  injectionTrigger: [],
+  group: null,
+  placementBinding: {
+    variableId: "layout",
+    options: {
+      standard: {
+        role: "assistant_append",
+        position: "in_history",
+        depth: 2,
+      },
+    },
+  },
+  sealed: true,
+  sealedKey: "dialogue.frame",
+  sealedSource: "lumihub",
+  sealedOriginPresetId: "lumihub-preset",
+  sealedOriginVersion: "v3",
+  sealedSha256: "sha256:dialogue-frame",
+};
+const promptBlocks: BoundAssembleRequestDTO["blocks"] = [boundPromptSnapshot];
 const boundRequest: BoundAssembleRequestDTO = {
   blocks: promptBlocks,
   promptVariableValues: {},

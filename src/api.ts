@@ -139,8 +139,17 @@ export interface InterceptorContextDTO {
   readonly signal: AbortSignal;
 }
 
+/**
+ * Deferred system guidance retained by the host terminal lease.
+ *
+ * A result may contain at most 128 entries. IDs must be unique canonical UUIDs
+ * (versions 1-5). Content must be non-empty, at most 1 MiB per entry when
+ * UTF-8 encoded, and at most 2 MiB across the result.
+ */
 export interface DeferredGuidanceDTO {
+  /** Unique canonical UUID (versions 1-5) within this interceptor result. */
   id: string;
+  /** Non-empty system guidance bounded by the limits above. */
   content: string;
   role: "system";
 }
@@ -1271,7 +1280,20 @@ export type PromptBlockRoleDTO = "system" | "user" | "assistant" | "user_append"
 export type PromptBlockPositionDTO = "pre_history" | "post_history" | "in_history";
 export type PromptBlockCategoryModeDTO = "radio" | "checkbox" | null;
 
-export interface PromptBlockDTO {
+/** A native Loom placement profile selected for a prompt block. */
+export interface PromptBlockPlacementDTO {
+  role: PromptBlockRoleDTO;
+  position: PromptBlockPositionDTO;
+  depth: number;
+}
+
+/** A select variable's mapping from option ids to native Loom placement profiles. */
+export interface PromptBlockPlacementBindingDTO {
+  variableId: string;
+  options: Record<string, PromptBlockPlacementDTO>;
+}
+
+interface PromptBlockCoreDTO {
   id: string;
   name: string;
   content: string;
@@ -1292,11 +1314,45 @@ export interface PromptBlockDTO {
   variables?: PromptVariableDefDTO[];
 }
 
+/**
+ * Editable/public prompt-block value.
+ *
+ * Host placement and sealed/provenance fields are snapshot-only and therefore
+ * cannot be supplied through mutable block or editor inputs.
+ */
+export interface PromptBlockDTO extends PromptBlockCoreDTO {
+  placementBinding?: never;
+  sealed?: never;
+  sealedKey?: never;
+  sealedSource?: never;
+  sealedOriginPresetId?: never;
+  sealedOriginVersion?: never;
+  sealedSha256?: never;
+}
+
+/**
+ * Host-returned snapshot of a prompt block.
+ *
+ * The placement binding and sealed/provenance fields are native host snapshot
+ * semantics. They are intentionally absent from the editable/public
+ * `PromptBlockDTO` and must not be supplied through mutable block or editor
+ * inputs.
+ */
+export interface PromptBlockSnapshotDTO extends PromptBlockCoreDTO {
+  placementBinding?: PromptBlockPlacementBindingDTO;
+  sealed?: boolean;
+  sealedKey?: string;
+  sealedSource?: "lumihub" | string;
+  sealedOriginPresetId?: string;
+  sealedOriginVersion?: string | null;
+  sealedSha256?: string;
+}
+
 export interface PromptBlockCategoryGroupDTO {
   /** The category header block, or null for uncategorized leading blocks. */
-  categoryBlock: PromptBlockDTO | null;
+  categoryBlock: PromptBlockSnapshotDTO | null;
   /** Non-category blocks after the header until the next category header. */
-  children: PromptBlockDTO[];
+  children: PromptBlockSnapshotDTO[];
 }
 
 export interface HostResponseErrorDTO {
@@ -1313,7 +1369,7 @@ export interface UserPresetDTO {
   provider: string;
   engine: string;
   parameters: Record<string, unknown>;
-  prompt_order: PromptBlockDTO[];
+  prompt_order: PromptBlockSnapshotDTO[];
   prompts: Record<string, unknown>;
   metadata: Record<string, unknown>;
   cache_revision: number;
@@ -1963,7 +2019,7 @@ export interface BoundPrefillAttachmentDTO {
 }
 
 export interface BoundAssembleRequestDTO {
-  blocks: PromptBlockDTO[];
+  blocks: PromptBlockSnapshotDTO[];
   promptVariableValues?: PromptVariableValuesDTO;
   dispatch: GenerationDispatchSourceDTO;
   deadlineAt: number;
@@ -3412,7 +3468,8 @@ export type WorkerToHost =
   | { type: "user_is_visible"; requestId: string; userId?: string }
   | { type: "user_get_role"; requestId: string; userId?: string }
   // ─── Text Editor (free tier) ───────────────────────────────────────
-  | { type: "text_editor_open"; requestId: string; title?: string; value?: string; placeholder?: string; userId?: string }
+  | { type: "text_editor_open"; requestId: string; editorRequestId?: string; title?: string; value?: string; placeholder?: string; userId?: string }
+  | { type: "text_editor_close"; requestId: string; editorRequestId: string; userId?: string }
   // ─── Modal (free tier) ────────────────────────────────────────────
   | { type: "modal_open"; requestId: string; modalRequestId?: string; title: string; items: SpindleModalItemDTO[]; width?: number; maxHeight?: number; persistent?: boolean; userId?: string }
   | { type: "modal_close"; requestId: string; openRequestId: string; userId?: string }

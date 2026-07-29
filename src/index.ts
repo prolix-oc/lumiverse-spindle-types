@@ -27,6 +27,7 @@ export { ALL_CAPABILITIES, isValidCapability } from "./capabilities";
 export { SpindleEvent, CoreEventType } from "./events";
 
 export type {
+  LlmMessagePartDTO,
   LlmMessageDTO,
   LlmThinkingBlockDTO,
   SpindleUserRoleDTO,
@@ -84,7 +85,10 @@ export type {
     PromptBlockRoleDTO,
     PromptBlockPositionDTO,
     PromptBlockCategoryModeDTO,
+    PromptBlockPlacementDTO,
+    PromptBlockPlacementBindingDTO,
     PromptBlockDTO,
+    PromptBlockSnapshotDTO,
     PromptBlockCreateDTO,
     PromptBlockUpdateDTO,
     PromptBlockCategoryGroupDTO,
@@ -246,13 +250,16 @@ export { PERMISSION_DENIED_PREFIX } from "./api";
 export type { ToolRegistration, JSONSchema } from "./tools";
 
 export type {
+  SpindleMessageElement,
+  SpindleTextEditorOptions,
+  SpindleTextEditorResult,
   SpindleDOMHelper,
   SpindleMountPoint,
   SpindleUploadFile,
-    SpindleMessageTagIntercept,
-    SpindleMessageTagInterceptorOptions,
-    SpindleMessageWidgetOptions,
-    PermissionRequestOptions,
+  SpindleMessageTagIntercept,
+  SpindleMessageTagInterceptorOptions,
+  SpindleMessageWidgetOptions,
+  PermissionRequestOptions,
   SpindleFrontendContext,
   SpindleFrontendModule,
   SpindleFrontendTeardown,
