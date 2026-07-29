@@ -858,6 +858,13 @@ export interface SpindleDisplayResolverRegistry {
   registerResolver(resolver: SpindleDisplayResolver): () => void;
   /** Ask the host to invalidate cached display resolutions whose dependencies (a `<scope>:<name>` set) changed. */
   invalidate(touchedVars: string[]): void;
+  /** Update the active chat's transient expression display without a backend round trip. */
+  setExpression(expression: {
+    chatId: string;
+    characterId: string;
+    label: string;
+    imageId: string;
+  }): void;
 }
 
 /** Context object provided to frontend extension modules */
