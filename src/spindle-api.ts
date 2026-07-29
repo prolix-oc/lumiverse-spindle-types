@@ -1356,6 +1356,7 @@ export interface SpindleAPI {
    * Host contract versions for feature detection, keyed by contract name.
    * `preAssemblyGenerationContext >= 1`: generation contexts carry
    * `dryRun`/`userId` and `cancelGeneration` is honored.
+   * `worldInfoActivationCapture >= 1`: world info activation capture is supported.
    */
   contracts?: Readonly<Record<string, number>>;
 
@@ -1404,11 +1405,14 @@ export interface SpindleAPI {
    * Multiple handlers chain in priority order and a later handler sees the
    * prior handlers' votes applied — useful for cross-entry injection
    * patterns where one entry merges into another and then disables itself.
+   * Captured IDs are activated against the pre-vote entry view and delivered
+   * only to the requesting extension as `capturedWorldInfo`; `[]` is an
+   * authoritative empty result and `undefined` means no capture was requested.
    *
    * Returning `void` passes the activation set through unchanged. Per-handler
    * 10s timeout; errors are logged and the chain continues.
    *
-   * @param handler  Returns the disabled / enabled / forced / mutated lists, or `void`.
+   * @param handler  Returns the disabled / enabled / forced / mutated / captured lists, or `void`.
    * @param priority Lower values run first. Default `100`.
    *
    * @example

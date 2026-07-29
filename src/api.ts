@@ -65,6 +65,7 @@ export interface LlmMessageDTO {
    * Source message's `index_in_chat`, paired with `sourceMessageId`. 
    */
   sourceIndexInChat?: number;
+  sourceMessageMetadata?: Readonly<Record<string, unknown>>;
 }
 
 export type SpindleUserRoleDTO = "operator" | "admin" | "user";
@@ -120,6 +121,8 @@ export interface InterceptorContextDTO {
   readonly characterId: string | null;
   readonly personaAddonStates: Readonly<Record<string, boolean>>;
   readonly excludeMessageId?: string;
+  readonly activatedWorldInfo?: readonly ActivatedWorldInfoEntryDTO[];
+  readonly capturedWorldInfo?: readonly ActivatedWorldInfoEntryDTO[];
   readonly rejectedSwipe?: string;
   readonly regenFeedback?: string;
   readonly regenFeedbackPosition?: "system" | "user";
@@ -1598,6 +1601,7 @@ export interface WorldInfoInterceptorResultDTO {
   readonly enabled?: readonly string[];
   readonly forced?: readonly string[];
   readonly mutated?: readonly WorldInfoInterceptorMutationDTO[];
+  readonly captured?: readonly string[];
 }
 
 // ─── Databank DTOs ───────────────────────────────────────────────────────
