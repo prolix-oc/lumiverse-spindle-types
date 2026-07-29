@@ -1628,8 +1628,10 @@ export interface WorldInfoInterceptorMessageDTO {
   readonly index_in_chat: number;
 }
 
-/** Effective host settings for recursive world-info activation. */
+/** Effective host settings for world-info activation. */
 export interface WorldInfoActivationSettingsDTO {
+  /** Default entry scan depth, or null to scan all available messages. */
+  readonly globalScanDepth: number | null;
   readonly maxRecursionPasses: number;
 }
 

@@ -127,6 +127,11 @@ const legacyArrayCallback: InterceptorHandler = async (input) => input;
 const legacyResultCallback: InterceptorHandler = async (input) => ({ messages: input });
 
 declare const spindle: SpindleAPI;
+spindle.registerWorldInfoInterceptor(async (worldInfoContext) => {
+  const globalScanDepth: number | null =
+    worldInfoContext.activationSettings.globalScanDepth;
+  void globalScanDepth;
+});
 const priorityDisposer: InterceptorDisposer = spindle.registerInterceptor(callback, 900, matchOptions);
 const optionsDisposer: InterceptorDisposer = spindle.registerInterceptor(callback, options);
 const handlerOnlyDisposer: InterceptorDisposer = spindle.registerInterceptor(legacyArrayCallback);
