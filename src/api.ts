@@ -1607,6 +1607,7 @@ export interface WorldInfoInterceptorEntryDTO {
   readonly keysecondary: readonly string[];
   readonly position: number;
   readonly depth: number;
+  readonly role: string | null;
   readonly priority: number;
   readonly probability: number;
   readonly use_probability: boolean;
@@ -1614,6 +1615,9 @@ export interface WorldInfoInterceptorEntryDTO {
   readonly automation_id: string | null;
   readonly selective: boolean;
   readonly selective_logic: number;
+  readonly group_name: string;
+  readonly group_override: boolean;
+  readonly group_weight: number;
   readonly match_whole_words: boolean;
   readonly case_sensitive: boolean;
   readonly use_regex: boolean;
@@ -1624,6 +1628,11 @@ export interface WorldInfoInterceptorEntryDTO {
   readonly exclude_greeting: boolean;
   readonly scan_depth: number | null;
   readonly order_value: number;
+  readonly sticky: number;
+  readonly cooldown: number;
+  readonly delay: number;
+  /** Latest prompt-local chat placement supplied by an earlier handler. */
+  readonly placement?: WorldInfoInterceptorPlacementDTO;
   /** Attachment scope that contributed the entry's book to this chat. */
   readonly book_source?: WorldBookSourceDTO;
 }
@@ -1660,6 +1669,24 @@ export interface WorldInfoActivationOverridesDTO {
   readonly disableRecursion?: true;
 }
 
+export type WorldInfoInterceptorRoleDTO = "system" | "user" | "assistant";
+
+/**
+ * Prompt-local placement relative to the selected chat history, including its
+ * greeting when present.
+ *
+ * Selected placements use the host's world-info insertion order. Each inserted
+ * entry becomes part of the history sequence used to place the next entry. The
+ * host does not persist these values to the world book.
+ */
+export interface WorldInfoInterceptorPlacementDTO {
+  readonly type: "chat_depth";
+  readonly role: WorldInfoInterceptorRoleDTO;
+  /** Non-negative integer passed to the selected direction's depth rule. */
+  readonly depth: number;
+  readonly direction: "from_start" | "from_end";
+}
+
 /**
  * Context passed to a `registerWorldInfoInterceptor` handler. Fires inside
  * `assemblePrompt` immediately before `activateWorldInfo` runs, so any
@@ -1691,6 +1718,11 @@ export interface WorldInfoInterceptorMutationDTO {
    * `content` (or the stored entry content when `content` is omitted).
    */
   readonly selectionContent?: string;
+  /**
+   * Overrides this entry's chat-history placement for the current prompt.
+   * Omit it to retain the stored native position, depth, and role.
+   */
+  readonly placement?: WorldInfoInterceptorPlacementDTO;
 }
 
 /**
