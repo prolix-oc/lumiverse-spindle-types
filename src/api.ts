@@ -337,6 +337,8 @@ export interface MessageContentProcessorCtxDTO {
   /** Undefined for `"create"` origins (the row doesn't exist yet). */
   messageId?: string;
   content: string;
+  /** True when the message was authored by the user. */
+  isUser: boolean;
   extra?: Record<string, unknown>;
   origin: MessageContentProcessorOrigin;
   /** Set for `"swipe_update"` only — the zero-based index of the swipe being rewritten. */

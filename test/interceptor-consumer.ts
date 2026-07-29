@@ -132,6 +132,10 @@ spindle.registerWorldInfoInterceptor(async (worldInfoContext) => {
     worldInfoContext.activationSettings.globalScanDepth;
   void globalScanDepth;
 });
+spindle.registerMessageContentProcessor(async (messageContext) => {
+  const isUser: boolean = messageContext.isUser;
+  void isUser;
+});
 const priorityDisposer: InterceptorDisposer = spindle.registerInterceptor(callback, 900, matchOptions);
 const optionsDisposer: InterceptorDisposer = spindle.registerInterceptor(callback, options);
 const handlerOnlyDisposer: InterceptorDisposer = spindle.registerInterceptor(legacyArrayCallback);
