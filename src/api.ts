@@ -779,6 +779,16 @@ export interface ImageGenRequestDTO {
   owner_character_id?: string;
   /** Optional chat ownership tag for the persisted result image. */
   owner_chat_id?: string;
+  /**
+   * Ask the host to omit the base64 `imageDataUrl` from the result.
+   *
+   * The host still needs the data URL to persist the image into the images
+   * table, so `imageId` / `imageUrl` remain populated. Only the
+   * extension-facing response drops the base64 field, which is the largest
+   * per-image RPC payload. The default (`includeDataUrl` omitted or `true`)
+   * keeps the data URL for backward compatibility.
+   */
+  includeDataUrl?: boolean;
   /** For operator-scoped extensions. */
   userId?: string;
 }
