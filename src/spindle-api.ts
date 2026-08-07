@@ -800,7 +800,9 @@ export interface SpindleAPI {
     /**
      * Generate an image using a connection profile.
      * If `connection_id` is omitted, uses the user's default image gen connection.
-     * Returns the image as a base64 data URL.
+     * Returns the image as a base64 data URL, unless `includeDataUrl: false` is
+     * passed and the host supports omitting it (the image is still persisted
+     * and `imageId` / `imageUrl` remain populated).
      */
     generate(input: ImageGenRequestDTO): Promise<ImageGenResultDTO>;
     /**
