@@ -120,6 +120,23 @@ export type SpindleMountPoint =
 
 // ── Drawer Tab ──
 
+/**
+ * Contextual documentation displayed by Lumiverse using its native
+ * guide viewer.
+ *
+ * Guide Markdown is rendered and sanitized by the host application.
+ */
+export interface SpindleGuideDefinition {
+  /** Markdown content for the guide. */
+  markdown: string;
+
+  /**
+   * Optional title shown by the guide viewer.
+   * Falls back to the title of the owning tab.
+   */
+  title?: string;
+}
+
 export interface SpindleDrawerTabOptions {
   /** Unique tab identifier. Used internally for routing and state. */
   id: string;
@@ -133,6 +150,8 @@ export interface SpindleDrawerTabOptions {
   keywords?: string[];
   /** Title shown in the panel header navbar. Falls back to `title` if omitted. Useful when the header needs a shorter label than the command palette entry. */
   headerTitle?: string;
+  /** Optional contextual documentation for this tab. */
+  guide?: SpindleGuideDefinition;
   /** URL to a 16x16 or 24x24 icon image. Mutually exclusive with `iconSvg`. */
   iconUrl?: string;
   /** Inline SVG string for the tab icon. Mutually exclusive with `iconUrl`. */
@@ -159,6 +178,8 @@ export interface SpindleCharacterEditorTabOptions {
   id: string;
   /** Label shown in the character editor tab bar. */
   title: string;
+  /** Optional contextual documentation for this tab. */
+  guide?: SpindleGuideDefinition;
 }
 
 export interface SpindleCharacterEditorTabHandle {
@@ -210,6 +231,8 @@ export interface SpindlePresetEditorTabOptions {
   id: string;
   /** Label shown in the Loom preset editor tab bar. */
   title: string;
+  /** Optional contextual documentation for this tab. */
+  guide?: SpindleGuideDefinition;
 }
 
 export interface SpindlePresetEditorTabHandle {
