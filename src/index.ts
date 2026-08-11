@@ -269,6 +269,7 @@ export type {
   SpindleFrontendContext,
   SpindleFrontendModule,
   SpindleFrontendTeardown,
+  SpindleGuideDefinition,
   SpindleDrawerTabOptions,
   SpindleDrawerTabHandle,
   SpindleCharacterEditorTabOptions,
