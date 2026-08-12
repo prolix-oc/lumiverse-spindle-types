@@ -1536,6 +1536,8 @@ export type RegexMacroModeDTO = "none" | "find" | "raw" | "escaped" | "after";
 
 export interface RegexScriptDTO {
   id: string;
+  /** True when the calling extension may update or delete this script. */
+  readonly can_mutate: boolean;
   name: string;
   script_id: string;
   find_regex: string;

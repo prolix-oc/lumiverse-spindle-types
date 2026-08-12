@@ -312,9 +312,14 @@ export interface SpindleAPI {
   /** Subscribe to a Lumiverse event. Multi-user extensions should use the optional `userId` to keep per-user state and notifications isolated. */
   on(event: string, handler: (payload: unknown, userId?: string) => void): () => void;
 
-  /** Register a macro. Handler contexts expose `commit === false` during dry resolves. */
+  /**
+   * Register a macro owned by this extension. Registrations cannot replace
+   * system macros or macros owned by another extension. Preset/request dynamic
+   * macros take precedence over extension macros with the same name.
+   * Handler contexts expose `commit === false` during dry resolves.
+   */
   registerMacro(def: MacroDefinitionDTO): void;
-  /** Unregister a macro */
+  /** Unregister a macro owned by this extension. */
   unregisterMacro(name: string): void;
   /**
    * Push the latest value for a registered macro.
@@ -1012,10 +1017,14 @@ export interface SpindleAPI {
   };
 
   /**
-   * Regex Scripts CRUD (permission: "regex_scripts").
-   * Full access to regex scripts attached to the user's account, including
-   * global, character-scoped, and chat-scoped rules. Same shape Lumiverse uses
-   * internally during prompt assembly, response baking, and display rendering.
+   * Regex Scripts API (permission: "regex_scripts").
+   * Read access to regex scripts attached to the user's account and write
+   * access to unbound scripts created by the calling extension. Legacy or
+   * unattributed scripts, preset-bound scripts, and scripts owned by another
+   * extension remain readable and executable but cannot be updated or deleted.
+   * Check `RegexScriptDTO.can_mutate` before presenting mutation controls.
+   * Uses the same shape Lumiverse applies internally during prompt assembly,
+   * response baking, and display rendering.
    * For user-scoped extensions, userId is inferred from the extension owner.
    * For operator-scoped extensions, pass userId to scope to a specific user.
    */
