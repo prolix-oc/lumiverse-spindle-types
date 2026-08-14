@@ -16,6 +16,7 @@ import type {
   SpindleAPI,
   SpindleConnectionsAPI,
   SpindleGenerateAPI,
+  StreamChunkDTO,
   ToolDefinitionDTO,
 } from "lumiverse-spindle-types";
 
@@ -197,6 +198,16 @@ const response: GenerationResponseDTO = {
   thinking_blocks: [{ type: "redacted_thinking", data: "opaque" }],
   reasoning_details: [{ type: "summary_text", text: "provider detail" }],
   usage,
+};
+
+const terminalStreamChunk: StreamChunkDTO = {
+  type: "done",
+  content: response.content,
+  reasoning: response.reasoning,
+  finish_reason: response.finish_reason,
+  tool_calls: response.tool_calls,
+  thinking_blocks: response.thinking_blocks,
+  reasoning_details: response.reasoning_details,
 };
 
 const receipt: QuietDispatchReceiptDTO = {
