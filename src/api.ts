@@ -547,6 +547,10 @@ export type StreamChunkDTO =
       reasoning?: string;
       finish_reason: string;
       tool_calls?: ToolCallDTO[];
+      /** Provider-native reasoning blocks preserved for multi-turn replay. */
+      thinking_blocks?: LlmThinkingBlockDTO[];
+      /** Provider-native opaque reasoning metadata preserved for multi-turn replay. */
+      reasoning_details?: Record<string, unknown>[];
       usage?: {
         prompt_tokens: number;
         completion_tokens: number;

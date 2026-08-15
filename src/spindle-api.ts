@@ -432,8 +432,8 @@ export interface SpindleAPI {
      *  - `{ type: 'reasoning', token }` — chain-of-thought chunk
      *  - `{ type: 'done', ... }`        — final aggregated response (emitted exactly once)
      *
-     * Tool-call deltas, finish reason, and token usage live on the terminal
-     * `done` chunk. If the upstream call fails or the request is aborted
+     * Tool-call deltas, provider-native reasoning replay carriers, finish reason,
+     * and token usage live on the terminal `done` chunk. If the upstream call fails or the request is aborted
      * via `input.signal`, the generator rejects with the underlying error
      * (`AbortError` for cancellations).
      *
