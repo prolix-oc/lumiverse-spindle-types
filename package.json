@@ -1,7 +1,7 @@
 {
   "name": "lumiverse-spindle-types",
-  "version": "0.6.15",
-  "types": "./src/index.ts",
+  "version": "0.6.16",
+  "types": "./dist/index.d.ts",
   "keywords": [
     "lumiverse",
     "typescript",
@@ -14,7 +14,20 @@
     "url": "https://github.com/prolix-oc/lumiverse-spindle-types"
   },
   "license": "SEE LICENSE IN LICENSE.md",
+  "files": [
+    "dist"
+  ],
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:consumer": "tsc -p tsconfig.consumer.json --noEmit && node test/scripts/verify-packed-consumer.mjs"
+  },
+  "devDependencies": {
+    "typescript": "5.6.3"
   }
 }

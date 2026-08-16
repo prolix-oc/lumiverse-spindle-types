@@ -1,9 +1,26 @@
 {
-  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "rootDir": ".",
-    "outDir": "./.consumer-dist",
-    "declaration": false
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "lib": ["ESNext", "DOM"],
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "lumiverse-spindle-types": ["./src/index.ts"]
+    }
   },
-  "include": ["test/loom-block-editor-consumer.ts", "test/bound-generation-consumer.ts", "test/interceptor-consumer.ts", "test/host-runtime-contract-consumer.ts", "test/image-gen-stream-consumer.ts"]
+  "include": [
+    "test/loom-block-editor-consumer.ts",
+    "test/bound-generation-consumer.ts",
+    "test/interceptor-consumer.ts",
+    "test/host-runtime-contract-consumer.ts",
+    "test/image-gen-stream-consumer.ts",
+    "test/package-exports-consumer.ts",
+    "test/legacy-0.6.15-consumer.ts",
+    "test/packed-0.6.16-consumer.ts",
+    "test/provider-runtime-union-parity.ts"
+  ]
 }
