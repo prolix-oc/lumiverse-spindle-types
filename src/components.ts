@@ -655,6 +655,13 @@ export type SpindleCloseButtonHandle = SpindleMountedComponent<SpindleCloseButto
  * picker.update({ value: "claude-opus-4-7" })
  * ```
  */
+/** Handle returned by {@link SpindleComponentsHelper.mountHostSurface}. */
+export interface SpindleHostSurfaceHandle {
+  update(props?: Record<string, unknown>): void;
+  destroy(): void;
+  on(event: string, handler: (payload: unknown) => void): () => void;
+}
+
 export interface SpindleComponentsHelper {
   // Text inputs
   mountTextInput(target: SpindleComponentTarget, options?: SpindleTextInputOptions): SpindleTextInputHandle;
@@ -686,4 +693,10 @@ export interface SpindleComponentsHelper {
     target: SpindleComponentTarget,
     options: SpindleLoomBlockEditorOptions,
   ): SpindleLoomBlockEditorHandle;
+  /** Mount a host-owned named surface into extension-owned DOM. */
+  mountHostSurface(
+    target: SpindleComponentTarget,
+    surfaceId: string,
+    props?: Record<string, unknown>,
+  ): SpindleHostSurfaceHandle;
 }
