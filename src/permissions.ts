@@ -28,6 +28,10 @@
  *                            (eval / new Function) for runtime-compiling frameworks.
  * - "final_response"        — replace the authoritative assistant response from
  *                            an interceptor (privileged; never auto-granted)
+ * - "providers.embedding.register" — register an embedding provider driver
+ * - "providers.tts.register"       — register a TTS engine
+ * - "providers.stt.register"       — register an STT engine
+ * - "providers.sidecar.register"   — register a sidecar HTTP endpoint
  */
 export type SpindlePermission =
   | "generation"
@@ -57,7 +61,11 @@ export type SpindlePermission =
   | "macro_interceptor"
   | "web_search"
   | "unsafe_eval"
-  | "final_response";
+  | "final_response"
+  | "providers.embedding.register"
+  | "providers.tts.register"
+  | "providers.stt.register"
+  | "providers.sidecar.register";
 
 export const ALL_PERMISSIONS: readonly SpindlePermission[] = [
   "generation",
@@ -88,6 +96,10 @@ export const ALL_PERMISSIONS: readonly SpindlePermission[] = [
   "web_search",
   "unsafe_eval",
   "final_response",
+  "providers.embedding.register",
+  "providers.tts.register",
+  "providers.stt.register",
+  "providers.sidecar.register",
 ] as const;
 
 export function isValidPermission(p: string): p is SpindlePermission {
