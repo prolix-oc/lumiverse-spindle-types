@@ -1,4 +1,21 @@
-import type { PromptBlockDTO, PromptVariableValuesDTO, RequestInitDTO } from "./api";
+import type {
+  ChatDTO,
+  ChatMessageDTO,
+  ChatUpdateDTO,
+  ConnectionProfileDTO,
+  LlmMessageDTO,
+  PromptBlockDTO,
+  PromptVariableValuesDTO,
+  RequestInitDTO,
+  TokenCountOptionsDTO,
+  TokenCountResultDTO,
+  WorldBookCreateDTO,
+  WorldBookDTO,
+  WorldBookEntryCreateDTO,
+  WorldBookEntryDTO,
+  WorldBookEntryUpdateDTO,
+  WorldBookUpdateDTO,
+} from "./api";
 import type { SpindleComponentsHelper } from "./components";
 import type { SpindleHostDescriptorV1, SpindleHostLocaleAPI } from "./host";
 
@@ -114,9 +131,64 @@ export interface SpindleDOMHelper {
 
 export type SpindleMountPoint =
   | "sidebar"
+  | "chat_header_left"
+  | "chat_header_center"
+  | "chat_header_right"
+  | "chat_top_dock"
+  | "chat_bottom_dock"
+  | "chat_surface_side"
+  | "chat_sidebar_left"
+  | "chat_sidebar_right"
+  | "chat_stream_before"
+  | "chat_stream_after"
+  | "chat_empty_state"
+  | "chat_composer_above"
+  | "chat_composer_below"
+  | "chat_input_tools_left"
+  | "chat_input_tools_right"
+  | "chat_actions"
   | "chat_toolbar"
+  | "message_header"
+  | "message_body_before"
+  | "message_body_after"
   | "message_footer"
-  | "settings_extensions";
+  | "message_actions"
+  | "message_edit_actions"
+  | "message_context_menu"
+  | "message_swipe_indicators"
+  | "landing_header"
+  | "landing_hero"
+  | "landing_characters"
+  | "landing_recent_chats"
+  | "landing_footer"
+  | "sidebar_top"
+  | "sidebar_bottom"
+  | "drawer_tab"
+  | "drawer_header_actions"
+  | "drawer_footer"
+  | "character_editor_tab"
+  | "character_browser_card_actions"
+  | "preset_editor_tab"
+  | "preset_editor_toolbar"
+  | "persona_editor_tab"
+  | "world_book_entry_table"
+  | "world_book_entry_row"
+  | "world_book_entry_editor"
+  | "world_book_entry_toolbar"
+  | "lorebook_workspace"
+  | "lorebook_half_workspace"
+  | "loom_builder_toolbar"
+  | "loom_builder_inspector"
+  | "regex_entry_row"
+  | "settings_tab"
+  | "settings_section"
+  | "settings_card_actions"
+  | "settings_extensions"
+  | "modal_header_actions"
+  | "modal_footer_actions"
+  | "command_palette_actions"
+  | "manage_chats_actions"
+  | "prompt_variables_toolbar";
 
 // ── Drawer Tab ──
 
@@ -890,10 +962,144 @@ export interface SpindleDisplayResolverRegistry {
   }): void;
 }
 
+export interface SpindleSettingsAPI {
+  get(key: string): Promise<unknown> | unknown;
+  set(key: string, value: unknown): Promise<void> | void;
+  remove(key: string): Promise<void> | void;
+  watch(key: string, listener: (value: unknown) => void): () => void;
+  core: {
+    get(key: string): Promise<unknown> | unknown;
+    watch(key: string, listener: (value: unknown) => void): () => void;
+    list(): Promise<readonly string[]> | readonly string[];
+    isReady(): boolean;
+  };
+}
+
+export interface SpindleSettingsTabOptions {
+  id: string;
+  title: string;
+  render?: (root: HTMLElement) => void | (() => void);
+}
+
+export interface SpindleSettingsTabHandle {
+  readonly id: string;
+  readonly root: HTMLElement;
+  update(options?: Partial<SpindleSettingsTabOptions>): void;
+  destroy(): void;
+}
+
+export interface SpindleStateSelectors {
+  get<T = unknown>(selector: string): T;
+  subscribe<T = unknown>(selector: string, listener: (value: T) => void): () => void;
+}
+
+export interface SpindleResizeController {
+  destroy(): void;
+}
+
+export interface SpindleGeometryAPI {
+  getUiScale(): number;
+  toLayoutPx(value: number): number;
+  layoutViewportSize(): { width: number; height: number };
+  layoutElementRect(element: Element): DOMRect;
+  createResizeController(element: Element, listener: (rect: DOMRect) => void): SpindleResizeController;
+}
+
+export interface SpindleHostSurfaceInfo {
+  id: string;
+  title?: string;
+  capabilities?: readonly string[];
+}
+
+export interface SpindleHostSurfaceAPI {
+  list(): readonly SpindleHostSurfaceInfo[] | Promise<readonly SpindleHostSurfaceInfo[]>;
+  subscribe(listener: (surfaces: readonly SpindleHostSurfaceInfo[]) => void): () => void;
+  invoke(surfaceId: string, method: string, params?: unknown): Promise<unknown>;
+  registerDeepLinkTarget(target: string, handler: (params: Record<string, string>) => void): () => void;
+}
+
+export interface SpindleComponentOverrideOptions {
+  componentId: string;
+  render?: (target: HTMLElement, props: Record<string, unknown>) => void | (() => void);
+}
+
+export interface SpindleComponentOverrideHandle {
+  destroy(): void;
+}
+
+export interface SpindleDomDecoratorOptions {
+  target: string;
+  decorate: (element: Element) => void | (() => void);
+}
+
+export interface SpindleDomDecoratorHandle {
+  destroy(): void;
+}
+
+export interface SpindleMessageActionOptions {
+  id: string;
+  label: string;
+  onClick: (messageId: string) => void;
+}
+
+export interface SpindleMessageActionHandle {
+  destroy(): void;
+}
+
+export interface SpindleFrontendWorldBooksAPI {
+  list(options?: { limit?: number; offset?: number }): Promise<{ data: WorldBookDTO[]; total: number }>;
+  get(worldBookId: string): Promise<WorldBookDTO | null>;
+  create(input: WorldBookCreateDTO): Promise<WorldBookDTO>;
+  update(worldBookId: string, input: WorldBookUpdateDTO): Promise<WorldBookDTO>;
+  delete(worldBookId: string): Promise<boolean>;
+  entries: {
+    list(worldBookId: string, options?: { limit?: number; offset?: number }): Promise<{ data: WorldBookEntryDTO[]; total: number }>;
+    get(entryId: string): Promise<WorldBookEntryDTO | null>;
+    create(worldBookId: string, input: WorldBookEntryCreateDTO): Promise<WorldBookEntryDTO>;
+    update(entryId: string, input: WorldBookEntryUpdateDTO): Promise<WorldBookEntryDTO>;
+    delete(entryId: string): Promise<boolean>;
+  };
+  getActivated(chatId: string): Promise<unknown>;
+  getGlobal(): Promise<string[]>;
+  setGlobal(worldBookIds: string[]): Promise<string[]>;
+}
+
+export interface SpindleFrontendTokensAPI {
+  countText(text: string, options?: TokenCountOptionsDTO): Promise<TokenCountResultDTO>;
+  countMessages(
+    messages: Array<Pick<LlmMessageDTO, "role" | "content">>,
+    options?: TokenCountOptionsDTO,
+  ): Promise<TokenCountResultDTO>;
+  countChat(chatId: string, options?: TokenCountOptionsDTO): Promise<TokenCountResultDTO>;
+}
+
+export interface SpindleFrontendConnectionsAPI {
+  list(): Promise<ConnectionProfileDTO[]>;
+  get(connectionId: string): Promise<ConnectionProfileDTO | null>;
+  setActiveAcknowledged(connectionId: string | null): void | Promise<void>;
+}
+
+export interface SpindleFrontendChatsAPI {
+  list(options?: { characterId?: string; limit?: number; offset?: number }): Promise<{ data: ChatDTO[]; total: number }>;
+  get(chatId: string): Promise<ChatDTO | null>;
+  getActive(): Promise<ChatDTO | null>;
+  update(chatId: string, input: ChatUpdateDTO): Promise<ChatDTO>;
+  delete(chatId: string): Promise<boolean>;
+}
+
+export interface SpindleFrontendMessagesAPI {
+  get(messageId: string): Promise<ChatMessageDTO | null>;
+  list(chatId?: string): Promise<ChatMessageDTO[]>;
+  update(chatId: string, messageId: string, input: { content?: string }): Promise<unknown>;
+  delete(chatId: string, messageId: string): Promise<void>;
+}
+
 /** Context object provided to frontend extension modules */
 export interface SpindleFrontendContext {
   /** Immutable host compatibility descriptor for this extension runtime. */
-  readonly host: SpindleHostDescriptorV1;
+  readonly host: SpindleHostDescriptorV1 & {
+    readonly surfaces?: SpindleHostSurfaceAPI;
+  };
   /** Synchronous host locale access with removable live-change subscriptions. */
   readonly locale: SpindleHostLocaleAPI;
   dom: SpindleDOMHelper;
@@ -966,6 +1172,8 @@ export interface SpindleFrontendContext {
     getBuiltInTabTitle(tabId: string): string | undefined;
     /** Get the root HTMLElement of a built-in drawer tab by its id, or undefined if not mounted. */
     getBuiltInTabRoot(tabId: string): HTMLElement | undefined;
+    registerSettingsTab?(options: SpindleSettingsTabOptions): SpindleSettingsTabHandle;
+    geometry?: SpindleGeometryAPI;
   };
   /**
    * Mount instances of Lumiverse's first-party shared UI components (form
@@ -1070,6 +1278,10 @@ export interface SpindleFrontendContext {
      * `dom.listMessageElements()` for the mounted-only DOM view.
      */
     listMessageIds(): string[];
+    get?: SpindleFrontendMessagesAPI["get"];
+    list?: SpindleFrontendMessagesAPI["list"];
+    update?: SpindleFrontendMessagesAPI["update"];
+    delete?: SpindleFrontendMessagesAPI["delete"];
   };
   characters: {
     /** Read a character through the host app's authenticated API. */
@@ -1078,11 +1290,49 @@ export interface SpindleFrontendContext {
   chats: {
     /** Update a message through the host app's authenticated API. */
     updateMessage(chatId: string, messageId: string, input: { content?: string }): Promise<unknown>;
+    list?: SpindleFrontendChatsAPI["list"];
+    get?: SpindleFrontendChatsAPI["get"];
+    getActive?: SpindleFrontendChatsAPI["getActive"];
+    update?: SpindleFrontendChatsAPI["update"];
+    delete?: SpindleFrontendChatsAPI["delete"];
   };
   /** Take over display-time content resolution in the browser. */
   display?: SpindleDisplayResolverRegistry;
   manifest: import("./manifest").SpindleManifest;
+  settings?: SpindleSettingsAPI;
+  registerComponentOverride?(
+    options: SpindleComponentOverrideOptions,
+  ): SpindleComponentOverrideHandle;
+  registerDomDecorator?(options: SpindleDomDecoratorOptions): SpindleDomDecoratorHandle;
+  registerMessageAction?(options: SpindleMessageActionOptions): SpindleMessageActionHandle;
+  onTeardown?(handler: () => void): () => void;
+  state?: SpindleStateSelectors;
+  worldBooks?: SpindleFrontendWorldBooksAPI;
+  tokens?: SpindleFrontendTokensAPI;
+  connections?: SpindleFrontendConnectionsAPI;
 }
+
+/** Frontend context with V2 extensibility members required. */
+export type SpindleFrontendContextV2 = SpindleFrontendContext & {
+  settings: SpindleSettingsAPI;
+  registerComponentOverride(
+    options: SpindleComponentOverrideOptions,
+  ): SpindleComponentOverrideHandle;
+  registerDomDecorator(options: SpindleDomDecoratorOptions): SpindleDomDecoratorHandle;
+  registerMessageAction(options: SpindleMessageActionOptions): SpindleMessageActionHandle;
+  onTeardown(handler: () => void): () => void;
+  state: SpindleStateSelectors;
+  worldBooks: SpindleFrontendWorldBooksAPI;
+  tokens: SpindleFrontendTokensAPI;
+  connections: SpindleFrontendConnectionsAPI;
+  host: SpindleHostDescriptorV1 & { readonly surfaces: SpindleHostSurfaceAPI };
+  ui: SpindleFrontendContext["ui"] & {
+    registerSettingsTab(options: SpindleSettingsTabOptions): SpindleSettingsTabHandle;
+    geometry: SpindleGeometryAPI;
+  };
+  chats: SpindleFrontendContext["chats"] & SpindleFrontendChatsAPI;
+  messages: SpindleFrontendContext["messages"] & SpindleFrontendMessagesAPI;
+};
 
 /** Cleanup returned by a frontend extension setup hook. */
 export type SpindleFrontendTeardown = () => void | Promise<void>;
