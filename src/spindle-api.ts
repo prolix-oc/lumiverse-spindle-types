@@ -68,7 +68,10 @@ import type {
   BoundAssemblyOutcomeDTO,
   QuietTrackedRequestDTO,
   QuietTrackedResultDTO,
+  BrokerRequest,
+  BrokerResponse,
   ChatMemoryResultDTO,
+  ProviderManager,
   ImageGenRequestDTO,
   ImageGenResultDTO,
   ImageGenStreamRequestDTO,
@@ -245,6 +248,30 @@ export interface SpindlePromptRegex {
    * the previously-declared set. Empty array clears ownership (host resumes its pass).
    */
   setOwnedChats(chatIds: string[]): void;
+}
+
+export interface SpindleEmbeddingDriver {
+  id: string;
+  name?: string;
+  embed(input: { texts: string[] }): Promise<{ embeddings: number[][] }>;
+}
+
+export interface SpindleTtsEngine {
+  id: string;
+  name?: string;
+  synthesize(input: { text: string; voice?: string }): Promise<{ audio: Uint8Array | string; contentType?: string }>;
+}
+
+export interface SpindleSttEngine {
+  id: string;
+  name?: string;
+  transcribe(input: { audio: Uint8Array | string; contentType?: string }): Promise<{ text: string }>;
+}
+
+export interface SpindleSidecarEndpoint {
+  id: string;
+  path: string;
+  handle(request: BrokerRequest): Promise<BrokerResponse>;
 }
 
 export type SpindleGenerateAPI = SpindleAPI["generate"];
@@ -2185,4 +2212,12 @@ export interface SpindleAPI {
 
   /** This extension's manifest */
   manifest: SpindleManifest;
+
+  /** Optional provider broker for registered embedding/TTS/STT/sidecar drivers. */
+  providers?: ProviderManager;
+
+  registerEmbeddingDriver?(driver: SpindleEmbeddingDriver): () => void;
+  registerTtsEngine?(engine: SpindleTtsEngine): () => void;
+  registerSttEngine?(engine: SpindleSttEngine): () => void;
+  registerSidecarEndpoint?(endpoint: SpindleSidecarEndpoint): () => void;
 }

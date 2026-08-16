@@ -250,6 +250,14 @@ export type {
   WebSearchResponseDTO,
   WorkerToHost,
   HostToWorker,
+  ProviderKind,
+  ProviderDescriptor,
+  WorkerToHostProviderMessage,
+  HostToWorkerProviderMessage,
+  ProviderRuntimeMessage,
+  BrokerRequest,
+  BrokerResponse,
+  ProviderManager,
 } from "./api";
 export { PERMISSION_DENIED_PREFIX } from "./api";
 
@@ -267,6 +275,26 @@ export type {
   SpindleMessageWidgetOptions,
   PermissionRequestOptions,
   SpindleFrontendContext,
+  SpindleFrontendContextV2,
+  SpindleSettingsAPI,
+  SpindleSettingsTabOptions,
+  SpindleSettingsTabHandle,
+  SpindleStateSelectors,
+  SpindleResizeController,
+  SpindleGeometryAPI,
+  SpindleHostSurfaceInfo,
+  SpindleHostSurfaceAPI,
+  SpindleComponentOverrideOptions,
+  SpindleComponentOverrideHandle,
+  SpindleDomDecoratorOptions,
+  SpindleDomDecoratorHandle,
+  SpindleMessageActionOptions,
+  SpindleMessageActionHandle,
+  SpindleFrontendWorldBooksAPI,
+  SpindleFrontendTokensAPI,
+  SpindleFrontendConnectionsAPI,
+  SpindleFrontendChatsAPI,
+  SpindleFrontendMessagesAPI,
   SpindleFrontendModule,
   SpindleFrontendTeardown,
   SpindleGuideDefinition,
@@ -377,6 +405,7 @@ export type {
   SpindleLoomBlockEditorOptions,
   SpindleLoomBlockEditorHandle,
   SpindleComponentsHelper,
+  SpindleHostSurfaceHandle,
 } from "./components";
 
 export type { ExtensionInfo } from "./extension-info";
@@ -442,6 +471,10 @@ export type {
   BackendProcessHandle,
   SpindleBackendProcessContext,
   SpindleBackendProcessModule,
+  SpindleEmbeddingDriver,
+  SpindleTtsEngine,
+  SpindleSttEngine,
+  SpindleSidecarEndpoint,
 } from "./spindle-api";
 
 export type {

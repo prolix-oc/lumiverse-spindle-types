@@ -3101,6 +3101,103 @@ export interface SharedRpcEndpointPolicyDTO {
 
 // ─── Worker → Host messages ──────────────────────────────────────────────
 
+/**
+ * Provider runtime size limits:
+ * - descriptor: 64KiB
+ * - request: 256KiB
+ * - result / error / envelope: 1MiB
+ * Default invoke timeout: 30000ms.
+ */
+export type ProviderKind = "embedding" | "tts" | "stt" | "sidecar";
+
+/** Provider descriptor payload. Limit: 64KiB. */
+export interface ProviderDescriptor {
+  id: string;
+  kind: ProviderKind;
+  name: string;
+  version?: string;
+  capabilities?: Record<string, unknown>;
+}
+
+export type WorkerToHostProviderMessage =
+  | {
+      type: "provider_register";
+      requestId: string;
+      /** Descriptor payload limit: 64KiB. */
+      descriptor: ProviderDescriptor;
+    }
+  | {
+      type: "provider_unregister";
+      requestId: string;
+      providerId: string;
+    }
+  | {
+      type: "provider_result";
+      requestId: string;
+      /** Result / error / envelope limit: 1MiB. */
+      result?: unknown;
+      error?: string;
+    };
+
+export type HostToWorkerProviderMessage =
+  | {
+      type: "provider_invoke";
+      requestId: string;
+      providerId: string;
+      method: string;
+      /** Request payload limit: 256KiB. Default timeout: 30000ms. */
+      params?: unknown;
+      timeoutMs?: number;
+    }
+  | {
+      type: "provider_abort";
+      requestId: string;
+      reason?: string;
+    }
+  | {
+      type: "provider_changed";
+      providerId?: string;
+      change?: "registered" | "unregistered" | "updated";
+    };
+
+export type ProviderRuntimeMessage = WorkerToHostProviderMessage | HostToWorkerProviderMessage;
+
+export interface BrokerRequest {
+  kind: string;
+  id: string;
+  method: string;
+  url: string;
+  headers: Record<string, string>;
+  body: string;
+  bodyEncoding: "utf8" | "base64";
+  expectedResponseEncoding: "utf8" | "base64";
+  /** Default timeout: 30000ms. */
+  timeoutMs: number;
+  allowlistKey: string;
+  correlationId: string;
+  round: number;
+}
+
+export interface BrokerResponse {
+  status: number;
+  headers: Record<string, string>;
+  body: string;
+  bodyEncoding: "utf8" | "base64";
+  contentType: string;
+  ok: boolean;
+  correlationId: string;
+  round: number;
+}
+
+export interface ProviderManager {
+  register(descriptor: ProviderDescriptor): void | Promise<void>;
+  list(): ProviderDescriptor[] | Promise<ProviderDescriptor[]>;
+  invoke(providerId: string, method: string, params?: unknown): Promise<unknown>;
+  revoke(providerId: string): void | Promise<void>;
+  reconnect(providerId: string): void | Promise<void>;
+  disposeGeneration(generationId: string): void | Promise<void>;
+}
+
 export type WorkerToHost =
   | { type: "subscribe_event"; event: string }
   | { type: "unsubscribe_event"; event: string }
@@ -3709,7 +3806,8 @@ export type WorkerToHost =
       tabId?: string;
       viewId?: string;
       userId?: string;
-    };
+    }
+  | WorkerToHostProviderMessage;
 
 // ─── Host → Worker messages ──────────────────────────────────────────────
 
@@ -3828,4 +3926,5 @@ export type HostToWorker =
    */
   | { type: "generation_stream_error"; requestId: string; error: string }
   | { type: "image_gen_stream_chunk"; requestId: string; event: ImageGenStreamEventDTO }
-  | { type: "image_gen_stream_error"; requestId: string; error: string };
+  | { type: "image_gen_stream_error"; requestId: string; error: string }
+  | HostToWorkerProviderMessage;
