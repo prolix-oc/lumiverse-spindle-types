@@ -890,6 +890,61 @@ export interface SpindleDisplayResolverRegistry {
   }): void;
 }
 
+/** Query options shared by the Lumiverse recent-chats host reads. */
+export interface SpindleRecentChatsQuery {
+  limit?: number;
+  offset?: number;
+  search?: string;
+  sort?: "name" | "recent" | "created";
+  direction?: "asc" | "desc";
+}
+
+/**
+ * A flat recent-chat row: one entry per chat, newest-first by default.
+ * `message_count` and `last_message_preview` ride along so list UIs never
+ * need a per-row message fetch.
+ */
+export interface SpindleRecentChat {
+  id: string;
+  character_id: string;
+  name: string;
+  created_at: number;
+  updated_at: number;
+  character_name: string;
+  character_image_id: string | null;
+  character_avatar_path?: string | null;
+  message_count: number;
+  last_message_preview: string;
+  [key: string]: unknown;
+}
+
+/**
+ * A grouped recent-chat row: one entry per solo character / group member
+ * set, pointing at that lineage's most recent chat.
+ */
+export interface SpindleGroupedRecentChat {
+  character_id: string;
+  character_name: string;
+  character_image_id: string | null;
+  character_avatar_path?: string | null;
+  latest_chat_id: string;
+  latest_chat_name: string;
+  updated_at: number;
+  chat_count: number;
+  is_group: boolean;
+  group_character_ids?: string[];
+  group_name?: string;
+  multiplayer?: boolean;
+  [key: string]: unknown;
+}
+
+/** Paginated recent-chats response (`data` + `total`). */
+export interface SpindleRecentChatsPage<TRow = SpindleRecentChat> {
+  data: TRow[];
+  total: number;
+  [key: string]: unknown;
+}
+
 /** Context object provided to frontend extension modules */
 export interface SpindleFrontendContext {
   /** Immutable host compatibility descriptor for this extension runtime. */
@@ -1078,6 +1133,22 @@ export interface SpindleFrontendContext {
   chats: {
     /** Update a message through the host app's authenticated API. */
     updateMessage(chatId: string, messageId: string, input: { content?: string }): Promise<unknown>;
+    /**
+     * Lumiverse host extension: flat one-row-per-chat recent list with
+     * server-side search/sort and per-row preview enrichment. Free
+     * (session-authenticated REST read). Undefined on hosts without it.
+     */
+    listRecent?(options?: SpindleRecentChatsQuery): Promise<SpindleRecentChatsPage<SpindleRecentChat>>;
+    /**
+     * Lumiverse host extension: recent chats grouped per character/group with
+     * server-side search, sort, and pagination. Free (session-authenticated
+     * REST read). Undefined on hosts without it.
+     */
+    listRecentGrouped?(options?: SpindleRecentChatsQuery): Promise<SpindleRecentChatsPage<SpindleGroupedRecentChat>>;
+    /** Lumiverse host extension: rename a chat / merge metadata (permission: "chats"). */
+    update?(chatId: string, input: { name?: string; metadata?: Record<string, unknown> }): Promise<unknown>;
+    /** Lumiverse host extension: permanently delete a chat (permission: "chats"). */
+    delete?(chatId: string): Promise<void>;
   };
   /** Take over display-time content resolution in the browser. */
   display?: SpindleDisplayResolverRegistry;
