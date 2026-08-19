@@ -10,6 +10,11 @@ test("final-response permission is valid and publicly declared", () => {
   expect(isValidPermission("final_response")).toBe(true);
 });
 
+test("unrestricted regex mutation permission is valid and publicly declared", () => {
+  expect(ALL_PERMISSIONS).toContain("regex_scripts_unrestricted");
+  expect(isValidPermission("regex_scripts_unrestricted")).toBe(true);
+});
+
 test("host compatibility constants are canonical and immutable", () => {
   expect(SPINDLE_COMPATIBILITY_ERROR_CODE).toBe("SPINDLE_COMPATIBILITY_ERROR");
   expect(SPINDLE_HOST_CAPABILITIES).toEqual({

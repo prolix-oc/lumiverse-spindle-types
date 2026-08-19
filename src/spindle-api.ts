@@ -1022,6 +1022,9 @@ export interface SpindleAPI {
    * access to unbound scripts created by the calling extension. Legacy or
    * unattributed scripts, preset-bound scripts, and scripts owned by another
    * extension remain readable and executable but cannot be updated or deleted.
+   * Extensions that also hold the privileged "regex_scripts_unrestricted"
+   * permission may update or delete any script in the user's library. The
+   * elevated permission is additive and does not replace "regex_scripts".
    * Check `RegexScriptDTO.can_mutate` before presenting mutation controls.
    * Set `RegexScriptCreateDTO.folder_version` alongside a non-empty `folder`
    * to render a version badge for an extension-installed regex folder.
