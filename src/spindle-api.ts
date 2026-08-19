@@ -1023,6 +1023,8 @@ export interface SpindleAPI {
    * unattributed scripts, preset-bound scripts, and scripts owned by another
    * extension remain readable and executable but cannot be updated or deleted.
    * Check `RegexScriptDTO.can_mutate` before presenting mutation controls.
+   * Set `RegexScriptCreateDTO.folder_version` alongside a non-empty `folder`
+   * to render a version badge for an extension-installed regex folder.
    * Uses the same shape Lumiverse applies internally during prompt assembly,
    * response baking, and display rendering.
    * For user-scoped extensions, userId is inferred from the extension owner.
