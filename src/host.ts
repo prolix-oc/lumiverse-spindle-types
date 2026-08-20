@@ -8,6 +8,10 @@ export const SPINDLE_HOST_CAPABILITIES = Object.freeze({
   "interceptor-final-response-v1": 1,
   "connection-dispatch-resolution-v1": 1,
   "text-editor-close-v1": 1,
+  "theme-assets-v1": 1,
+  "theme-packs-v1": 1,
+  "theme-catalog-v1": 1,
+  "theme-editor-navigation-v1": 1,
 }) as Readonly<Record<string, number>>;
 /** Structured error code returned when host compatibility validation fails. */
 export const SPINDLE_COMPATIBILITY_ERROR_CODE = "SPINDLE_COMPATIBILITY_ERROR" as const;

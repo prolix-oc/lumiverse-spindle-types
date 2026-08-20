@@ -27,6 +27,10 @@ test("host compatibility constants are canonical and immutable", () => {
     "interceptor-final-response-v1": 1,
     "connection-dispatch-resolution-v1": 1,
     "text-editor-close-v1": 1,
+    "theme-assets-v1": 1,
+    "theme-packs-v1": 1,
+    "theme-catalog-v1": 1,
+    "theme-editor-navigation-v1": 1,
   });
   expect(Object.isFrozen(SPINDLE_HOST_CAPABILITIES)).toBe(true);
 });

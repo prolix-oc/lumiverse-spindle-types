@@ -18,6 +18,22 @@ export {
   SPINDLE_COMPATIBILITY_ERROR_CODE,
 } from "./host";
 
+export type {
+  SpindleThemeAsset,
+  SpindleThemeAssetUploadOptions,
+  SpindleThemeAssetUpdate,
+  SpindleThemePackComponentDraft,
+  SpindleThemePackDraft,
+  SpindleThemePackImportResult,
+  SpindleThemePackInstallOptions,
+  SpindleThemePackInstallResult,
+  SpindleThemeComponentCatalogEntry,
+  SpindleThemeVariableCatalogEntry,
+  SpindleThemeEditorTarget,
+  SpindleThemeEditorOptions,
+  SpindleThemeAuthoringAPI,
+} from "./theme";
+
 export type { SpindlePermission as SpindlePermissionType } from "./permissions";
 export { ALL_PERMISSIONS, isValidPermission } from "./permissions";
 
