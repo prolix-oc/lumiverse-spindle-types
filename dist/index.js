@@ -1,5 +1,6 @@
 export { IDENTIFIER_PATTERN, validateIdentifier, } from "./manifest";
 export { SPINDLE_HOST_CAPABILITIES, SPINDLE_COMPATIBILITY_ERROR_CODE, } from "./host";
+export { SPINDLE_THEME_AUTHORING_HOST_CAPABILITIES } from "./theme";
 export { ALL_PERMISSIONS, isValidPermission } from "./permissions";
 export { ALL_CAPABILITIES, isValidCapability } from "./capabilities";
 export { SpindleEvent, CoreEventType } from "./events";

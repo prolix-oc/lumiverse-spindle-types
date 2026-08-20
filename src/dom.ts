@@ -18,6 +18,7 @@ import type {
 } from "./api";
 import type { SpindleComponentsHelper } from "./components";
 import type { SpindleHostDescriptorV1, SpindleHostLocaleAPI } from "./host";
+import type { SpindleThemeAuthoringAPI } from "./theme";
 
 /** A chat-message DOM element paired with its stable message id. */
 export interface SpindleMessageElement {
@@ -1110,6 +1111,8 @@ export interface SpindleFrontendChatsAPI {
   list(options?: { characterId?: string; limit?: number; offset?: number }): Promise<{ data: ChatDTO[]; total: number }>;
   get(chatId: string): Promise<ChatDTO | null>;
   getActive(): Promise<ChatDTO | null>;
+  listRecent?(options?: SpindleRecentChatsQuery): Promise<SpindleRecentChatsPage<SpindleRecentChat>>;
+  listRecentGrouped?(options?: SpindleRecentChatsQuery): Promise<SpindleRecentChatsPage<SpindleGroupedRecentChat>>;
   update(chatId: string, input: ChatUpdateDTO): Promise<ChatDTO>;
   delete(chatId: string): Promise<boolean>;
 }
@@ -1121,6 +1124,61 @@ export interface SpindleFrontendMessagesAPI {
   delete(chatId: string, messageId: string): Promise<void>;
 }
 
+/** Query options shared by the Lumiverse recent-chats host reads. */
+export interface SpindleRecentChatsQuery {
+  limit?: number;
+  offset?: number;
+  search?: string;
+  sort?: "name" | "recent" | "created";
+  direction?: "asc" | "desc";
+}
+
+/**
+ * A flat recent-chat row: one entry per chat, newest-first by default.
+ * `message_count` and `last_message_preview` ride along so list UIs never
+ * need a per-row message fetch.
+ */
+export interface SpindleRecentChat {
+  id: string;
+  character_id: string;
+  name: string;
+  created_at: number;
+  updated_at: number;
+  character_name: string;
+  character_image_id: string | null;
+  character_avatar_path?: string | null;
+  message_count: number;
+  last_message_preview: string;
+  [key: string]: unknown;
+}
+
+/**
+ * A grouped recent-chat row: one entry per solo character / group member
+ * set, pointing at that lineage's most recent chat.
+ */
+export interface SpindleGroupedRecentChat {
+  character_id: string;
+  character_name: string;
+  character_image_id: string | null;
+  character_avatar_path?: string | null;
+  latest_chat_id: string;
+  latest_chat_name: string;
+  updated_at: number;
+  chat_count: number;
+  is_group: boolean;
+  group_character_ids?: string[];
+  group_name?: string;
+  multiplayer?: boolean;
+  [key: string]: unknown;
+}
+
+/** Paginated recent-chats response (`data` + `total`). */
+export interface SpindleRecentChatsPage<TRow = SpindleRecentChat> {
+  data: TRow[];
+  total: number;
+  [key: string]: unknown;
+}
+
 /** Context object provided to frontend extension modules */
 export interface SpindleFrontendContext {
   /** Immutable host compatibility descriptor for this extension runtime. */
@@ -1129,6 +1187,8 @@ export interface SpindleFrontendContext {
   };
   /** Synchronous host locale access with removable live-change subscriptions. */
   readonly locale: SpindleHostLocaleAPI;
+  /** Native persistent theme authoring. Feature-detect each versioned host capability before use. */
+  readonly theme: SpindleThemeAuthoringAPI;
   dom: SpindleDOMHelper;
   events: {
     on(event: string, handler: (payload: unknown) => void): () => void;
@@ -1320,6 +1380,18 @@ export interface SpindleFrontendContext {
     list?: SpindleFrontendChatsAPI["list"];
     get?: SpindleFrontendChatsAPI["get"];
     getActive?: SpindleFrontendChatsAPI["getActive"];
+    /**
+     * Lumiverse host extension: flat one-row-per-chat recent list with
+     * server-side search/sort and per-row preview enrichment. Free
+     * (session-authenticated REST read). Undefined on hosts without it.
+     */
+    listRecent?(options?: SpindleRecentChatsQuery): Promise<SpindleRecentChatsPage<SpindleRecentChat>>;
+    /**
+     * Lumiverse host extension: recent chats grouped per character/group with
+     * server-side search, sort, and pagination. Free (session-authenticated
+     * REST read). Undefined on hosts without it.
+     */
+    listRecentGrouped?(options?: SpindleRecentChatsQuery): Promise<SpindleRecentChatsPage<SpindleGroupedRecentChat>>;
     update?: SpindleFrontendChatsAPI["update"];
     delete?: SpindleFrontendChatsAPI["delete"];
   };

@@ -15,6 +15,7 @@ export const ALL_PERMISSIONS = [
     "presets",
     "world_books",
     "regex_scripts",
+    "regex_scripts_unrestricted",
     "databanks",
     "memories",
     "media",

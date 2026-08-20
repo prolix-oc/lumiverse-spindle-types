@@ -21,6 +21,7 @@
     "test/package-exports-consumer.ts",
     "test/legacy-0.6.15-consumer.ts",
     "test/packed-0.6.16-consumer.ts",
-    "test/provider-runtime-union-parity.ts"
+    "test/provider-runtime-union-parity.ts",
+    "test/theme-authoring-consumer.ts"
   ]
 }

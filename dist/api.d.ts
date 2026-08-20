@@ -1400,6 +1400,8 @@ export interface RegexScriptDTO {
     sort_order: number;
     description: string;
     folder: string;
+    /** Host-validated version badge for this Spindle-owned folder, or null when unversioned/unfiled. */
+    readonly folder_version?: string | null;
     metadata: Record<string, unknown>;
     created_at: number;
     updated_at: number;
@@ -1436,6 +1438,13 @@ export interface RegexScriptCreateDTO {
     sort_order?: number;
     description?: string;
     folder?: string;
+    /**
+     * Optional version label rendered on the regex folder created by this
+     * extension. It is applied only when `folder` is non-empty. Omit it for the
+     * normal unversioned folder display; pass null or an empty string on update
+     * to clear an existing label.
+     */
+    folder_version?: string | null;
     metadata?: Record<string, unknown>;
     script_id?: string;
 }

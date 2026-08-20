@@ -28,6 +28,8 @@
  *                            (eval / new Function) for runtime-compiling frameworks.
  * - "final_response"        — replace the authoritative assistant response from
  *                            an interceptor (privileged; never auto-granted)
+ * - "regex_scripts_unrestricted" — update/delete any regex script in the user's
+ *                            library (privileged; additive to "regex_scripts")
  * - "providers.embedding.register" — register an embedding provider driver
  * - "providers.tts.register"       — register a TTS engine
  * - "providers.stt.register"       — register an STT engine
@@ -50,6 +52,7 @@ export type SpindlePermission =
   | "presets"
   | "world_books"
   | "regex_scripts"
+  | "regex_scripts_unrestricted"
   | "databanks"
   | "memories"
   | "media"
@@ -84,6 +87,7 @@ export const ALL_PERMISSIONS: readonly SpindlePermission[] = [
   "presets",
   "world_books",
   "regex_scripts",
+  "regex_scripts_unrestricted",
   "databanks",
   "memories",
   "media",

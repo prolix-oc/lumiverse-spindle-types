@@ -28,11 +28,13 @@
  *                            (eval / new Function) for runtime-compiling frameworks.
  * - "final_response"        — replace the authoritative assistant response from
  *                            an interceptor (privileged; never auto-granted)
+ * - "regex_scripts_unrestricted" — update/delete any regex script in the user's
+ *                            library (privileged; additive to "regex_scripts")
  * - "providers.embedding.register" — register an embedding provider driver
  * - "providers.tts.register"       — register a TTS engine
  * - "providers.stt.register"       — register an STT engine
  * - "providers.sidecar.register"   — register a sidecar HTTP endpoint
  */
-export type SpindlePermission = "generation" | "interceptor" | "tools" | "cors_proxy" | "context_handler" | "ephemeral_storage" | "chat_mutation" | "event_tracking" | "ui_panels" | "app_manipulation" | "oauth" | "characters" | "chats" | "presets" | "world_books" | "regex_scripts" | "databanks" | "memories" | "media" | "personas" | "push_notification" | "image_gen" | "images" | "generation_parameters" | "macro_interceptor" | "web_search" | "unsafe_eval" | "final_response" | "providers.embedding.register" | "providers.tts.register" | "providers.stt.register" | "providers.sidecar.register";
+export type SpindlePermission = "generation" | "interceptor" | "tools" | "cors_proxy" | "context_handler" | "ephemeral_storage" | "chat_mutation" | "event_tracking" | "ui_panels" | "app_manipulation" | "oauth" | "characters" | "chats" | "presets" | "world_books" | "regex_scripts" | "regex_scripts_unrestricted" | "databanks" | "memories" | "media" | "personas" | "push_notification" | "image_gen" | "images" | "generation_parameters" | "macro_interceptor" | "web_search" | "unsafe_eval" | "final_response" | "providers.embedding.register" | "providers.tts.register" | "providers.stt.register" | "providers.sidecar.register";
 export declare const ALL_PERMISSIONS: readonly SpindlePermission[];
 export declare function isValidPermission(p: string): p is SpindlePermission;

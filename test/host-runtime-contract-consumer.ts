@@ -99,6 +99,16 @@ void result;
 void legacyManifest;
 
 declare const spindle: SpindleAPI;
+const versionedRegex = spindle.regex_scripts.create({
+  name: "Versioned extension regex",
+  find_regex: "example",
+  folder: "Extension scripts",
+  folder_version: "2.4.0",
+});
+versionedRegex.then((script) => {
+  const folderVersion: string | null | undefined = script.folder_version;
+  void folderVersion;
+});
 const backendHost: SpindleHostDescriptorV1 = spindle.host;
 // @ts-expect-error the host descriptor is exposed as a readonly API property
 spindle.host = host;

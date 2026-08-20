@@ -113,10 +113,11 @@ try {
     { cwd: repoRoot, stdio: "inherit" },
   );
 
+  const rootPkg = JSON.parse(readFileSync(join(repoRoot, "package.json"), "utf8"));
   const installedPkgPath = join(fixtureDir, "node_modules/lumiverse-spindle-types/package.json");
   const installed = JSON.parse(readFileSync(installedPkgPath, "utf8"));
-  if (installed.version !== "0.6.16") {
-    throw new Error(`installed version ${installed.version}, expected 0.6.16`);
+  if (installed.version !== rootPkg.version) {
+    throw new Error(`installed version ${installed.version}, expected ${rootPkg.version}`);
   }
   if (installed.types !== "./dist/index.d.ts") {
     throw new Error(`installed types ${installed.types}, expected ./dist/index.d.ts`);
