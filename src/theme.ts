@@ -1,5 +1,13 @@
 import type { SpindleUploadFile } from "./dom";
 
+/** Frontend-only host capabilities for the native theme-authoring context. */
+export const SPINDLE_THEME_AUTHORING_HOST_CAPABILITIES = Object.freeze({
+  "theme-assets-v1": 1,
+  "theme-packs-v1": 1,
+  "theme-catalog-v1": 1,
+  "theme-editor-navigation-v1": 1,
+} as const);
+
 /** A native theme asset with separate browser and pack-safe references. */
 export interface SpindleThemeAsset {
   id: string;

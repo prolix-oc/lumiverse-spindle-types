@@ -4,10 +4,14 @@ import type {
   SpindleThemePackDraft,
   SpindleUploadFile,
 } from "lumiverse-spindle-types";
+import { SPINDLE_THEME_AUTHORING_HOST_CAPABILITIES } from "lumiverse-spindle-types";
 
 declare const ctx: SpindleFrontendContext;
 declare const upload: SpindleUploadFile;
 declare const archive: Uint8Array;
+
+const themeAssetsVersion: 1 = SPINDLE_THEME_AUTHORING_HOST_CAPABILITIES["theme-assets-v1"];
+void themeAssetsVersion;
 
 const draft: SpindleThemePackDraft = {
   name: "Visual Theme",
