@@ -4,6 +4,7 @@ import {
   SPINDLE_HOST_CAPABILITIES,
 } from "../src/host";
 import { ALL_PERMISSIONS, isValidPermission } from "../src/permissions";
+import { SPINDLE_THEME_AUTHORING_HOST_CAPABILITIES } from "../src/theme";
 
 test("final-response permission is valid and publicly declared", () => {
   expect(ALL_PERMISSIONS).toContain("final_response");
@@ -29,4 +30,15 @@ test("host compatibility constants are canonical and immutable", () => {
     "text-editor-close-v1": 1,
   });
   expect(Object.isFrozen(SPINDLE_HOST_CAPABILITIES)).toBe(true);
+});
+
+test("theme authoring capabilities remain frontend-specific and immutable", () => {
+  expect(SPINDLE_THEME_AUTHORING_HOST_CAPABILITIES).toEqual({
+    "theme-assets-v1": 1,
+    "theme-packs-v1": 1,
+    "theme-catalog-v1": 1,
+    "theme-editor-navigation-v1": 1,
+  });
+  expect(Object.isFrozen(SPINDLE_THEME_AUTHORING_HOST_CAPABILITIES)).toBe(true);
+  expect(SPINDLE_HOST_CAPABILITIES).not.toHaveProperty("theme-assets-v1");
 });

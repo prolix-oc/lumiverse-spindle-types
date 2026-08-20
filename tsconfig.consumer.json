@@ -5,5 +5,5 @@
     "outDir": "./.consumer-dist",
     "declaration": false
   },
-  "include": ["test/loom-block-editor-consumer.ts", "test/bound-generation-consumer.ts", "test/interceptor-consumer.ts", "test/host-runtime-contract-consumer.ts", "test/image-gen-stream-consumer.ts"]
+  "include": ["test/loom-block-editor-consumer.ts", "test/bound-generation-consumer.ts", "test/interceptor-consumer.ts", "test/host-runtime-contract-consumer.ts", "test/image-gen-stream-consumer.ts", "test/theme-authoring-consumer.ts"]
 }
