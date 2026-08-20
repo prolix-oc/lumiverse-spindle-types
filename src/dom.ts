@@ -975,9 +975,36 @@ export interface SpindleSettingsAPI {
   };
 }
 
+export interface SpindleSettingsTabSection {
+  readonly key: string;
+  readonly titleKey: string;
+  readonly titleFallback: string;
+  readonly keywords?: readonly string[];
+}
+
 export interface SpindleSettingsTabOptions {
+  /** Unique tab identifier. A shared tab id may belong to core or to another extension. */
   id: string;
+  /** Tab title shown in settings navigation. */
   title: string;
+  /** Short label for compact layouts. */
+  shortName?: string;
+  /** Inline SVG string for the tab icon. */
+  iconSvg?: string;
+  /** Description for search and command palette. */
+  description?: string;
+  /** Keywords for search indexing. */
+  keywords?: readonly string[];
+  /** Sub-sections within the settings tab for search indexing and navigation. */
+  sections?: readonly SpindleSettingsTabSection[];
+  /**
+   * Relative tab position: 'top', 'bottom', 'after-display', 'before-chat',
+   * 'after-<tabId>', 'before-<tabId>', or any specific tab identifier.
+   */
+  position?: 'top' | 'bottom' | `after-${string}` | `before-${string}` | string;
+  /** Body order among registrants sharing a tab. Defaults to 100. */
+  order?: number;
+  /** Optional render callback for mounting tab content into root. */
   render?: (root: HTMLElement) => void | (() => void);
 }
 

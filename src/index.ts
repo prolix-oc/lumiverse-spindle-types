@@ -278,6 +278,7 @@ export type {
   SpindleFrontendContextV2,
   SpindleSettingsAPI,
   SpindleSettingsTabOptions,
+  SpindleSettingsTabSection,
   SpindleSettingsTabHandle,
   SpindleStateSelectors,
   SpindleResizeController,
