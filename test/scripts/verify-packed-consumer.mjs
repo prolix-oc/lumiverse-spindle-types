@@ -151,7 +151,7 @@ try {
     [
       "--input-type=module",
       "-e",
-      "import('lumiverse-spindle-types').then(m => { if (!m.SPINDLE_HOST_CAPABILITIES) process.exit(1); console.log('Node ESM import verified'); })",
+      "import('lumiverse-spindle-types').then(m => { if (!m.SPINDLE_HOST_CAPABILITIES) process.exit(1); if (typeof m.validateIdentifier !== 'function') process.exit(1); console.log('Node ESM import verified'); })",
     ],
     {
       cwd: fixtureDir,
