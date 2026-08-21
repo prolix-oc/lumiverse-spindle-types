@@ -1,4 +1,4 @@
-import type { SpindlePermission } from "./permissions";
+import type { SpindlePermission } from "./permissions.js";
 /** Extension info as returned by the backend API */
 export interface ExtensionInfo {
     id: string;

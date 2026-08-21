@@ -2,21 +2,21 @@ export type {
   SpindleManifest,
   SpindlePermission,
   SpindleCapability,
-} from "./manifest";
+} from "./manifest.js";
 export {
   IDENTIFIER_PATTERN,
   validateIdentifier,
-} from "./manifest";
+} from "./manifest.js";
 
 export type {
   SpindleHostDescriptorV1,
   SpindleHostLocale,
   SpindleHostLocaleAPI,
-} from "./host";
+} from "./host.js";
 export {
   SPINDLE_HOST_CAPABILITIES,
   SPINDLE_COMPATIBILITY_ERROR_CODE,
-} from "./host";
+} from "./host.js";
 
 export type {
   SpindleThemeAsset,
@@ -32,16 +32,16 @@ export type {
   SpindleThemeEditorTarget,
   SpindleThemeEditorOptions,
   SpindleThemeAuthoringAPI,
-} from "./theme";
-export { SPINDLE_THEME_AUTHORING_HOST_CAPABILITIES } from "./theme";
+} from "./theme.js";
+export { SPINDLE_THEME_AUTHORING_HOST_CAPABILITIES } from "./theme.js";
 
-export type { SpindlePermission as SpindlePermissionType } from "./permissions";
-export { ALL_PERMISSIONS, isValidPermission } from "./permissions";
+export type { SpindlePermission as SpindlePermissionType } from "./permissions.js";
+export { ALL_PERMISSIONS, isValidPermission } from "./permissions.js";
 
-export type { SpindleCapability as SpindleCapabilityType } from "./capabilities";
-export { ALL_CAPABILITIES, isValidCapability } from "./capabilities";
+export type { SpindleCapability as SpindleCapabilityType } from "./capabilities.js";
+export { ALL_CAPABILITIES, isValidCapability } from "./capabilities.js";
 
-export { SpindleEvent, CoreEventType } from "./events";
+export { SpindleEvent, CoreEventType } from "./events.js";
 
 export type {
   LlmMessagePartDTO,
@@ -275,10 +275,10 @@ export type {
   BrokerRequest,
   BrokerResponse,
   ProviderManager,
-} from "./api";
-export { PERMISSION_DENIED_PREFIX } from "./api";
+} from "./api.js";
+export { PERMISSION_DENIED_PREFIX } from "./api.js";
 
-export type { ToolRegistration, JSONSchema } from "./tools";
+export type { ToolRegistration, JSONSchema } from "./tools.js";
 
 export type {
   SpindleMessageElement,
@@ -379,7 +379,7 @@ export type {
     SpindleDisplayResolveResult,
     SpindleDisplayTemplatesResult,
     SpindleTabLocation,
-  } from "./dom";
+  } from "./dom.js";
 
 export type {
   SpindleMountedComponent,
@@ -428,9 +428,9 @@ export type {
   SpindleLoomBlockEditorHandle,
   SpindleComponentsHelper,
   SpindleHostSurfaceHandle,
-} from "./components";
+} from "./components.js";
 
-export type { ExtensionInfo } from "./extension-info";
+export type { ExtensionInfo } from "./extension-info.js";
 
 export type {
   EntityTypeDTO,
@@ -482,7 +482,7 @@ export type {
   CortexIngestionTelemetryDTO,
   ChatChunkDTO,
   ChatMemoryWarmupResultDTO,
-} from "./memories";
+} from "./memories.js";
 
 export type {
   SpindleAPI,
@@ -497,7 +497,7 @@ export type {
   SpindleTtsEngine,
   SpindleSttEngine,
   SpindleSidecarEndpoint,
-} from "./spindle-api";
+} from "./spindle-api.js";
 
 export type {
   CouncilMember,
@@ -512,10 +512,10 @@ export type {
   CouncilToolCategory,
   CouncilToolExecution,
   CouncilToolDefinition,
-} from "./council";
+} from "./council.js";
 export {
   SIDECAR_DEFAULTS,
   COUNCIL_SIDECAR_DEFAULTS,
   COUNCIL_TOOLS_DEFAULTS,
   COUNCIL_SETTINGS_DEFAULTS,
-} from "./council";
+} from "./council.js";

@@ -22,7 +22,7 @@
  * Components inherit the active Lumiverse theme via CSS variables, so they
  * visually match the rest of the host UI without any additional wiring.
  */
-import type { PromptBlockDTO, PromptVariableValuesDTO } from "./api";
+import type { PromptBlockDTO, PromptVariableValuesDTO } from "./api.js";
 /** Editable public value rendered by the native Loom block editor. */
 export interface SpindleLoomBlockEditorValue {
     blocks: PromptBlockDTO[];

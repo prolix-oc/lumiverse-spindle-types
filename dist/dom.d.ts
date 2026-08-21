@@ -1,7 +1,7 @@
-import type { ChatDTO, ChatMessageDTO, ChatUpdateDTO, ConnectionProfileDTO, LlmMessageDTO, PromptBlockDTO, PromptVariableValuesDTO, RequestInitDTO, TokenCountOptionsDTO, TokenCountResultDTO, WorldBookCreateDTO, WorldBookDTO, WorldBookEntryCreateDTO, WorldBookEntryDTO, WorldBookEntryUpdateDTO, WorldBookUpdateDTO } from "./api";
-import type { SpindleComponentsHelper } from "./components";
-import type { SpindleHostDescriptorV1, SpindleHostLocaleAPI } from "./host";
-import type { SpindleThemeAuthoringAPI } from "./theme";
+import type { ChatDTO, ChatMessageDTO, ChatUpdateDTO, ConnectionProfileDTO, LlmMessageDTO, PromptBlockDTO, PromptVariableValuesDTO, RequestInitDTO, TokenCountOptionsDTO, TokenCountResultDTO, WorldBookCreateDTO, WorldBookDTO, WorldBookEntryCreateDTO, WorldBookEntryDTO, WorldBookEntryUpdateDTO, WorldBookUpdateDTO } from "./api.js";
+import type { SpindleComponentsHelper } from "./components.js";
+import type { SpindleHostDescriptorV1, SpindleHostLocaleAPI } from "./host.js";
+import type { SpindleThemeAuthoringAPI } from "./theme.js";
 /** A chat-message DOM element paired with its stable message id. */
 export interface SpindleMessageElement {
     /** Stable message id (matches the message's id in the host's data store). */

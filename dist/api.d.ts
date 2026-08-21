@@ -1,7 +1,7 @@
-import type { SpindleManifest } from "./manifest";
-import type { SpindleHostDescriptorV1 } from "./host";
-import type { CouncilMemberContext } from "./council";
-import type { ChatLinkAttachDTO, CortexQueryDTO, MemoryCortexConfigDTO, MemoryEntityStatusUpdateDTO, MemoryEntityUpsertDTO, MemoryRelationUpsertDTO, VaultCreateDTO } from "./memories";
+import type { SpindleManifest } from "./manifest.js";
+import type { SpindleHostDescriptorV1 } from "./host.js";
+import type { CouncilMemberContext } from "./council.js";
+import type { ChatLinkAttachDTO, CortexQueryDTO, MemoryCortexConfigDTO, MemoryEntityStatusUpdateDTO, MemoryEntityUpsertDTO, MemoryRelationUpsertDTO, VaultCreateDTO } from "./memories.js";
 export type LlmMessagePartDTO = {
     type: "text";
     text: string;

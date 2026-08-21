@@ -145,6 +145,20 @@ try {
     cwd: fixtureDir,
     stdio: "inherit",
   });
+
+  execFileSync(
+    process.execPath,
+    [
+      "--input-type=module",
+      "-e",
+      "import('lumiverse-spindle-types').then(m => { if (!m.SPINDLE_HOST_CAPABILITIES) process.exit(1); console.log('Node ESM import verified'); })",
+    ],
+    {
+      cwd: fixtureDir,
+      stdio: "inherit",
+      windowsHide: true,
+    },
+  );
 } finally {
   rmSync(fixtureDir, { recursive: true, force: true });
   const fixturesRoot = dirname(fixtureDir);

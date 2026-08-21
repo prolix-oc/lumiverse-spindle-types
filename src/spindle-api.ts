@@ -1,10 +1,10 @@
-import type { SpindleManifest } from "./manifest";
-import type { SpindleHostDescriptorV1 } from "./host";
-import type { SpindleTextEditorOptions, SpindleTextEditorResult } from "./dom";
+import type { SpindleManifest } from "./manifest.js";
+import type { SpindleHostDescriptorV1 } from "./host.js";
+import type { SpindleTextEditorOptions, SpindleTextEditorResult } from "./dom.js";
 import type {
   CouncilMemberContext,
   CouncilSettings,
-} from "./council";
+} from "./council.js";
 import type {
   LlmMessageDTO,
   InterceptorDisposer,
@@ -137,7 +137,7 @@ import type {
   WebSearchRequestDTO,
   WebSearchResponseDTO,
   WebSearchSettingsDTO,
-} from "./api";
+} from "./api.js";
 import type {
   ChatChunkDTO,
   ChatLinkAttachDTO,
@@ -162,7 +162,7 @@ import type {
   VaultDTO,
   VaultReindexResultDTO,
   VaultWithContentsDTO,
-} from "./memories";
+} from "./memories.js";
 
 export interface FrontendProcessHandle {
   /** Host-assigned process ID unique within the extension runtime. */

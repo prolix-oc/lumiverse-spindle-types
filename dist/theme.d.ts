@@ -1,4 +1,4 @@
-import type { SpindleUploadFile } from "./dom";
+import type { SpindleUploadFile } from "./dom.js";
 /** Frontend-only host capabilities for the native theme-authoring context. */
 export declare const SPINDLE_THEME_AUTHORING_HOST_CAPABILITIES: Readonly<{
     readonly "theme-assets-v1": 1;
