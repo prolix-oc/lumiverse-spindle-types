@@ -28,8 +28,22 @@ test("host compatibility constants are canonical and immutable", () => {
     "interceptor-final-response-v1": 1,
     "connection-dispatch-resolution-v1": 1,
     "text-editor-close-v1": 1,
+    "frontend-extensibility-v2": 1,
   });
   expect(Object.isFrozen(SPINDLE_HOST_CAPABILITIES)).toBe(true);
+});
+
+test("provider registration permissions are valid and publicly declared", () => {
+  const providerPermissions = [
+    "providers.embedding.register",
+    "providers.tts.register",
+    "providers.stt.register",
+    "providers.sidecar.register",
+  ] as const;
+  for (const perm of providerPermissions) {
+    expect(ALL_PERMISSIONS).toContain(perm);
+    expect(isValidPermission(perm)).toBe(true);
+  }
 });
 
 test("theme authoring capabilities remain frontend-specific and immutable", () => {

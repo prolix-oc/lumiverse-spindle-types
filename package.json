@@ -25,7 +25,8 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "build:consumer": "tsc -p tsconfig.consumer.json --noEmit && node test/scripts/verify-packed-consumer.mjs"
+    "build:consumer": "tsc -p tsconfig.consumer.json --noEmit && node test/scripts/verify-packed-consumer.mjs",
+    "test": "bun test"
   },
   "devDependencies": {
     "typescript": "5.6.3"
