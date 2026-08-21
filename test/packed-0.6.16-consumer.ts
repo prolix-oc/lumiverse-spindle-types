@@ -84,10 +84,12 @@ const response: BrokerResponse = {
   round: 1,
 };
 declare const manager: ProviderManager;
-void manager.list();
+manager.register({ kind: "sidecar", id: "1" });
 const runtime: ProviderRuntimeMessage = {
   type: "provider_result",
-  requestId: "x",
+  phase: "result",
+  correlationId: "c1",
+  round: 1,
   result: response,
 };
 void request;

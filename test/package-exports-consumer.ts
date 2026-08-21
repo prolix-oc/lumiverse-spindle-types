@@ -41,37 +41,53 @@ import {
 } from "lumiverse-spindle-types";
 
 const kind: ProviderKind = "embedding";
-const descriptor: ProviderDescriptor = { id: "emb-1", kind, name: "Local embed" };
+const descriptor: ProviderDescriptor = {
+  kind,
+  id: "emb-1",
+  description: { dims: 768 },
+  generation: 1,
+};
 const registerMsg: WorkerToHostProviderMessage = {
   type: "provider_register",
-  requestId: "r1",
-  descriptor,
+  phase: "register",
+  kind: descriptor.kind,
+  id: descriptor.id,
+  description: descriptor.description,
+  generation: descriptor.generation,
 };
 const unregisterMsg: WorkerToHostProviderMessage = {
   type: "provider_unregister",
-  requestId: "r2",
-  providerId: descriptor.id,
+  phase: "unregister",
+  kind: descriptor.kind,
+  id: descriptor.id,
 };
 const resultMsg: WorkerToHostProviderMessage = {
   type: "provider_result",
-  requestId: "r3",
+  phase: "result",
+  correlationId: "c1",
+  round: 1,
   result: { ok: true },
 };
 const invokeMsg: HostToWorkerProviderMessage = {
   type: "provider_invoke",
-  requestId: "r4",
-  providerId: descriptor.id,
-  method: "embed",
-  timeoutMs: 30000,
+  phase: "invoke",
+  correlationId: "c1",
+  round: 1,
+  key: { effectiveScope: "user:alice", installationId: "inst-a", kind: descriptor.kind, id: descriptor.id },
+  request: { text: "hi" },
 };
 const abortMsg: HostToWorkerProviderMessage = {
   type: "provider_abort",
-  requestId: "r4",
+  phase: "abort",
+  correlationId: "c1",
+  round: 1,
+  reason: "cancel",
 };
 const changedMsg: HostToWorkerProviderMessage = {
   type: "provider_changed",
-  providerId: descriptor.id,
-  change: "registered",
+  phase: "changed",
+  action: "registered",
+  key: { effectiveScope: "user:alice", installationId: "inst-a", kind: descriptor.kind, id: descriptor.id },
 };
 const runtime: ProviderRuntimeMessage[] = [
   registerMsg,
@@ -108,12 +124,22 @@ const brokerResponse: BrokerResponse = {
 };
 
 declare const providers: ProviderManager;
-void providers.register(descriptor);
-void providers.list();
-void providers.invoke(descriptor.id, "embed");
-void providers.revoke(descriptor.id);
-void providers.reconnect(descriptor.id);
-void providers.disposeGeneration("gen-1");
+providers.register(descriptor);
+providers.unregister(descriptor.kind, descriptor.id);
+const disposeHandler: () => void = providers.handle(descriptor.kind, descriptor.id, (req) => {
+  void req.correlationId;
+  void req.round;
+  void req.key.installationId;
+  void req.request;
+  void req.signal.aborted;
+  return { ok: true };
+});
+const disposeChanged: () => void = providers.onChanged((event) => {
+  void event.action;
+  void event.key.installationId;
+});
+disposeHandler();
+disposeChanged();
 
 const embedding: SpindleEmbeddingDriver = {
   id: "emb",

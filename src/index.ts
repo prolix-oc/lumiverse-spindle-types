@@ -269,6 +269,8 @@ export type {
   HostToWorker,
   ProviderKind,
   ProviderDescriptor,
+  ProviderBrokerSpec,
+  ProviderKeyDTO,
   WorkerToHostProviderMessage,
   HostToWorkerProviderMessage,
   ProviderRuntimeMessage,
