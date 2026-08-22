@@ -1,10 +1,10 @@
-import type { SpindleManifest } from "./manifest";
-import type { SpindleHostDescriptorV1 } from "./host";
-import type { SpindleTextEditorOptions, SpindleTextEditorResult } from "./dom";
+import type { SpindleManifest } from "./manifest.js";
+import type { SpindleHostDescriptorV1 } from "./host.js";
+import type { SpindleTextEditorOptions, SpindleTextEditorResult } from "./dom.js";
 import type {
   CouncilMemberContext,
   CouncilSettings,
-} from "./council";
+} from "./council.js";
 import type {
   LlmMessageDTO,
   InterceptorDisposer,
@@ -68,7 +68,10 @@ import type {
   BoundAssemblyOutcomeDTO,
   QuietTrackedRequestDTO,
   QuietTrackedResultDTO,
+  BrokerRequest,
+  BrokerResponse,
   ChatMemoryResultDTO,
+  ProviderManager,
   ImageGenRequestDTO,
   ImageGenResultDTO,
   ImageGenStreamRequestDTO,
@@ -134,7 +137,7 @@ import type {
   WebSearchRequestDTO,
   WebSearchResponseDTO,
   WebSearchSettingsDTO,
-} from "./api";
+} from "./api.js";
 import type {
   ChatChunkDTO,
   ChatLinkAttachDTO,
@@ -159,7 +162,7 @@ import type {
   VaultDTO,
   VaultReindexResultDTO,
   VaultWithContentsDTO,
-} from "./memories";
+} from "./memories.js";
 
 export interface FrontendProcessHandle {
   /** Host-assigned process ID unique within the extension runtime. */
@@ -245,6 +248,30 @@ export interface SpindlePromptRegex {
    * the previously-declared set. Empty array clears ownership (host resumes its pass).
    */
   setOwnedChats(chatIds: string[]): void;
+}
+
+export interface SpindleEmbeddingDriver {
+  id: string;
+  name?: string;
+  embed(input: { texts: string[] }): Promise<{ embeddings: number[][] }>;
+}
+
+export interface SpindleTtsEngine {
+  id: string;
+  name?: string;
+  synthesize(input: { text: string; voice?: string }): Promise<{ audio: Uint8Array | string; contentType?: string }>;
+}
+
+export interface SpindleSttEngine {
+  id: string;
+  name?: string;
+  transcribe(input: { audio: Uint8Array | string; contentType?: string }): Promise<{ text: string }>;
+}
+
+export interface SpindleSidecarEndpoint {
+  id: string;
+  path: string;
+  handle(request: BrokerRequest): Promise<BrokerResponse>;
 }
 
 export type SpindleGenerateAPI = SpindleAPI["generate"];
@@ -2190,4 +2217,12 @@ export interface SpindleAPI {
 
   /** This extension's manifest */
   manifest: SpindleManifest;
+
+  /** Optional provider broker for registered embedding/TTS/STT/sidecar drivers. */
+  providers?: ProviderManager;
+
+  registerEmbeddingDriver?(driver: SpindleEmbeddingDriver): () => void;
+  registerTtsEngine?(engine: SpindleTtsEngine): () => void;
+  registerSttEngine?(engine: SpindleSttEngine): () => void;
+  registerSidecarEndpoint?(endpoint: SpindleSidecarEndpoint): () => void;
 }

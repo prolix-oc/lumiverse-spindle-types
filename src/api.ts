@@ -1,6 +1,6 @@
-import type { SpindleManifest } from "./manifest";
-import type { SpindleHostDescriptorV1 } from "./host";
-import type { CouncilMemberContext } from "./council";
+import type { SpindleManifest } from "./manifest.js";
+import type { SpindleHostDescriptorV1 } from "./host.js";
+import type { CouncilMemberContext } from "./council.js";
 import type {
   ChatLinkAttachDTO,
   CortexQueryDTO,
@@ -9,7 +9,7 @@ import type {
   MemoryEntityUpsertDTO,
   MemoryRelationUpsertDTO,
   VaultCreateDTO,
-} from "./memories";
+} from "./memories.js";
 
 // ─── DTO types for messages ──────────────────────────────────────────────
 
@@ -3110,6 +3110,177 @@ export interface SharedRpcEndpointPolicyDTO {
 
 // ─── Worker → Host messages ──────────────────────────────────────────────
 
+/**
+ * Provider runtime size limits:
+ * - descriptor: 64KiB
+ * - request: 256KiB
+ * - result / error / envelope: 1MiB
+ * Default invoke timeout: 30000ms.
+ */
+export type ProviderKind = "embedding" | "tts" | "stt" | "sidecar";
+
+/**
+ * Broker specification declared at registration time. The broker URL is
+ * immutable — the host always dispatches to the registration-time `url`
+ * and never honours per-invocation destination overrides.
+ */
+export interface ProviderBrokerSpec {
+  url: string;
+  method?: string;
+  /**
+   * Secret reference resolved host-side at request time. Must be namespaced
+   * to the registering installation: `extension:<installationId>:<name>`.
+   * Global or user-scoped secret keys are rejected with an authorization
+   * error before any network request is made.
+   */
+  secretKey?: string;
+  headers?: Record<string, string>;
+  kind?: ProviderKind;
+}
+
+/** Scope-qualified identity of a registered provider. Limit: full envelope 1MiB. */
+export interface ProviderKeyDTO {
+  effectiveScope: string;
+  installationId: string;
+  kind: string;
+  id: string;
+}
+
+/** Provider descriptor payload. Limit: 64KiB. */
+export interface ProviderDescriptor {
+  kind: string;
+  id: string;
+  description?: unknown;
+  broker?: ProviderBrokerSpec;
+  generation?: number;
+  revision?: number;
+}
+
+/**
+ * Pipelined worker → host provider messages (phase-tagged). Mirrors Core's
+ * runtime wire schema exactly.
+ */
+export type WorkerToHostProviderMessage =
+  | {
+      type: "provider_register";
+      phase: "register";
+      kind: string;
+      id: string;
+      /** Descriptor payload limit: 64KiB. */
+      description?: unknown;
+      broker?: ProviderBrokerSpec;
+      generation?: number;
+      revision?: number;
+    }
+  | {
+      type: "provider_unregister";
+      phase: "unregister";
+      kind: string;
+      id: string;
+    }
+  | {
+      type: "provider_result";
+      phase: "result";
+      correlationId: string;
+      round?: number;
+      /** Result / error / envelope limit: 1MiB. */
+      result?: unknown;
+      error?: string;
+    };
+
+/**
+ * Pipelined host → worker provider messages (phase-tagged). Mirrors Core's
+ * runtime wire schema exactly.
+ */
+export type HostToWorkerProviderMessage =
+  | {
+      type: "provider_invoke";
+      phase: "invoke";
+      correlationId: string;
+      round: number;
+      key: ProviderKeyDTO;
+      /** Request payload limit: 256KiB. Default timeout: 30000ms. */
+      request: unknown;
+    }
+  | {
+      type: "provider_abort";
+      phase: "abort";
+      correlationId: string;
+      round: number;
+      reason?: string;
+    }
+  | {
+      type: "provider_changed";
+      phase: "changed";
+      action: "registered" | "unregistered" | "updated";
+      key: ProviderKeyDTO;
+    };
+
+export type ProviderRuntimeMessage = WorkerToHostProviderMessage | HostToWorkerProviderMessage;
+
+export interface BrokerRequest {
+  kind: string;
+  id: string;
+  method: string;
+  url: string;
+  headers: Record<string, string>;
+  body: string;
+  bodyEncoding: "utf8" | "base64";
+  expectedResponseEncoding: "utf8" | "base64";
+  /** Default timeout: 30000ms. */
+  timeoutMs: number;
+  allowlistKey: string;
+  correlationId: string;
+  round: number;
+}
+
+export interface BrokerResponse {
+  status: number;
+  headers: Record<string, string>;
+  body: string;
+  bodyEncoding: "utf8" | "base64";
+  contentType: string;
+  ok: boolean;
+  correlationId: string;
+  round: number;
+}
+
+/**
+ * Host-side provider manager exposed to extension workers as
+ * `spindle.providers`. Mirrors the runtime API exactly: registration is
+ * fire-and-forget, invocations arrive through `handle`, and registry changes
+ * are observed via `onChanged`.
+ */
+export interface ProviderManager {
+  /** Register a provider descriptor (kind/id unique per installation scope). */
+  register(descriptor: ProviderDescriptor): void;
+  /** Remove a previously registered provider. */
+  unregister(kind: string, id: string): void;
+  /**
+   * Bind an invocation handler for `kind/id`. The handler receives the
+   * pipelined invoke payload plus a worker-local abort signal; its return
+   * value is delivered back to the host as a `provider_result`.
+   */
+  handle(
+    kind: string,
+    id: string,
+    handler: (req: {
+      correlationId: string;
+      round: number;
+      key: ProviderKeyDTO;
+      request: unknown;
+      signal: AbortSignal;
+    }) => unknown | Promise<unknown>,
+  ): () => void;
+  /** Subscribe to registry changes for this installation. Returns an unsubscribe function. */
+  onChanged(
+    handler: (event: {
+      action: "registered" | "unregistered" | "updated";
+      key: ProviderKeyDTO;
+    }) => void,
+  ): () => void;
+}
+
 export type WorkerToHost =
   | { type: "subscribe_event"; event: string }
   | { type: "unsubscribe_event"; event: string }
@@ -3718,7 +3889,8 @@ export type WorkerToHost =
       tabId?: string;
       viewId?: string;
       userId?: string;
-    };
+    }
+  | WorkerToHostProviderMessage;
 
 // ─── Host → Worker messages ──────────────────────────────────────────────
 
@@ -3837,4 +4009,5 @@ export type HostToWorker =
    */
   | { type: "generation_stream_error"; requestId: string; error: string }
   | { type: "image_gen_stream_chunk"; requestId: string; event: ImageGenStreamEventDTO }
-  | { type: "image_gen_stream_error"; requestId: string; error: string };
+  | { type: "image_gen_stream_error"; requestId: string; error: string }
+  | HostToWorkerProviderMessage;

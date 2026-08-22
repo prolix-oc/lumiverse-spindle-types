@@ -51,8 +51,8 @@ export interface SpindleStorageSeedFile {
   required?: boolean;
 }
 
-export type SpindlePermission = import("./permissions").SpindlePermission;
-export type SpindleCapability = import("./capabilities").SpindleCapability;
+export type SpindlePermission = import("./permissions.js").SpindlePermission;
+export type SpindleCapability = import("./capabilities.js").SpindleCapability;
 
 /** Regex for validating extension identifiers */
 export const IDENTIFIER_PATTERN = /^[a-z][a-z0-9_]*$/;
