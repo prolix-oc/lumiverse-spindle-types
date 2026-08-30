@@ -1423,6 +1423,28 @@ export type UserPresetUpdateDTO = Partial<UserPresetCreateDTO> & {
 export type PromptBlockCreateDTO = Partial<PromptBlockDTO>;
 export type PromptBlockUpdateDTO = Partial<Omit<PromptBlockDTO, "id">>;
 
+/** Identifies one exact occurrence in a preset's ordered prompt-block list. */
+export interface PromptBlockOccurrenceDTO {
+  readonly blockId: string;
+  readonly promptOrder: number;
+}
+
+/** Exact prompt-block occurrence plus the preset revision required for mutation. */
+export interface PromptBlockMutationTargetDTO extends PromptBlockOccurrenceDTO {
+  readonly expectedCacheRevision: number;
+}
+
+/** Revision authority serialized inside a prompt-block create request. */
+export interface PromptBlockCreateAuthorityDTO {
+  readonly expectedCacheRevision: number;
+  readonly index?: number;
+}
+
+/** Public create options; user scope remains outside the wire authority object. */
+export interface PromptBlockCreateOptionsDTO extends PromptBlockCreateAuthorityDTO {
+  readonly userId?: string;
+}
+
 // ─── World Book DTOs ─────────────────────────────────────────────────────
 
 /**
@@ -3629,10 +3651,10 @@ export type WorkerToHost =
   | { type: "presets_update"; requestId: string; presetId: string; input: UserPresetUpdateDTO; userId?: string }
   | { type: "presets_delete"; requestId: string; presetId: string; userId?: string }
   | { type: "preset_blocks_list"; requestId: string; presetId: string; userId?: string }
-  | { type: "preset_blocks_get"; requestId: string; presetId: string; blockId: string; userId?: string }
-  | { type: "preset_blocks_create"; requestId: string; presetId: string; input: PromptBlockCreateDTO; index?: number; userId?: string }
-  | { type: "preset_blocks_update"; requestId: string; presetId: string; blockId: string; input: PromptBlockUpdateDTO; userId?: string }
-  | { type: "preset_blocks_delete"; requestId: string; presetId: string; blockId: string; userId?: string }
+  | { type: "preset_blocks_get"; requestId: string; presetId: string; occurrence: PromptBlockOccurrenceDTO; userId?: string }
+  | { type: "preset_blocks_create"; requestId: string; presetId: string; input: PromptBlockCreateDTO; options: PromptBlockCreateAuthorityDTO; userId?: string }
+  | { type: "preset_blocks_update"; requestId: string; presetId: string; target: PromptBlockMutationTargetDTO; input: PromptBlockUpdateDTO; userId?: string }
+  | { type: "preset_blocks_delete"; requestId: string; presetId: string; target: PromptBlockMutationTargetDTO; userId?: string }
   | { type: "preset_categories_list"; requestId: string; presetId: string; userId?: string }
   // ─── World Books (gated: "world_books") ──────────────────────────────
   | { type: "world_books_list"; requestId: string; limit?: number; offset?: number; userId?: string }

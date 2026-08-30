@@ -1278,6 +1278,24 @@ export type UserPresetUpdateDTO = Partial<UserPresetCreateDTO> & {
 };
 export type PromptBlockCreateDTO = Partial<PromptBlockDTO>;
 export type PromptBlockUpdateDTO = Partial<Omit<PromptBlockDTO, "id">>;
+/** Identifies one exact occurrence in a preset's ordered prompt-block list. */
+export interface PromptBlockOccurrenceDTO {
+    readonly blockId: string;
+    readonly promptOrder: number;
+}
+/** Exact prompt-block occurrence plus the preset revision required for mutation. */
+export interface PromptBlockMutationTargetDTO extends PromptBlockOccurrenceDTO {
+    readonly expectedCacheRevision: number;
+}
+/** Revision authority serialized inside a prompt-block create request. */
+export interface PromptBlockCreateAuthorityDTO {
+    readonly expectedCacheRevision: number;
+    readonly index?: number;
+}
+/** Public create options; user scope remains outside the wire authority object. */
+export interface PromptBlockCreateOptionsDTO extends PromptBlockCreateAuthorityDTO {
+    readonly userId?: string;
+}
 /**
  * Safe representation of a world book exposed to extensions.
  */
@@ -3601,27 +3619,27 @@ export type WorkerToHost = {
     type: "preset_blocks_get";
     requestId: string;
     presetId: string;
-    blockId: string;
+    occurrence: PromptBlockOccurrenceDTO;
     userId?: string;
 } | {
     type: "preset_blocks_create";
     requestId: string;
     presetId: string;
     input: PromptBlockCreateDTO;
-    index?: number;
+    options: PromptBlockCreateAuthorityDTO;
     userId?: string;
 } | {
     type: "preset_blocks_update";
     requestId: string;
     presetId: string;
-    blockId: string;
+    target: PromptBlockMutationTargetDTO;
     input: PromptBlockUpdateDTO;
     userId?: string;
 } | {
     type: "preset_blocks_delete";
     requestId: string;
     presetId: string;
-    blockId: string;
+    target: PromptBlockMutationTargetDTO;
     userId?: string;
 } | {
     type: "preset_categories_list";

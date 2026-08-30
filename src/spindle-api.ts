@@ -34,6 +34,9 @@ import type {
   PromptBlockSnapshotDTO,
   PromptBlockCreateDTO,
   PromptBlockUpdateDTO,
+  PromptBlockOccurrenceDTO,
+  PromptBlockMutationTargetDTO,
+  PromptBlockCreateOptionsDTO,
   PromptBlockCategoryGroupDTO,
   WorldBookDTO,
   WorldBookCreateDTO,
@@ -997,10 +1000,10 @@ export interface SpindleAPI {
     delete(presetId: string, userId?: string): Promise<boolean>;
     blocks: {
       list(presetId: string, userId?: string): Promise<PromptBlockSnapshotDTO[]>;
-      get(presetId: string, blockId: string, userId?: string): Promise<PromptBlockSnapshotDTO | null>;
-      create(presetId: string, input: PromptBlockCreateDTO, options?: { index?: number; userId?: string }): Promise<PromptBlockSnapshotDTO>;
-      update(presetId: string, blockId: string, input: PromptBlockUpdateDTO, userId?: string): Promise<PromptBlockSnapshotDTO>;
-      delete(presetId: string, blockId: string, userId?: string): Promise<boolean>;
+      get(presetId: string, occurrence: PromptBlockOccurrenceDTO, userId?: string): Promise<PromptBlockSnapshotDTO | null>;
+      create(presetId: string, input: PromptBlockCreateDTO, options: PromptBlockCreateOptionsDTO): Promise<PromptBlockSnapshotDTO>;
+      update(presetId: string, target: PromptBlockMutationTargetDTO, input: PromptBlockUpdateDTO, userId?: string): Promise<PromptBlockSnapshotDTO>;
+      delete(presetId: string, target: PromptBlockMutationTargetDTO, userId?: string): Promise<boolean>;
     };
     categories: {
       list(presetId: string, userId?: string): Promise<PromptBlockCategoryGroupDTO[]>;

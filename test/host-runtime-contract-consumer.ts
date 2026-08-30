@@ -3,6 +3,9 @@ import type {
   HostToWorker,
   InterceptorBreakdownEntryDTO,
   InterceptorResultDTO,
+  PromptBlockOccurrenceDTO,
+  PromptBlockMutationTargetDTO,
+  PromptBlockCreateAuthorityDTO,
   SpindleAPI,
   SpindleFrontendContext,
   SpindleHostDescriptorV1,
@@ -147,6 +150,108 @@ const skippedThumbnailDataUrlMessage: WorkerToHost = {
   dataUrl: "data:image/avif;base64,AQID",
   skip_thumbnail_processing: true,
 };
+const blockOccurrence: PromptBlockOccurrenceDTO = {
+  blockId: "duplicate-block",
+  promptOrder: 3,
+};
+const blockTarget: PromptBlockMutationTargetDTO = {
+  ...blockOccurrence,
+  expectedCacheRevision: 11,
+};
+const blockCreateAuthority: PromptBlockCreateAuthorityDTO = {
+  expectedCacheRevision: 11,
+  index: 4,
+};
+const blockGetMessage: WorkerToHost = {
+  type: "preset_blocks_get",
+  requestId: "transport-block-get",
+  presetId: "preset-1",
+  occurrence: blockOccurrence,
+  userId: "user-1",
+};
+const blockCreateMessage: WorkerToHost = {
+  type: "preset_blocks_create",
+  requestId: "transport-block-create",
+  presetId: "preset-1",
+  input: { name: "New block" },
+  options: blockCreateAuthority,
+  userId: "user-1",
+};
+const blockUpdateMessage: WorkerToHost = {
+  type: "preset_blocks_update",
+  requestId: "transport-block-update",
+  presetId: "preset-1",
+  target: blockTarget,
+  input: { name: "Updated block" },
+  userId: "user-1",
+};
+const blockDeleteMessage: WorkerToHost = {
+  type: "preset_blocks_delete",
+  requestId: "transport-block-delete",
+  presetId: "preset-1",
+  target: blockTarget,
+  userId: "user-1",
+};
+// @ts-expect-error Prompt-block occurrences are immutable coordinates.
+blockOccurrence.promptOrder = 4;
+// @ts-expect-error Mutation revision authority is immutable.
+blockTarget.expectedCacheRevision = 12;
+const legacyBlockGetMessage: WorkerToHost = {
+  type: "preset_blocks_get",
+  requestId: "legacy-block-get",
+  presetId: "preset-1",
+  // @ts-expect-error A bare blockId is not an occurrence coordinate.
+  blockId: "duplicate-block",
+};
+// @ts-expect-error Create wire messages require nested revision authority.
+const createWithoutAuthorityMessage: WorkerToHost = {
+  type: "preset_blocks_create",
+  requestId: "legacy-block-create-no-cas",
+  presetId: "preset-1",
+  input: { name: "No CAS" },
+};
+const createWithLegacyIndexMessage: WorkerToHost = {
+  type: "preset_blocks_create",
+  requestId: "legacy-block-create-index",
+  presetId: "preset-1",
+  input: { name: "Legacy index" },
+  options: blockCreateAuthority,
+  // @ts-expect-error The insertion index is nested inside options.
+  index: 4,
+};
+const createWithIndexOnlyMessage: WorkerToHost = {
+  type: "preset_blocks_create",
+  requestId: "legacy-block-create-index-only",
+  presetId: "preset-1",
+  input: { name: "Index without CAS" },
+  // @ts-expect-error Create options must include expectedCacheRevision.
+  options: { index: 4 },
+};
+const legacyBlockUpdateMessage: WorkerToHost = {
+  type: "preset_blocks_update",
+  requestId: "legacy-block-update",
+  presetId: "preset-1",
+  // @ts-expect-error Update requires an occurrence-scoped CAS target.
+  blockId: "duplicate-block",
+  input: { name: "Legacy update" },
+};
+const legacyBlockDeleteMessage: WorkerToHost = {
+  type: "preset_blocks_delete",
+  requestId: "legacy-block-delete",
+  presetId: "preset-1",
+  // @ts-expect-error Delete requires an occurrence-scoped CAS target.
+  blockId: "duplicate-block",
+};
+void blockGetMessage;
+void blockCreateMessage;
+void blockUpdateMessage;
+void blockDeleteMessage;
+void legacyBlockGetMessage;
+void createWithoutAuthorityMessage;
+void createWithLegacyIndexMessage;
+void createWithIndexOnlyMessage;
+void legacyBlockUpdateMessage;
+void legacyBlockDeleteMessage;
 void editorResult;
 void editorClose;
 void editorOpenMessage;

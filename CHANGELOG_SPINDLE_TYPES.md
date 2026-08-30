@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Made prompt-block reads duplicate-safe with exact occurrence coordinates and
+  mutations race-safe with required cache-revision authority.
 - Aligned `SpindleHostSurfaceAPI` with the host's ref-based invocation and
   deep-link registration contracts.
 - Aligned settings-tab handles and settings storage reads with the concrete
