@@ -1455,6 +1455,9 @@ export interface SpindleAPI {
    * `preAssemblyGenerationContext >= 1`: generation contexts carry
    * `dryRun`/`userId` and `cancelGeneration` is honored.
    * `worldInfoActivationCapture >= 1`: world info activation capture is supported.
+   * `worldInfoOutputOrdering >= 1`: world info mutations accept prompt-local
+   * `outputOrder`, applied after selection without changing budget priority.
+   *
    * `worldInfoRuntimePlacement >= 1`: world info mutations accept prompt-local
    * chat-depth placement.
    */

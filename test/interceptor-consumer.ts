@@ -17,7 +17,20 @@ import type {
   QuietTrackedRequestDTO,
   SpindleAPI,
   WorkerToHost,
+  WorldInfoInterceptorCtxDTO,
+  WorldInfoInterceptorResultDTO,
 } from "lumiverse-spindle-types";
+
+function orderSelectedEntries(ctx: WorldInfoInterceptorCtxDTO): WorldInfoInterceptorResultDTO {
+  return { mutated: ctx.entries.map(entry => ({
+    id: entry.id,
+    outputOrder: entry.outputOrder === "insertion" ? "selection" : "insertion",
+  })) };
+}
+void orderSelectedEntries;
+// @ts-expect-error Unsupported output orders are rejected by the public API.
+const invalidWorldInfoOrder: WorldInfoInterceptorResultDTO = { mutated: [{ id: "entry", outputOrder: "random" }] };
+void invalidWorldInfoOrder;
 
 const generationType: InterceptorGenerationType = "continue";
 const match: InterceptorMatchDTO = {

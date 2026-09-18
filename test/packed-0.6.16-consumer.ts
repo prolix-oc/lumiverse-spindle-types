@@ -8,7 +8,13 @@ import type {
   SpindleHostSurfaceHandle,
   SpindleMountPoint,
   SpindlePermission,
+  WorldInfoInterceptorResultDTO,
 } from "lumiverse-spindle-types";
+
+const orderedLore: WorldInfoInterceptorResultDTO = {
+  mutated: [{ id: "entry", outputOrder: "insertion" }],
+};
+void orderedLore;
 import {
   ALL_PERMISSIONS,
   CoreEventType,

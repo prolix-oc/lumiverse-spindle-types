@@ -1,6 +1,10 @@
 # Lumiverse Spindle Types - Technical Changelog
 
 ## Unreleased
+- Version 0.6.33 adds prompt-local `outputOrder` to world-info interceptor
+  entries and mutations, plus the `worldInfoOutputOrdering` host contract.
+  Extensions can request insertion order after budget selection or clear an
+  earlier request without changing stored lore or selection priority.
 - Added the create-only `preset_id` link to `RegexScriptCreateDTO` and the
   host-projected read-only `preset_id` on `RegexScriptDTO`, and excluded the field
   from `RegexScriptUpdateDTO` so an update cannot attempt to re-point a script's

@@ -1598,6 +1598,8 @@ export interface WorldInfoInterceptorEntryDTO {
     readonly delay: number;
     /** Latest prompt-local chat placement supplied by an earlier handler. */
     readonly placement?: WorldInfoInterceptorPlacementDTO;
+    /** Active output-order request from an earlier handler; omission means selection order. */
+    readonly outputOrder?: "selection" | "insertion";
     /** Attachment scope that contributed the entry's book to this chat. */
     readonly book_source?: WorldBookSourceDTO;
 }
@@ -1663,8 +1665,8 @@ export interface WorldInfoInterceptorCtxDTO {
     readonly activationSettings: WorldInfoActivationSettingsDTO;
 }
 /**
- * Per-entry content overrides emitted by a `registerWorldInfoInterceptor`
- * handler. Both values are prompt-local and never persist to the world book.
+ * Per-entry overrides emitted by a `registerWorldInfoInterceptor` handler.
+ * Overrides are prompt-local and never persist to the world book.
  */
 export interface WorldInfoInterceptorMutationDTO {
     readonly id: string;
@@ -1681,6 +1683,18 @@ export interface WorldInfoInterceptorMutationDTO {
      * Omit it to retain the stored native position, depth, and role.
      */
     readonly placement?: WorldInfoInterceptorPlacementDTO;
+    /**
+     * "insertion" orders selected entries by order_value ascending, reversing
+     * equal-order ties relative to selection order, as chat-depth placement does.
+     * Entries requested by the same extension exchange only their own output
+     * slots; other entries and other extensions' groups retain their slots.
+     * This runs after selection and budget filtering and applies to native
+     * position buckets and named outlets. Explicit chat-depth placement takes
+     * precedence and keeps its existing ordering.
+     * "selection" clears an earlier request; omission leaves it unchanged.
+     * The last valid request for an entry determines its extension group.
+     */
+    readonly outputOrder?: "selection" | "insertion";
 }
 /**
  * Return value of a `registerWorldInfoInterceptor` handler. Each list is
