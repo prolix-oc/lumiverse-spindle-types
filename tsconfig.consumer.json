@@ -25,6 +25,7 @@
     "test/provider-runtime-union-parity.ts",
     "test/regex-script-preset-link.ts",
     "test/theme-authoring-consumer.ts",
-    "test/mcp-consumer.ts"
+    "test/mcp-consumer.ts",
+    "test/decisions-consumer.ts"
   ]
 }

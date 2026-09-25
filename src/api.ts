@@ -3973,6 +3973,8 @@ export type WorkerToHost =
   | { type: "image_gen_connections_list"; requestId: string; userId?: string }
   | { type: "image_gen_connections_get"; requestId: string; connectionId: string; userId?: string }
   | { type: "image_gen_models"; requestId: string; connectionId: string; userId?: string }
+  // ─── Decision models (gated: "decisions") ─────────────────────────
+  | { type: "decisions_evaluate"; requestId: string; input: import("./decisions.js").DecisionRequest }
   // ─── Images (gated: "images") ────────────────────────────────────────
   | {
       type: "images_list";
