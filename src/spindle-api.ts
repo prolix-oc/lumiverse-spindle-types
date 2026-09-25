@@ -293,6 +293,8 @@ export interface SpindleConnectionsAPI {
 
 /** The global `spindle` object available in backend extension workers */
 export interface SpindleAPI {
+  /** Typed decision evaluations (permission: `decisions`). */
+  decisions: import("./decisions.js").SpindleDecisionsAPI;
   /** Immutable host compatibility descriptor for this extension runtime. */
   readonly host: SpindleHostDescriptorV1;
   /**

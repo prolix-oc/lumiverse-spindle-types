@@ -1476,6 +1476,8 @@ export interface SpindleFrontendContext {
   worldBooks?: SpindleFrontendWorldBooksAPI;
   tokens?: SpindleFrontendTokensAPI;
   connections?: SpindleFrontendConnectionsAPI;
+  /** Typed decision evaluations (permission: `decisions`). */
+  decisions?: import("./decisions.js").SpindleDecisionsAPI;
 }
 
 /** Frontend context with V2 extensibility members required. */
@@ -1491,6 +1493,7 @@ export type SpindleFrontendContextV2 = SpindleFrontendContext & {
   worldBooks: SpindleFrontendWorldBooksAPI;
   tokens: SpindleFrontendTokensAPI;
   connections: SpindleFrontendConnectionsAPI;
+  decisions: import("./decisions.js").SpindleDecisionsAPI;
   host: SpindleHostDescriptorV1 & { readonly surfaces: SpindleHostSurfaceAPI };
   ui: SpindleFrontendContext["ui"] & {
     registerSettingsTab(options: SpindleSettingsTabOptions): SpindleSettingsTabHandle;

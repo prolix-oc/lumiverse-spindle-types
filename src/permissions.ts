@@ -5,6 +5,7 @@
  *
  * Gated tier (must declare):
  * - "generation"           — fire generations on behalf of user
+ * - "decisions"            — evaluate through a user's decision connection
  * - "interceptor"          — pre-generation prompt modification
  * - "tools"                — register LLM tools
  * - "cors_proxy"           — use CORS proxy
@@ -39,6 +40,7 @@
  */
 export type SpindlePermission =
   | "generation"
+  | "decisions"
   | "interceptor"
   | "tools"
   | "cors_proxy"
@@ -76,6 +78,7 @@ export type SpindlePermission =
 
 export const ALL_PERMISSIONS: readonly SpindlePermission[] = [
   "generation",
+  "decisions",
   "interceptor",
   "tools",
   "cors_proxy",

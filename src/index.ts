@@ -37,6 +37,7 @@ export { SPINDLE_THEME_AUTHORING_HOST_CAPABILITIES } from "./theme.js";
 
 export type { SpindlePermission as SpindlePermissionType } from "./permissions.js";
 export { ALL_PERMISSIONS, isValidPermission } from "./permissions.js";
+export type { DecisionData, DecisionQuestion, DecisionRequest, DecisionAnswer, DecisionResult, SpindleDecisionsAPI } from "./decisions.js";
 
 export type { SpindleCapability as SpindleCapabilityType } from "./capabilities.js";
 export { ALL_CAPABILITIES, isValidCapability } from "./capabilities.js";
