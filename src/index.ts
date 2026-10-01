@@ -36,6 +36,11 @@ export type {
 export { SPINDLE_THEME_AUTHORING_HOST_CAPABILITIES } from "./theme.js";
 
 export type { SpindlePermission as SpindlePermissionType } from "./permissions.js";
+export type {
+  DesktopCaptureKind, DesktopCaptureDevice, DesktopCaptureRequest, CapturedMediaRef,
+  SpindleDesktopAPI, DesktopCaptureWorkerMessage, DesktopCaptureDestination,
+  DesktopCaptureCommand, DesktopCaptureReply,
+} from "./desktop-capture.js";
 export { ALL_PERMISSIONS, isValidPermission } from "./permissions.js";
 
 export type { SpindleCapability as SpindleCapabilityType } from "./capabilities.js";

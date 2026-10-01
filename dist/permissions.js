@@ -1,4 +1,6 @@
 export const ALL_PERMISSIONS = [
+    "screen_capture",
+    "screen_recording",
     "generation",
     "interceptor",
     "tools",

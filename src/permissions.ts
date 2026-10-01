@@ -38,6 +38,8 @@
  * - "mcp_servers.create"           — add MCP server profiles for a user
  */
 export type SpindlePermission =
+  | "screen_capture"
+  | "screen_recording"
   | "generation"
   | "interceptor"
   | "tools"
@@ -75,6 +77,8 @@ export type SpindlePermission =
   | "mcp_servers.create";
 
 export const ALL_PERMISSIONS: readonly SpindlePermission[] = [
+  "screen_capture",
+  "screen_recording",
   "generation",
   "interceptor",
   "tools",

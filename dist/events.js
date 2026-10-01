@@ -13,6 +13,7 @@ export var SpindleEvent;
 export var CoreEventType;
 (function (CoreEventType) {
     CoreEventType["CONNECTED"] = "CONNECTED";
+    CoreEventType["FRONTEND_SESSION_CLOSED"] = "FRONTEND_SESSION_CLOSED";
     CoreEventType["CHAT_CHANGED"] = "CHAT_CHANGED";
     CoreEventType["CHAT_SWITCHED"] = "CHAT_SWITCHED";
     CoreEventType["CHAT_FORKED"] = "CHAT_FORKED";

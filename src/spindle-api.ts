@@ -1,5 +1,6 @@
 import type { SpindleManifest } from "./manifest.js";
 import type { SpindleHostDescriptorV1 } from "./host.js";
+import type { SpindleDesktopAPI } from "./desktop-capture.js";
 import type { SpindleTextEditorOptions, SpindleTextEditorResult } from "./dom.js";
 import type {
   CouncilMemberContext,
@@ -293,6 +294,7 @@ export interface SpindleConnectionsAPI {
 
 /** The global `spindle` object available in backend extension workers */
 export interface SpindleAPI {
+  readonly desktop: SpindleDesktopAPI;
   /** Immutable host compatibility descriptor for this extension runtime. */
   readonly host: SpindleHostDescriptorV1;
   /**

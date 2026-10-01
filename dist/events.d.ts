@@ -11,6 +11,7 @@ export declare enum SpindleEvent {
  */
 export declare enum CoreEventType {
     CONNECTED = "CONNECTED",
+    FRONTEND_SESSION_CLOSED = "FRONTEND_SESSION_CLOSED",
     CHAT_CHANGED = "CHAT_CHANGED",
     CHAT_SWITCHED = "CHAT_SWITCHED",
     CHAT_FORKED = "CHAT_FORKED",

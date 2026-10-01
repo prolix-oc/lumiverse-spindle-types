@@ -14,6 +14,8 @@ import type {
 // ─── DTO types for messages ──────────────────────────────────────────────
 
 export type LlmMessagePartDTO =
+  | { type: "video"; data: string; mime_type: string; cache_control?: Record<string, unknown> }
+  | { type: "desktop_capture"; asset_id: string }
   | { type: "text"; text: string; cache_control?: Record<string, unknown> }
   | { type: "image"; data: string; mime_type: string; cache_control?: Record<string, unknown> }
   | { type: "audio"; data: string; mime_type: string; cache_control?: Record<string, unknown> }
@@ -3463,6 +3465,7 @@ export interface ProviderManager {
 }
 
 export type WorkerToHost =
+  | import("./desktop-capture.js").DesktopCaptureWorkerMessage
   | { type: "subscribe_event"; event: string }
   | { type: "unsubscribe_event"; event: string }
   | {

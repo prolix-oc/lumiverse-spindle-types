@@ -734,6 +734,8 @@ export interface SpindleDisplayContext {
 }
 export interface SpindleDisplayResolveResult {
     content: string;
+    /** Opaque local state carried from resolveBody to applyScripts with this content, including cache hits. */
+    processingState?: string;
     touchedVars?: string[];
     cacheable?: boolean;
 }
@@ -752,6 +754,8 @@ export interface SpindleDisplayTemplatesArgs {
 }
 export interface SpindleDisplayScriptsArgs {
     content: string;
+    /** The processingState returned by resolveBody for this content. Never sent to the backend. */
+    processingState?: string;
     scripts: unknown[];
     context: SpindleDisplayContext;
     resolvedFindPatterns?: Record<string, string>;
@@ -765,6 +769,10 @@ export interface SpindleDisplayScriptsArgs {
  * not ready for the chat, throws, or returns `null`.
  */
 export interface SpindleDisplayResolver {
+    /** Skip automatic formatting repairs in owned chat message bodies. Defaults to false; HTML sanitization still applies. */
+    skipFormattingHealing?: boolean;
+    /** Opt into finalization when no display scripts are active. Defaults to false. */
+    finalizeWithoutScripts?: boolean;
     ready(chatId: string): boolean;
     resolveBody(args: SpindleDisplayBodyArgs): Promise<SpindleDisplayResolveResult | null>;
     resolveTemplates(args: SpindleDisplayTemplatesArgs): Promise<SpindleDisplayTemplatesResult | null>;
@@ -1025,6 +1033,8 @@ export interface SpindleRecentChatsPage<TRow = SpindleRecentChat> {
 }
 /** Context object provided to frontend extension modules */
 export interface SpindleFrontendContext {
+    /** Per-document routing identity, available with frontend-session-origin-v1. */
+    readonly frontendSessionId?: string;
     /** Immutable host compatibility descriptor for this extension runtime. */
     readonly host: SpindleHostDescriptorV1 & {
         readonly surfaces?: SpindleHostSurfaceAPI;
@@ -1035,7 +1045,7 @@ export interface SpindleFrontendContext {
     readonly theme: SpindleThemeAuthoringAPI;
     dom: SpindleDOMHelper;
     events: {
-        on(event: string, handler: (payload: unknown) => void): () => void;
+        on(event: string, handler: (payload: unknown, metadata?: import("./runtime-state.js").RuntimeEventMetadataDTO) => void): () => void;
         emit(event: string, payload: unknown): void;
     };
     ui: {
