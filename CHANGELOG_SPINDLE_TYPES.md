@@ -7,6 +7,10 @@
 - Added optional display processing state and authoritative macro source ownership.
 
 ## Unreleased
+- Documented `InterceptorMatchDTO.presetField` and the interceptor context's
+  `presetId` / `presetMetadata`. The filter reads the registering extension's
+  own preset metadata namespace (`preset.metadata[<manifest identifier>]`), the
+  same value the callback receives. Documentation only; no type changes.
 - Added worker-only `spindle.desktop.capture` device discovery, bounded image/video requests, and expiring media handles, plus the `screen_capture` and `screen_recording` permissions.
 - Added desktop capture native-client command/reply and worker wire contracts. LLM message DTOs now include video and private desktop capture references.
 - Version 0.6.33 adds prompt-local `outputOrder` to world-info interceptor

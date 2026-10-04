@@ -95,10 +95,24 @@ export interface InterceptorMatchDTO {
     generationTypes?: InterceptorGenerationType[];
     /** Terminal callbacks are never invoked for dry runs. */
     isDryRun?: boolean;
+    /**
+     * Filter on this extension's own preset metadata namespace, the same value
+     * the callback receives as `InterceptorContextDTO.presetMetadata`
+     * (`preset.metadata[<manifest identifier>]` of the generation's preset).
+     * Another extension's or Loom's metadata is never visible to the filter.
+     */
     presetField?: {
+        /**
+         * Object keys walked from the namespace; an empty path tests the namespace
+         * itself. A missing key, an array, or a non-object along the way reads as
+         * `undefined`, as does a generation without a preset.
+         */
         path: string[];
+        /** `true` requires a value at `path` (`null` counts as a value); `false` requires none. */
         exists?: boolean;
+        /** The value at `path` must be `Object.is`-equal to one of these scalars. */
         oneOf?: InterceptorMatchScalar[];
+        /** The value at `path` must not be `Object.is`-equal to any of these scalars. */
         notIn?: InterceptorMatchScalar[];
     };
 }
@@ -124,8 +138,18 @@ export interface InterceptorContextDTO {
     readonly generationId: string;
     readonly generationType: InterceptorGenerationType;
     readonly isDryRun: boolean;
+    /**
+     * Preset that prompt assembly resolved for this generation, after request,
+     * profile, and binding resolution. `null` when the generation has no preset
+     * or skips assembly (an explicit `messages` request).
+     */
     readonly presetId: string | null;
-    /** Deep clone of only this extension's own preset metadata namespace. */
+    /**
+     * Deep clone of only this extension's own preset metadata namespace:
+     * `preset.metadata[<manifest identifier>]` of the preset in `presetId`, the
+     * key the preset editor's extension helper writes. `undefined` when that key
+     * is absent or there is no preset. Mutating it does not change the preset.
+     */
     readonly presetMetadata: unknown;
     readonly personaId: string | null;
     readonly characterId: string | null;
