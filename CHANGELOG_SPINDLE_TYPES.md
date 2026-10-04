@@ -10,8 +10,6 @@
   cancellation, including their worker messages and exported preset DTOs.
 - Added request-local connection, source-image, output media/node, and mapped
   ComfyUI workflow controls plus media metadata on native generation results.
-- These declarations require the corresponding Lumiverse host implementation
-  (QuickGen commit 938ac61f); updating this package does not add host behavior.
 
 ## 0.6.35
 - Added capability-gated document routing, cancellable required generation hooks,
