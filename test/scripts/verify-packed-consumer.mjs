@@ -89,7 +89,7 @@ try {
           lib: ["ESNext", "DOM"],
           noEmit: true,
         },
-        include: ["packed-0.6.16-consumer.ts", "frontend-runtime-consumer.ts"],
+        include: ["packed-0.6.16-consumer.ts", "frontend-runtime-consumer.ts", "image-gen-native-consumer.ts", "image-gen-0.6.37-consumer.ts"],
       },
       null,
       2,
@@ -98,6 +98,8 @@ try {
 
   copyFileSync(sourceConsumer, join(fixtureDir, "packed-0.6.16-consumer.ts"));
   copyFileSync(join(repoRoot, "test/frontend-runtime-consumer.ts"), join(fixtureDir, "frontend-runtime-consumer.ts"));
+  copyFileSync(join(repoRoot, "test/image-gen-native-consumer.ts"), join(fixtureDir, "image-gen-native-consumer.ts"));
+  copyFileSync(join(repoRoot, "test/image-gen-0.6.37-consumer.ts"), join(fixtureDir, "image-gen-0.6.37-consumer.ts"));
 
   runNpm(
     [
