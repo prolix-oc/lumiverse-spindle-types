@@ -1,5 +1,18 @@
 # Lumiverse Spindle Types - Technical Changelog
 
+## 0.6.38
+- Preserved the open-ended native `parameters` contract. ComfyUI parameter
+  validation is opt-in through `ImageGenNativeParametersDTO`.
+- New methods are optional for compatibility with older hosts and API mocks.
+  New wire messages use the separate `ImageGenNativeControlWorkerMessage` union
+  so existing exhaustive `WorkerToHost` handlers remain valid.
+- Declared native image generation preset discovery and extension/account-scoped
+  cancellation, including their worker messages and exported preset DTOs.
+- Added request-local connection, source-image, output media/node, and mapped
+  ComfyUI workflow controls plus media metadata on native generation results.
+- These declarations require the corresponding Lumiverse host implementation
+  (QuickGen commit 938ac61f); updating this package does not add host behavior.
+
 ## 0.6.35
 - Added capability-gated document routing, cancellable required generation hooks,
   and runtime state snapshots, mutation acknowledgements, and event metadata.

@@ -77,6 +77,7 @@ import type {
   ImageGenResultDTO,
   ImageGenNativeRequestDTO,
   ImageGenNativeResultDTO,
+  ImageGenPromptPresetsResultDTO,
   ImageGenStreamRequestDTO,
   ImageGenStreamEventDTO,
   ImageGenConnectionDTO,
@@ -893,6 +894,19 @@ export interface SpindleAPI {
      * connection-level generation semantics remain unchanged.
      */
     generateNative(input: ImageGenNativeRequestDTO): Promise<ImageGenNativeResultDTO>;
+    /**
+     * Read Main Presets and active preset/connection IDs without changing settings.
+     * Requires image_gen permission and account scope. Optional because older
+     * hosts do not implement it; feature-detect before calling.
+     */
+    getPromptPresets?(userId?: string): Promise<ImageGenPromptPresetsResultDTO>;
+    /**
+     * Cancel an in-flight native job owned by this extension and account.
+     * Returns false when no matching job exists. Requires image_gen permission;
+     * feature-detect on older hosts. Supply clientJobId when starting the job to
+     * know its ID before generateNative resolves.
+     */
+    cancelNative?(jobId: string, userId?: string): Promise<boolean>;
     /**
      * Generate through a provider that supports WebSocket preview images and
      * status updates (currently SwarmUI and ComfyUI). The terminal `done`

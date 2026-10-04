@@ -780,6 +780,43 @@ export type ImageGenCharacterLoraSelectionDTO = {
     lora: ImageGenLoraEntryDTO;
     base_tags?: string;
 };
+/** Saved native image prompt preset. Legacy entries without a kind are Main Presets. */
+export interface ImageGenPromptPresetDTO {
+    id: string;
+    name: string;
+    mode: "custom" | "parsed_custom";
+    prompt: string;
+    negativePrompt?: string;
+    parserConnectionId?: string | null;
+    parserModel?: string;
+    parserParameters?: Record<string, unknown>;
+    kind?: "main" | "character" | "persona" | "captioning";
+}
+/** Read-only snapshot; discovery does not reconcile or change saved selections. */
+export interface ImageGenPromptPresetsResultDTO {
+    activeId: string | null;
+    activeConnectionId: string | null;
+    /** Main Presets only, including legacy presets without a kind. */
+    presets: ImageGenPromptPresetDTO[];
+}
+/** Request-local ComfyUI mapped field values; unmapped node fields are ignored. */
+export interface ImageGenComfyUIFieldValuesDTO extends Record<string, unknown> {
+    /** Custom field values keyed by `<nodeId>:<fieldName>`. */
+    custom?: Record<string, unknown>;
+    /**
+     * Primitive overrides keyed by `<nodeId>:<fieldName>`. Prompt and source-image
+     * injection take precedence. Mapped seed values of -1 are randomized per run.
+     */
+    node_fields?: Record<string, string | number | boolean>;
+}
+/** Opt-in validation helper for native provider parameters and saved ComfyUI controls. */
+export interface ImageGenNativeParametersDTO extends Record<string, unknown> {
+    /** Select a saved workflow for this request without changing the active workflow. */
+    workflow_id?: string;
+    /** Alias for workflow_id. */
+    workflowId?: string;
+    comfyui_field_values?: ImageGenComfyUIFieldValuesDTO;
+}
 /**
  * Input for `spindle.imageGen.generateNative()`.
  *
@@ -790,10 +827,19 @@ export type ImageGenCharacterLoraSelectionDTO = {
 export interface ImageGenNativeRequestDTO {
     /** Chat used for prompt/macro context and native generation lifecycle. */
     chat_id: string;
+    /** Request-local connection override; does not change the user's active connection. */
+    connection_id?: string;
+    /** Persisted image owned by the user. ComfyUI workflows must map init_image. */
+    source_image_id?: string;
+    /** Video output selection requires a ComfyUI connection. Omit for legacy selection. */
+    output_media_type?: "image" | "video";
+    /** Select the ComfyUI output node for this request. */
+    output_node_id?: string;
     /** Inline prompt. Optional when native settings/preset supply one. */
     prompt?: string;
     negativePrompt?: string;
     promptMode?: "scene" | "custom" | "parsed_custom";
+    /** Use this preset's mode/parser configuration; a missing explicit preset is rejected. */
     promptPresetId?: string | null;
     /** Skip parser/scene rewriting and use the resolved prompt directly. */
     skipParse?: boolean;
@@ -809,16 +855,35 @@ export interface ImageGenNativeRequestDTO {
     extraBaseTags?: string;
     /** Scale applied to the complete assembled LoRA stack. */
     loraStrengthScale?: number;
-    /** Provider parameters merged over the active native connection defaults. */
+    /**
+     * Provider parameters merged over the active native connection defaults.
+     * Use `satisfies ImageGenNativeParametersDTO` for opt-in ComfyUI validation.
+     */
     parameters?: Record<string, unknown>;
     /** Omit the base64 payload while retaining persisted IDs/URL. */
     includeDataUrl?: boolean;
+    /** Caller-chosen ID used to correlate progress and cancel an in-flight native job. */
     clientJobId?: string;
     promptGenerationTimeoutSeconds?: number;
     generationTimeoutSeconds?: number;
     /** For operator-scoped extensions. */
     userId?: string;
 }
+/**
+ * Additional native image controls supported by QuickGen-capable hosts.
+ * Compose with WorkerToHost explicitly so existing exhaustive handlers remain valid.
+ * Both messages require image_gen permission and account scope.
+ */
+export type ImageGenNativeControlWorkerMessage = {
+    type: "image_gen_prompt_presets";
+    requestId: string;
+    userId?: string;
+} | {
+    type: "image_gen_cancel_native";
+    requestId: string;
+    jobId: string;
+    userId?: string;
+};
 /** Result from `spindle.imageGen.generateNative()`. */
 export interface ImageGenNativeResultDTO {
     generated: boolean;
@@ -829,6 +894,10 @@ export interface ImageGenNativeResultDTO {
     imageDataUrl?: string;
     imageId?: string;
     imageUrl?: string;
+    mediaType?: "image" | "video";
+    mimeType?: string;
+    /** Authenticated media URL; imageId/imageUrl remain available for compatibility. */
+    mediaUrl?: string;
     jobId?: string;
 }
 /** Result from `spindle.imageGen.generate()` */
