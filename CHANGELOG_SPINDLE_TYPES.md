@@ -1,5 +1,14 @@
 # Lumiverse Spindle Types - Technical Changelog
 
+## 0.6.39
+- Added optional, capability-gated frontend `ctx.stt` for provider discovery,
+  background preparation, microphone sessions, and supplied-audio transcription.
+- Whistle is a typed on-device option alongside Web Speech and STT connections.
+  The host bundles its model and shares it with native chat; no external setup.
+- Exported speech options, results, audio frames, mono PCM, cancellable sessions,
+  and the frontend-only `speech-to-text-v1` host capability. Processing uses the
+  existing `media` permission; recording also requires browser microphone consent.
+
 ## 0.6.38
 - Preserved the open-ended native `parameters` contract. ComfyUI parameter
   validation is opt-in through `ImageGenNativeParametersDTO`.

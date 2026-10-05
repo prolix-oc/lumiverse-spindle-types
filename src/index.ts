@@ -563,3 +563,10 @@ export {
   COUNCIL_TOOLS_DEFAULTS,
   COUNCIL_SETTINGS_DEFAULTS,
 } from "./council.js";
+
+export type {
+  SpindleSTTProvider, SpindleSTTProviderOption, SpindleSTTStatus, SpindleSTTResult,
+  SpindleSTTAudioFrame, SpindleSTTTranscript, SpindleSTTPcmAudio, SpindleSTTOptions,
+  SpindleSTTStartOptions, SpindleSTTSession, SpindleSTTAPI,
+} from "./speech-to-text.js";
+export { SPINDLE_STT_HOST_CAPABILITIES } from "./speech-to-text.js";

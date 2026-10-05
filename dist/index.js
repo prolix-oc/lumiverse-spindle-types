@@ -7,3 +7,4 @@ export { SpindleEvent, CoreEventType } from "./events.js";
 export { ALL_FRONTEND_RUNTIME_CAPABILITIES, isValidFrontendRuntimeCapability, } from "./frontend-capabilities.js";
 export { PERMISSION_DENIED_PREFIX } from "./api.js";
 export { SIDECAR_DEFAULTS, COUNCIL_SIDECAR_DEFAULTS, COUNCIL_TOOLS_DEFAULTS, COUNCIL_SETTINGS_DEFAULTS, } from "./council.js";
+export { SPINDLE_STT_HOST_CAPABILITIES } from "./speech-to-text.js";

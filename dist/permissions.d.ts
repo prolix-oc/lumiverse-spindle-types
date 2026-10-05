@@ -18,8 +18,9 @@
  * - "memories"             — CRUD on the Memory Cortex (entities, relations, vaults, chat
  *                            links, consolidations) and long-term chat memory (vectorized
  *                            chat-chunk retrieval, warmup, cache).
- * - "media"                — invoke the backend media pipeline for audio/video conversion,
- *                            transcoding, muxing, and simple image+audio composition.
+ * - "media"                — invoke the host media pipeline for audio/video conversion,
+ *                            transcoding, muxing, and simple image+audio composition; frontend STT
+ *                            and microphone capture through ctx.stt (browser consent also required).
  * - "macro_interceptor"    — transform raw templates before macro parsing/dispatch
  * - "web_search"           — execute searches via the user's configured web search
  *                            provider (e.g. SearXNG) and read the safe view of their

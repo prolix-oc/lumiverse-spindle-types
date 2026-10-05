@@ -23,3 +23,5 @@ export type { EntityTypeDTO, EntityStatusDTO, MentionRoleDTO, RelationTypeDTO, R
 export type { SpindleAPI, SpindleGenerateAPI, SpindleConnectionsAPI, SpindlePromptRegex, FrontendProcessHandle, BackendProcessHandle, SpindleBackendProcessContext, SpindleBackendProcessModule, SpindleEmbeddingDriver, SpindleTtsEngine, SpindleSttEngine, SpindleSidecarEndpoint, } from "./spindle-api.js";
 export type { CouncilMember, CouncilMemberContext, SidecarConfig, CouncilSidecarConfig, CouncilToolsSettings, CouncilSettings, CouncilToolResult, CouncilExecutionResult, CachedCouncilResult, CouncilToolCategory, CouncilToolExecution, CouncilToolDefinition, } from "./council.js";
 export { SIDECAR_DEFAULTS, COUNCIL_SIDECAR_DEFAULTS, COUNCIL_TOOLS_DEFAULTS, COUNCIL_SETTINGS_DEFAULTS, } from "./council.js";
+export type { SpindleSTTProvider, SpindleSTTProviderOption, SpindleSTTStatus, SpindleSTTResult, SpindleSTTAudioFrame, SpindleSTTTranscript, SpindleSTTPcmAudio, SpindleSTTOptions, SpindleSTTStartOptions, SpindleSTTSession, SpindleSTTAPI, } from "./speech-to-text.js";
+export { SPINDLE_STT_HOST_CAPABILITIES } from "./speech-to-text.js";

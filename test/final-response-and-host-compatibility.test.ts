@@ -65,3 +65,11 @@ test("theme authoring capabilities remain frontend-specific and immutable", () =
   expect(Object.isFrozen(SPINDLE_THEME_AUTHORING_HOST_CAPABILITIES)).toBe(true);
   expect(SPINDLE_HOST_CAPABILITIES).not.toHaveProperty("theme-assets-v1");
 });
+
+
+test("speech capabilities stay frontend-specific and immutable", async () => {
+  const { SPINDLE_STT_HOST_CAPABILITIES } = await import("../src/index");
+  expect(SPINDLE_STT_HOST_CAPABILITIES["speech-to-text-v1"]).toBe(1);
+  expect(Object.isFrozen(SPINDLE_STT_HOST_CAPABILITIES)).toBe(true);
+  expect(SPINDLE_HOST_CAPABILITIES["speech-to-text-v1"]).toBeUndefined();
+});
