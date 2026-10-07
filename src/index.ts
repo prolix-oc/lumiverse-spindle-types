@@ -379,6 +379,7 @@ export type {
   SpindlePresetEditorBuiltinTabId,
   SpindlePresetEditorExtensionState,
   SpindlePresetEditorScopedHelper,
+  SpindleTouchScrollMode,
   SpindleFloatWidgetOptions,
   SpindleFloatWidgetHandle,
   SpindleDockEdge,

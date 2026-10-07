@@ -408,6 +408,9 @@ export interface SpindlePresetEditorScopedHelper {
 
 // ── Float Widget ──
 
+/** Installed-iOS single-finger overscroll policy for one floating widget. */
+export type SpindleTouchScrollMode = "guarded" | "native";
+
 export interface SpindleFloatWidgetOptions {
   width?: number;
   height?: number;
@@ -420,6 +423,9 @@ export interface SpindleFloatWidgetOptions {
   /** When true, the widget is created in fullscreen mode anchored to the
    *  viewport origin (0,0) and sized to fill the entire viewport. */
   fullscreen?: boolean;
+  /** Default: guarded. Native bypasses the installed-iOS overscroll guard only
+   *  within this widget. The extension owns scroll containment in native mode. */
+  touchScrollMode?: SpindleTouchScrollMode;
 }
 
 export interface SpindleFloatWidgetHandle {
@@ -437,6 +443,9 @@ export interface SpindleFloatWidgetHandle {
   setFullscreen(fullscreen: boolean): void;
   /** Returns true when the widget is currently in fullscreen mode. */
   isFullscreen(): boolean;
+  /** Reversibly change this widget's installed-iOS overscroll policy.
+   *  Destroy/unload/permission revocation removes the override automatically. */
+  setTouchScrollMode(mode: SpindleTouchScrollMode): void;
   destroy(): void;
   onDragEnd(handler: (pos: { x: number; y: number }) => void): () => void;
 }
