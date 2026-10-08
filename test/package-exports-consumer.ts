@@ -8,6 +8,9 @@ import type {
   ProviderRuntimeMessage,
   SpindleComponentOverrideHandle,
   SpindleComponentOverrideOptions,
+  SpindleFloatWidgetHandle,
+  SpindleFloatWidgetOptions,
+  SpindleTouchScrollMode,
   SpindleDockPanelHandle,
   SpindleDockPanelOptions,
   SpindleDomDecoratorHandle,
@@ -41,6 +44,14 @@ import {
   SPINDLE_HOST_CAPABILITIES,
   isValidPermission,
 } from "lumiverse-spindle-types";
+
+const touchScrollMode: SpindleTouchScrollMode = "native";
+const touchWidgetOptions: SpindleFloatWidgetOptions = { touchScrollMode };
+function restoreWidgetGuard(widget: SpindleFloatWidgetHandle): void {
+  widget.setTouchScrollMode("guarded");
+}
+void touchWidgetOptions;
+void restoreWidgetGuard;
 
 const kind: ProviderKind = "embedding";
 const descriptor: ProviderDescriptor = {
