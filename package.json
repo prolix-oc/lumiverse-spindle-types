@@ -1,6 +1,6 @@
 {
   "name": "lumiverse-spindle-types",
-  "version": "0.6.44",
+  "version": "0.6.46",
   "type": "module",
   "types": "./dist/index.d.ts",
   "keywords": [
@@ -26,6 +26,7 @@
     }
   },
   "scripts": {
+    "prepack": "npm run build",
     "build": "tsc -p tsconfig.json",
     "build:consumer": "tsc -p tsconfig.consumer.json --noEmit && node test/scripts/verify-packed-consumer.mjs",
     "test": "bun test"

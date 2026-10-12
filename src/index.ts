@@ -590,6 +590,7 @@ export { SPINDLE_STT_HOST_CAPABILITIES } from "./speech-to-text.js";
 
 export type {
   SpindleSystemAudioUnavailableReason, SpindleSystemAudioAvailability, SpindleSystemAudioFrame,
+  SpindleSystemAudioChannelFrame,
   SpindleSystemAudioEndReason, SpindleSystemAudioStartOptions, SpindleSystemAudioSession, SpindleSystemAudioAPI,
 } from "./system-audio.js";
 export { SPINDLE_SYSTEM_AUDIO_HOST_CAPABILITIES } from "./system-audio.js";

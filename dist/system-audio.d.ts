@@ -14,15 +14,24 @@ export type SpindleSystemAudioUnavailableReason =
 export interface SpindleSystemAudioAvailability {
     available: boolean;
     unavailableReason?: SpindleSystemAudioUnavailableReason;
+    /** The native adapter supports stereo analysis. Missing means an older or unsupported client. */
+    stereoSupported?: boolean;
 }
-/** One analysis frame. Every number is normalised to 0 – 1. */
-export interface SpindleSystemAudioFrame {
+/** One channel's analysis. Every number is normalised to 0 – 1. */
+export interface SpindleSystemAudioChannelFrame {
     /** Overall level (RMS). */
     amplitude: number;
     /** Loudest recent level. */
     peak: number;
     /** `bands` log-spaced magnitudes from about 40 Hz up to about 14 kHz, lowest first. */
     frequencies: number[];
+}
+/** Combined analysis, with optional independent channels when stereo was requested. Never contains samples. */
+export interface SpindleSystemAudioFrame extends SpindleSystemAudioChannelFrame {
+    stereo?: {
+        left: SpindleSystemAudioChannelFrame;
+        right: SpindleSystemAudioChannelFrame;
+    };
 }
 /** Why a session ended without the extension calling `stop()`. */
 export type SpindleSystemAudioEndReason = 'revoked' | 'user-stopped' | 'source-lost' | 'host-disabled';
@@ -31,6 +40,8 @@ export interface SpindleSystemAudioStartOptions {
     bands?: number;
     /** Most frames per second, 1 – 30 (default 30). The host clamps out-of-range values. */
     maxFps?: number;
+    /** Add independent left/right analysis. Default false. Requires stereoSupported; otherwise ready rejects with NotSupportedError. */
+    stereo?: boolean;
     signal?: AbortSignal;
     onFrame(frame: SpindleSystemAudioFrame): void;
     /** Called once if the host ends the session (permission revoked, the user pressed Stop on the host's indicator, the device went away). */
@@ -38,7 +49,7 @@ export interface SpindleSystemAudioStartOptions {
 }
 export interface SpindleSystemAudioSession {
     /**
-     * Resolves when the user has approved the host's prompt and analysis has begun. Rejects with a `NotAllowedError`
+     * Resolves when the host has verified explicit or remembered approval and analysis has begun. Rejects with a `NotAllowedError`
      * `DOMException` if the user declines, `NotSupportedError` if unavailable, and `AbortError` if cancelled first.
      */
     readonly ready: Promise<void>;
@@ -50,11 +61,12 @@ export interface SpindleSystemAudioAPI {
     /** Free. Never prompts, and never opens anything. */
     isAvailable(): SpindleSystemAudioAvailability;
     /**
-     * Requires `system_audio`. Call directly from a user gesture. The host asks the user for approval on every
-     * start and shows an indicator for as long as analysis runs. One session per extension at a time.
+     * Requires `system_audio`. Call the first start from a user gesture. The host checks explicit or remembered
+     * approval and shows an indicator for as long as analysis runs. One session per extension at a time.
      */
     start(options: SpindleSystemAudioStartOptions): SpindleSystemAudioSession;
 }
 export declare const SPINDLE_SYSTEM_AUDIO_HOST_CAPABILITIES: Readonly<{
     'system-audio-v1': 1;
+    'system-audio-stereo-v1': 1;
 }>;

@@ -134,6 +134,8 @@ export interface SpindleConnectionsAPI {
 }
 /** The global `spindle` object available in backend extension workers */
 export interface SpindleAPI {
+    /** Typed Decision models (permission: decisions; host capability: decisions-v1). */
+    decisions: import("./decisions.js").SpindleDecisionsAPI;
     /** Disk-backed downloads and bounded reads/writes. Available with file-transfers-v1. */
     readonly files: SpindleFilesAPI;
     /** Streaming ZIP64 creation and validated disk-backed extraction. */

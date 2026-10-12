@@ -11,6 +11,7 @@ export const SPINDLE_HOST_CAPABILITIES = Object.freeze({
     "frontend-extensibility-v2": 1,
     "frontend-runtime-capabilities-v1": 1,
     "mcp-servers-v1": 1,
+    "decisions-v1": 1,
     "file-transfers-v1": 1,
 });
 /** Structured error code returned when host compatibility validation fails. */

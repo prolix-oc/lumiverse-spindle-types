@@ -24,6 +24,7 @@ export const ALL_PERMISSIONS = [
     "media",
     "personas",
     "push_notification",
+    "decisions",
     "image_gen",
     "images",
     "generation_parameters",
