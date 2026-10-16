@@ -20,6 +20,7 @@ test("host compatibility constants are canonical and immutable", () => {
   expect(SPINDLE_COMPATIBILITY_ERROR_CODE).toBe("SPINDLE_COMPATIBILITY_ERROR");
   expect(SPINDLE_HOST_CAPABILITIES).toEqual({
     "decisions-v1": 1,
+    "decision-images-v1": 1,
     "preset-extension-data-v1": 1,
     "preset-editor-v1": 1,
     "loom-block-editor-v1": 1,

@@ -1,4 +1,26 @@
 /** Native typed Decision API. Requires decisions permission and decisions-v1 host capability. */
+/**
+ * An image in `DecisionEvaluationInput.assets`. Requires the decision-images-v1 host capability and a TypeSafe connection.
+ * `image_id` sends a stored Lumiverse image (PNG or JPEG) without moving its bytes through the worker; it requires the images permission.
+ */
+export type DecisionImageAsset = {
+    type?: "image";
+    format: "png" | "jpg" | "jpeg";
+    data_base64: string;
+} | {
+    type?: "image";
+    image_id: string;
+};
+/**
+ * The edges in a `box` answer. A `box` question finds one target in an image; it needs an image asset and a Jev 1.14 model such as `jev-preview`.
+ * Edges are fractions of the image's width (left, right) and height (top, bottom), measured from the top-left corner.
+ */
+export interface DecisionBox {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+}
 export type DecisionJsonValue = null | boolean | number | string | DecisionJsonValue[] | {
     [key: string]: DecisionJsonValue;
 };
@@ -21,6 +43,9 @@ export type DecisionQuestion = {
         true: DecisionDescription;
         false: DecisionDescription;
     };
+} | {
+    type: "box";
+    instructions: DecisionDescription;
 };
 export type DecisionAnswer = {
     type: "choice";
@@ -36,6 +61,10 @@ export type DecisionAnswer = {
 } | {
     type: "noul";
     noul: number;
+} | {
+    type: "box";
+    box: DecisionBox;
+    confidence: number;
 };
 export type DecisionAnswerFor<Q extends DecisionQuestion> = Q extends {
     type: "choice";
@@ -49,6 +78,10 @@ export type DecisionAnswerFor<Q extends DecisionQuestion> = Q extends {
     type: "score";
 } ? Extract<DecisionAnswer, {
     type: "score";
+}> : Q extends {
+    type: "box";
+} ? Extract<DecisionAnswer, {
+    type: "box";
 }> : Extract<DecisionAnswer, {
     type: "noul";
 }>;
@@ -72,6 +105,8 @@ export interface DecisionEvaluationInput<Q extends Record<string, DecisionQuesti
     model?: string;
     state: DecisionState;
     questions: Q;
+    /** Images keyed by a reference string; every reference must appear in `state`, `instructions`, or `criteria`. */
+    assets?: Record<string, DecisionImageAsset>;
     userId?: string;
 }
 export interface DecisionConnectionProfileDTO {
