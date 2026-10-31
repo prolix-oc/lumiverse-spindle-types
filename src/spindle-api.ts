@@ -310,6 +310,8 @@ export interface SpindleConnectionsAPI {
 
 /** The global `spindle` object available in backend extension workers */
 export interface SpindleAPI {
+  /** Backend UUID v4/v7 generation (free tier; host capability: uuid-v1). */
+  readonly uuid: import("./uuid.js").SpindleUUIDAPI;
   /** Typed Decision models (permission: decisions; host capability: decisions-v1). */
   decisions: import("./decisions.js").SpindleDecisionsAPI;
   /** Embed text with the user's embedding connections (permission: embeddings; host capability: embeddings-v1). */

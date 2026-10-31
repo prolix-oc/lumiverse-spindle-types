@@ -4441,6 +4441,8 @@ export type WorkerToHost =
   // ─── Commands (free tier) ──────────────────────────────────────────────
   | { type: "commands_register"; commands: SpindleCommandDTO[] }
   | { type: "commands_unregister"; commandIds: string[] }
+  // ─── UUID Generation (free tier) ───────────────────────────────────────
+  | import("./uuid.js").UUIDWorkerMessage
   // ─── Version (free tier) ───────────────────────────────────────────────
   | { type: "version_get_backend"; requestId: string }
   | { type: "version_get_frontend"; requestId: string }

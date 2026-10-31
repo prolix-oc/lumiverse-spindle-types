@@ -1,6 +1,7 @@
 export type { LiveActivityPresentation, LiveActivityStartInput, LiveActivityResult, LiveActivityStatus, SpindleLiveActivitiesAPI, LiveActivityWorkerMessage } from "./live-activities.js";
 export type { DecisionImageAsset, DecisionBox, DecisionJsonValue, DecisionDescription, DecisionState, DecisionQuestion, DecisionAnswer, DecisionAnswerFor, DecisionAnswers, DecisionResult, DecisionEvaluationInput, DecisionConnectionProfileDTO, DecisionModelDTO, DecisionProviderDTO, SpindleDecisionsAPI, DecisionWorkerMessage } from "./decisions.js";
 export type { EmbeddingConnectionDTO, EmbeddingsEmbedInput, EmbeddingsEmbedResult, SpindleEmbeddingsAPI, EmbeddingsWorkerMessage } from "./embeddings.js";
+export type { SpindleUUIDAPI, UUIDWorkerMessage } from "./uuid.js";
 
 export type {
   SpindleManifest,

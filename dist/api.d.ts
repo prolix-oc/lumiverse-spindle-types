@@ -5086,7 +5086,7 @@ export type WorkerToHost = import("./live-activities.js").LiveActivityWorkerMess
 } | {
     type: "commands_unregister";
     commandIds: string[];
-} | {
+} | import("./uuid.js").UUIDWorkerMessage | {
     type: "version_get_backend";
     requestId: string;
 } | {
