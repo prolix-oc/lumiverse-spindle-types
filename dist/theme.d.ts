@@ -2,6 +2,7 @@ import type { SpindleUploadFile } from "./dom.js";
 /** Frontend-only host capabilities for the native theme-authoring context. */
 export declare const SPINDLE_THEME_AUTHORING_HOST_CAPABILITIES: Readonly<{
     readonly "theme-assets-v1": 1;
+    readonly "theme-inspection-v1": 1;
     readonly "theme-packs-v1": 1;
     readonly "theme-catalog-v1": 1;
     readonly "theme-editor-navigation-v1": 1;
@@ -91,6 +92,8 @@ export interface SpindleThemeEditorOptions {
  * `spindle.theme` live-presentation API.
  */
 export interface SpindleThemeAuthoringAPI {
+    /** Requires theme-inspection-v1 and app_manipulation in an active browser context. */
+    inspect?(options: ThemeInspectionOptions): ThemeInspectionResult;
     /** Requires host capability `theme-assets-v1`. Mutations require `app_manipulation`. */
     readonly assets: {
         getActiveBundleId(): string | null;
@@ -115,4 +118,23 @@ export interface SpindleThemeAuthoringAPI {
     };
     /** Requires host capability `theme-editor-navigation-v1`. */
     openEditor(options?: SpindleThemeEditorOptions): boolean;
+}
+export interface ThemeInspectionOptions {
+    selector: string;
+    properties?: string[];
+    limit?: number;
+}
+export interface ThemeInspectionResult {
+    count: number;
+    matches: Array<{
+        tag: string;
+        visible: boolean;
+        rect: {
+            x: number;
+            y: number;
+            width: number;
+            height: number;
+        };
+        styles: Record<string, string>;
+    }>;
 }

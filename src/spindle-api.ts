@@ -2087,6 +2087,10 @@ export interface SpindleAPI {
    * ```
    */
   theme: {
+    /** Persistent backend edits. Mutations require app_manipulation. */
+    readonly authoring?: import("./theme-authoring.js").ThemeAuthoringAPI;
+    /** Read-only public build references, independent of persistent authoring. */
+    readonly references?: import("./theme-references.js").ThemeReferencesAPI;
     /**
      * Apply CSS variable overrides on top of the user's current theme.
      * Subsequent calls merge with (and overwrite) any previously applied

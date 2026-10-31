@@ -42,3 +42,6 @@ export { SPINDLE_SYSTEM_AUDIO_HOST_CAPABILITIES } from "./system-audio.js";
 export type { MessageGenerationInputDTO, MessageGenerationResultDTO } from "./api.js";
 export { SPINDLE_CONNECTION_ORGANIZATION_HOST_CAPABILITIES } from './connection-organization.js';
 export type { SpindleConnectionOrganizationSnapshot, SpindleConnectionOrganizationOptions, SpindleBackendConnectionOrganizationOptions, SpindleConnectionOrganizationAPI, SpindleConnectionOrganizationError, SpindleConnectionOrganizationErrorCode } from './connection-organization.js';
+export type * from "./theme-authoring.js";
+export type * from "./theme-references.js";
+export type { ThemeInspectionOptions, ThemeInspectionResult } from "./theme.js";

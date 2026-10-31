@@ -4428,6 +4428,8 @@ export type WorkerToHost =
       input: MediaCreateVideoFromImageAndAudioRequestDTO;
     }
   // ─── Theme (gated: "app_manipulation") ──────────────────────────────────
+  | { type: "theme_references"; requestId: string; input: import("./theme-references.js").ThemeReferencesRequest }
+  | { type: "theme_authoring"; requestId: string; input: import("./theme-authoring.js").ThemeAuthoringHostRequest; userId?: string }
   | { type: "theme_apply"; requestId: string; overrides: ThemeOverrideDTO; userId?: string }
   | { type: "theme_apply_palette"; requestId: string; palette: ThemePaletteConfigDTO | null; userId?: string }
   | { type: "theme_clear"; requestId: string; userId?: string }

@@ -5045,6 +5045,15 @@ export type WorkerToHost = import("./live-activities.js").LiveActivityWorkerMess
     requestId: string;
     input: MediaCreateVideoFromImageAndAudioRequestDTO;
 } | {
+    type: "theme_references";
+    requestId: string;
+    input: import("./theme-references.js").ThemeReferencesRequest;
+} | {
+    type: "theme_authoring";
+    requestId: string;
+    input: import("./theme-authoring.js").ThemeAuthoringHostRequest;
+    userId?: string;
+} | {
     type: "theme_apply";
     requestId: string;
     overrides: ThemeOverrideDTO;

@@ -71,6 +71,7 @@ test("MCP permissions are valid and publicly declared", () => {
 test("theme authoring capabilities remain frontend-specific and immutable", () => {
   expect(SPINDLE_THEME_AUTHORING_HOST_CAPABILITIES).toEqual({
     "theme-assets-v1": 1,
+    "theme-inspection-v1": 1,
     "theme-packs-v1": 1,
     "theme-catalog-v1": 1,
     "theme-editor-navigation-v1": 1,
