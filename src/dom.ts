@@ -1335,6 +1335,8 @@ export interface SpindleRecentChatsPage<TRow = SpindleRecentChat> {
 
 /** Context object provided to frontend extension modules */
 export interface SpindleFrontendContext {
+  /** Synchronous browser-local UUIDs. Feature-detect frontend-uuid-v1; unavailable on older hosts. */
+  readonly uuid?: import("./uuid.js").SpindleFrontendUUIDAPI;
   /** Current frontend client identity and native bridge discovery. Feature-detect client-info-v1. */
   readonly client?: SpindleClientAPI;
   /** Native downloads of completed backend files. Available with file-transfers-v1. */

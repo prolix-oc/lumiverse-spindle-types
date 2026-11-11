@@ -1,3 +1,4 @@
+export { SPINDLE_FRONTEND_UUID_HOST_CAPABILITIES } from "./uuid.js";
 export { IDENTIFIER_PATTERN, validateIdentifier, } from "./manifest.js";
 export { SPINDLE_CLIENT_HOST_CAPABILITIES } from "./client.js";
 export { SPINDLE_COMPOSER_HOST_CAPABILITIES } from "./composer.js";
