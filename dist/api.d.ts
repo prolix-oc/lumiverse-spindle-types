@@ -4169,6 +4169,7 @@ export type WorkerToHost = import("./live-activities.js").LiveActivityWorkerMess
     offset?: number;
     search?: string;
     userId?: string;
+    includeSystem?: boolean;
 } | {
     type: "characters_get";
     requestId: string;

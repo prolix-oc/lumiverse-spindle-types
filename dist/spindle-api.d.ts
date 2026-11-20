@@ -874,6 +874,8 @@ export interface SpindleAPI {
             /** Search the character library (maximum 200 characters). Requires character-search-v1. */
             search?: string;
             userId?: string;
+            /** Include host-internal container cards, omitted by default. Requires character-system-filter-v1. */
+            includeSystem?: boolean;
         }): Promise<{
             data: CharacterDTO[];
             total: number;
