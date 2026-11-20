@@ -1073,7 +1073,9 @@ export interface SpindleAPI {
   characters: {
     list(options?: { limit?: number; offset?: number;
       /** Search the character library (maximum 200 characters). Requires character-search-v1. */
-      search?: string; userId?: string }): Promise<{ data: CharacterDTO[]; total: number }>;
+      search?: string; userId?: string;
+      /** Include host-internal container cards, omitted by default. Requires character-system-filter-v1. */
+      includeSystem?: boolean }): Promise<{ data: CharacterDTO[]; total: number }>;
     get(characterId: string, userId?: string): Promise<CharacterDTO | null>;
     /**
      * List the character's gallery images in gallery order. Returns `[]` when

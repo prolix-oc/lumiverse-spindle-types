@@ -4210,7 +4210,7 @@ export type WorkerToHost =
   | { type: "vars_list_chat"; requestId: string; chatId: string }
   | { type: "vars_has_chat"; requestId: string; chatId: string; key: string }
   // ─── Characters (gated: "characters") ──────────────────────────────
-  | { type: "characters_list"; requestId: string; limit?: number; offset?: number; search?: string; userId?: string }
+  | { type: "characters_list"; requestId: string; limit?: number; offset?: number; search?: string; userId?: string; includeSystem?: boolean }
   | { type: "characters_get"; requestId: string; characterId: string; userId?: string }
   | { type: "characters_get_gallery"; requestId: string; characterId: string; userId?: string }
   | { type: "characters_create"; requestId: string; input: CharacterCreateDTO; userId?: string }
